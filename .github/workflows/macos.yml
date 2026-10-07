@@ -95,6 +95,8 @@ jobs:
           To update, quit Botball Lab and replace the previous app. Saved projects are preserved.
           The app checks for newer versions at startup; use «Обновления» to check manually.
 
+          Starts with a working assembled robot: platform, two fastened motors and two wheels. Restore it with «Готовый робот» or start an empty build with «Собрать с нуля». Motor placement offers large left/right buttons and adds both inventory screws automatically. Corrected chassis side walls and motor output direction; all 156 models have crease-aware surface normals, with detailed estimated fasteners, chamfered electronics and studio reflections. Old standard robot projects are realigned on opening.
+
           Includes a Python-like code editor: numbered motor and servo control, wait, drive, stop, variables, loops, conditions, print, virtual distance and encoder readings. Assembled motors/wheels drive the robot with its measured track; servo output rotates its attached horn. Programs are saved with projects. The physics and motor mounts remain simplified.
 
           Includes simple assembly: choose a platform, flip it, click highlighted motor mounts, fasten with inventory screws, and attach wheels. Placement preview and undo are included; the advanced connector editor remains available. Motor mounting locations are approximate teaching geometry.
