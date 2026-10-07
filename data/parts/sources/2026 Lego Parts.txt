@@ -1,0 +1,585 @@
+     Description    Part #      Picture   # in 2026 Kit
+
+
+                        AXLES
+
+
+# 2 Axle            32062
+
+                                                          32
+
+
+
+# 3 Axle            4519
+
+                                                          48
+
+
+
+#3 Axle w/ stud     6587
+
+                                                          4
+
+
+
+#4 Axle             3705
+
+                                                          16
+
+
+
+# 4 Axle w/ stop    87083
+
+                                                          4
+
+
+
+#5 Axle             32073
+
+                                                          12
+
+
+
+#5.5 Axle w/ stop   32209
+
+                                                          2
+
+
+
+#6 Axle             3706
+
+                                                          16
+#7 Axle     44294
+
+                         16
+
+
+
+#8 Axle     3707
+
+                         8
+
+
+
+#10 Axle    3737
+
+                         4
+
+
+
+#12 Axle    3708
+
+                         2
+
+
+            Connectors
+
+#1 Angle
+            32013
+Connector
+                         12
+
+
+#2 Angle
+            32034
+Connector
+                         4
+
+
+#3 Angle
+            32016
+Connector
+                         4
+
+
+#4 Angle
+            32192
+Connector
+                         4
+#5 Angle
+                     32015
+Connector
+                             4
+
+
+#6 Angle
+                     32014
+Connector
+                             8
+
+
+Axle Joiner Inline
+                     6538c
+Smooth
+                             32
+
+
+Axle Connector
+                     45590
+Double Rubber
+                             8
+
+
+Axle Joiner
+                     6536
+Perpendicular
+                             48
+
+Axle Joiner
+Perpendicular 3      32184
+Long
+                             8
+
+Axle Joiner
+Perpendicular        32291
+Double
+                             8
+
+Axle Joiner
+Perpendicular        41678
+Double Split
+                             6
+
+Axle Joiner
+Perpendicular        63869
+Triple
+                             8
+Axle Joiner
+Perpendicular w/   42003
+2 Holes
+                           12
+
+
+
+Bionicle Tooth     x346
+
+                           8
+
+
+
+Pin Connector      62462
+
+                           4
+
+Pin Connector
+Perpendicular      32557
+Double 3 Long
+                           8
+
+Pin Connector
+Perpendicular      44809
+2 x 2 Bent
+                           4
+
+
+
+Pole Reverser      6553
+
+                           4
+
+
+Axle Connector
+                   32039
+w/ Axle Hole
+                           4
+
+
+Axle Connector
+                   57585
+Hub w/ 3 Axles
+                           2
+                     Liftarms Thick
+
+1 x 2 Liftarm w/
+                     60483
+Axle Hole
+                                      8
+
+
+
+1 x 3 Liftarm        32523
+
+                                      16
+
+
+
+1 x 5 Liftarm        32316
+
+                                      11
+
+
+1 x 5 Liftarm Bent
+                     32140
+(2 x 4)
+                                      12
+
+
+
+1 x 7 Liftarm        32524
+
+                                      16
+
+
+1 x 7 Liftarm Bent
+                     32348
+(4 x 4)
+                                      16
+
+
+1 x 7 Liftarm Bent
+                     32526
+(3 x 5)
+                                      8
+
+
+
+1 x 9 Liftarm        40490
+
+                                      10
+1 x 9 Liftarm Bent
+                     32271
+(3 x 7)
+                                   4
+
+
+
+1 x 11 Liftarm       32525
+
+                                   10
+
+
+1 x 11.5 Liftarm
+                     32009
+Double Bent
+                                   6
+
+
+
+1 x 13 Liftarm       41239
+
+                                   10
+
+
+
+1 x 15 Liftarm       32278
+
+                                   14
+
+
+                            Pins
+
+
+Pin 1/2              4274
+
+                                   16
+
+
+
+Pin 3/4              32002
+
+                                   16
+
+
+
+Pin w/out Friction   3673
+
+                                   25
+Pin w/ Friction     2780
+
+                            122
+
+
+Pin Long w/
+                    6558
+Friction
+                            40
+
+
+Pin Long w/ out
+                    32556
+Friction
+                            13
+
+Pin w/ Friction 3
+Long w/ Stop        32054
+Bush
+                            16
+
+
+
+Pin w/ Towball      6628
+
+                             8
+
+
+
+Axle w/ Towball     2736
+
+                             2
+
+
+Axle Pin w/
+                    43093
+Friction
+                            80
+
+
+Axle Pin w/ out
+                    3749
+Friction
+                            20
+
+Pin Connector
+Perpendicular 3     48989
+Long w/ 4 Pins
+                            12
+Pin Connector
+Perpendicular 3 x   55615
+3 Bent w/ 4 Pins
+                                4
+
+
+Pin Double w/
+                    32138
+Axle Hole
+                                4
+
+
+                        Gears
+
+
+8 Tooth             3647
+
+                                8
+
+
+12 Tooth Double
+                    32270
+Bevel
+                                4
+
+
+12 Tooth Single
+                    6589
+Bevel
+                                3
+
+
+
+16 Tooth            4019
+
+                                6
+
+
+20 Tooth Double
+                    32269
+Bevel
+                                12
+
+
+
+24 Tooth            3648
+
+                                6
+36 Tooth Double
+                  32498
+Bevel
+                          2
+
+
+
+40 Tooth          3649
+
+                          4
+
+
+
+Bush 1/2          4265c
+
+                          42
+
+
+
+Bush              3713
+
+                          42
+
+
+
+Cam               6575
+
+                          2
+
+
+
+Differential      6573
+
+                          1
+
+
+
+Gear Rack 1 x 4   3743
+
+                          4
+
+
+
+Knob Wheel        32072
+
+                          2
+
+
+
+Pulley Wheel      4185
+
+                          4
+Worm Gear            4716
+
+                                      2
+
+
+                     Liftarms Thin
+
+
+1 x 3 Liftarm Thin   6632
+
+                                      16
+
+
+
+Triangle             2905
+
+                                      4
+
+
+                     Plates / Tiles
+
+
+1 x 2 Tile           3069b
+
+                                      4
+
+
+
+1 x 2 Plate          3023
+
+                                      8
+
+
+
+1 x 4 Plate          3710
+
+                                      4
+
+
+
+1 x 6 Plate          3666
+
+                                      4
+
+
+
+1 x 8 Plate          3460
+
+                                      4
+2 x 2 Round Dish     2654
+
+                                 2
+
+
+2 x 2 Plate
+                     4032b
+Round
+                                 4
+
+
+2 x 4 Plate w/
+                     3709b
+holes
+                                 4
+
+
+2 x 6 Plate w/
+                     32001
+holes
+                                 4
+
+
+2 x 8 Plate w/
+                     3738
+holes
+                                 4
+
+
+                        Bricks
+
+
+1 x 1 Cone           4589
+                                 3
+
+
+
+1 x 2 w/ axle hole   32064
+                                 4
+
+
+
+1 x 2 w/ Hole        3700
+                                 4
+1 x 4 w/ Holes     3701
+                               4
+
+
+
+1 x 6 w/ Holes     3894
+
+                               2
+
+
+
+1 x 8 w/ Holes     3702
+
+                               2
+
+
+
+1 x 12 w/ Holes    3895
+
+                               2
+
+
+
+1 x 14 w/ Holes    32018
+
+                               4
+
+
+
+2 x 2 Round        3941
+
+                               2
+
+
+                      Wheels
+
+
+Wheel 30.4 x 20    56145
+
+                               8
+
+
+ Technic Wedge
+                   70162
+ Belt Wheel Tire
+                               4
+Tire 56 x 26
+                    55976
+Balloon
+                            2
+
+
+
+Tire 43.2 x 22 ZR   44309
+
+                            2
+

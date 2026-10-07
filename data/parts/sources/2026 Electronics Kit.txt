@@ -1,0 +1,104 @@
+  Description      Picture   # in 2026 Kit
+
+
+                SENSORS
+
+                ANALOG
+
+    ET
+                                  2
+(Rangefinder)
+
+
+
+   Tophat
+                                  4
+(Reflectance)
+
+
+
+Small Tophat
+                                  2
+(Reflectance)
+
+
+
+    Light                         3
+
+
+
+
+Linear Slide                      1
+
+
+
+
+                DIGITAL
+
+
+   Lever                          2
+  Small Touch                4
+
+
+
+
+  Large Touch                6
+
+
+
+
+                   MOTION
+
+
+     Servo                   5
+
+
+
+
+Black Gear Motor             8
+
+
+
+
+  Micro Servo                2
+
+
+
+
+                CONTROLLER
+
+
+    Wombat                   2
+ Black Camera          or   1
+
+
+
+
+Wombat Battery
+                            2
+  Charger
+
+
+
+ Wombat Battery             2
+
+
+
+
+                    MISC.
+
+Servo Extension
+                            3
+     Cable
+Sensor Extension
+                            2
+     Cable
+
+
+Solarbotics Wheel           4
+
+
+
+
+Mecanum Wheel               4
+

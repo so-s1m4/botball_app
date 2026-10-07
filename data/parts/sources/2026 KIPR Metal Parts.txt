@@ -1,0 +1,166 @@
+          Description     Picture    # in 2026 Kit   Bendable
+
+
+                        KIPR Metal
+
+
+Strap 1 x 19                              4            Yes
+
+
+
+
+Strap 1 x 10                              6            Yes
+
+
+
+
+Channel 3 x 8                             3            No
+
+
+
+
+Channel 3 x 12                            2            No
+
+
+
+
+Channel 3 x 16                            1            No
+
+
+
+
+Plate 4 x 12                              4            Yes
+
+
+
+
+Chassis                                   2            No
+D Bracket           1   No
+
+
+
+
+Angle Bracket       2   No
+
+
+
+
+Plus Plate          1   Yes
+
+
+
+
+Servo Bracket       8   No
+
+
+
+
+Round Servo Horn    2   No
+
+
+
+
+1 x 5 Servo Horn    4   No
+
+
+
+
+Micro Servo Mount   2   No
+                  Screws, Nuts, and Standoffs
+
+Screw 8-32 x 1/4" (black)                 40
+
+
+
+
+Screw 8-32 x 1/2" (black)                 90
+
+
+
+
+Screw 8-32 x 3/4" (black)                 70
+
+
+
+
+ Nut 8-32 Keps (black)                   170
+
+
+
+
+Nut 8-32 Nylock (black)                   30
+
+
+
+  Standoff 8-32 x 1/2"                    12
+
+
+
+   Standoff 8-32 x 1"                     7
+
+
+
+
+   Standoff 8-32 x 2"                     2
+
+
+
+   Standoff 8-32 x 3"                     1
+
+
+Short Silver Servo Horn
+                                          6
+      Screw (M3)
+
+      18-8 Washer                         6
+
+
+ Silver Servo Horn Nut
+                                          10
+          (M3)
+Silver Servo Horn Machine
+                                      10
+        Screw (M3)
+
+     Threaded Rod
+                                      10
+       8-32 x 1"
+     Threaded Rod
+                                      2
+       8-32 x 2"
+     Threaded Rod
+                                      2
+       8-32 x 3"
+     Threaded Rod
+                                      1
+       8-32 x 6"
+      Brass Screws                    10
+
+
+  2-56 1" Caster Screw                5
+
+  2-56 3/8" Micro Servo
+                                      6
+      Mount Screw
+ M3 x 0.5" x 6" Mecanum
+                                      6
+      Wheel Screw
+
+
+                              MISC.
+
+
+
+           Caster                     2
+
+
+
+
+       Screwdriver                    1
+     (not useable on robot)
+
+
+
+     11/32" Wrench                    1
+     (not useable on robot)
+

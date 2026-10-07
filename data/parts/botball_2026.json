@@ -1,0 +1,1566 @@
+{
+  "schema_version": 1,
+  "kit": "Botball 2026",
+  "inventory_scope": "Standard kit listed by ECER; personal inventory not verified",
+  "source_page": "https://ecer.eraa.at/archive/ecer-2026/",
+  "sources": [
+    {
+      "id": "electronics",
+      "url": "https://ecer.eraa.at/documents/2026/botball/parts-lists/2026%20Electronics%20Kit.pdf",
+      "local_file": "sources/2026 Electronics Kit.pdf",
+      "sha256": "2f064abf822f2afdfb76993a208874afd60cea50b6679eb9c4ba440810a604a5"
+    },
+    {
+      "id": "metal",
+      "url": "https://ecer.eraa.at/documents/2026/botball/parts-lists/2026%20KIPR%20Metal%20Parts.pdf",
+      "local_file": "sources/2026 KIPR Metal Parts.pdf",
+      "sha256": "35c6da1e5d3f219caa0f9db67f030d1d654f521101ad683e3ba7766687f92bc2"
+    },
+    {
+      "id": "lego",
+      "url": "https://ecer.eraa.at/documents/2026/botball/parts-lists/2026%20Lego%20Parts.pdf",
+      "local_file": "sources/2026 Lego Parts.pdf",
+      "sha256": "5e725ca8e07608e6484f56a932c5c0795bd176bfa51cf218a3e4995800889c58"
+    }
+  ],
+  "parts": [
+    {
+      "id": "electronics_001",
+      "name": "ET (Rangefinder)",
+      "quantity": 2,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_002",
+      "name": "Tophat (Reflectance)",
+      "quantity": 4,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_003",
+      "name": "Small Tophat (Reflectance)",
+      "quantity": 2,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_004",
+      "name": "Light",
+      "quantity": 3,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_005",
+      "name": "Linear Slide",
+      "quantity": 1,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_006",
+      "name": "Lever",
+      "quantity": 2,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_007",
+      "name": "Small Touch",
+      "quantity": 4,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_008",
+      "name": "Large Touch",
+      "quantity": 6,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_009",
+      "name": "Servo",
+      "quantity": 5,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_010",
+      "name": "Black Gear Motor",
+      "quantity": 8,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_011",
+      "name": "Micro Servo",
+      "quantity": 2,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_012",
+      "name": "Wombat",
+      "quantity": 2,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_013",
+      "name": "Black Camera",
+      "quantity": 1,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 3,
+      "usable_on_robot": true,
+      "notes": "PDF shows alternative camera images separated by “or”; quantity 1 is shared. Model not specified in text."
+    },
+    {
+      "id": "electronics_014",
+      "name": "Wombat Battery Charger",
+      "quantity": 2,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_015",
+      "name": "Wombat Battery",
+      "quantity": 2,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_016",
+      "name": "Servo Extension Cable",
+      "quantity": 3,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_017",
+      "name": "Sensor Extension Cable",
+      "quantity": 2,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_018",
+      "name": "Solarbotics Wheel",
+      "quantity": 4,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "electronics_019",
+      "name": "Mecanum Wheel",
+      "quantity": 4,
+      "group": "electronics",
+      "source": "electronics",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_001",
+      "name": "Strap 1 x 19",
+      "quantity": 4,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 1,
+      "usable_on_robot": true,
+      "bendable": true
+    },
+    {
+      "id": "metal_002",
+      "name": "Strap 1 x 10",
+      "quantity": 6,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 1,
+      "usable_on_robot": true,
+      "bendable": true
+    },
+    {
+      "id": "metal_003",
+      "name": "Channel 3 x 8",
+      "quantity": 3,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 1,
+      "usable_on_robot": true,
+      "bendable": false
+    },
+    {
+      "id": "metal_004",
+      "name": "Channel 3 x 12",
+      "quantity": 2,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 1,
+      "usable_on_robot": true,
+      "bendable": false
+    },
+    {
+      "id": "metal_005",
+      "name": "Channel 3 x 16",
+      "quantity": 1,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 1,
+      "usable_on_robot": true,
+      "bendable": false
+    },
+    {
+      "id": "metal_006",
+      "name": "Plate 4 x 12",
+      "quantity": 4,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 1,
+      "usable_on_robot": true,
+      "bendable": true
+    },
+    {
+      "id": "metal_007",
+      "name": "Chassis",
+      "quantity": 2,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 1,
+      "usable_on_robot": true,
+      "bendable": false
+    },
+    {
+      "id": "metal_008",
+      "name": "D Bracket",
+      "quantity": 1,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 2,
+      "usable_on_robot": true,
+      "bendable": false
+    },
+    {
+      "id": "metal_009",
+      "name": "Angle Bracket",
+      "quantity": 2,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 2,
+      "usable_on_robot": true,
+      "bendable": false
+    },
+    {
+      "id": "metal_010",
+      "name": "Plus Plate",
+      "quantity": 1,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 2,
+      "usable_on_robot": true,
+      "bendable": true
+    },
+    {
+      "id": "metal_011",
+      "name": "Servo Bracket",
+      "quantity": 8,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 2,
+      "usable_on_robot": true,
+      "bendable": false
+    },
+    {
+      "id": "metal_012",
+      "name": "Round Servo Horn",
+      "quantity": 2,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 2,
+      "usable_on_robot": true,
+      "bendable": false
+    },
+    {
+      "id": "metal_013",
+      "name": "1 x 5 Servo Horn",
+      "quantity": 4,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 2,
+      "usable_on_robot": true,
+      "bendable": false
+    },
+    {
+      "id": "metal_014",
+      "name": "Micro Servo Mount",
+      "quantity": 2,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 2,
+      "usable_on_robot": true,
+      "bendable": false
+    },
+    {
+      "id": "metal_015",
+      "name": "Screw 8-32 x 1/4\" (black)",
+      "quantity": 40,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_016",
+      "name": "Screw 8-32 x 1/2\" (black)",
+      "quantity": 90,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_017",
+      "name": "Screw 8-32 x 3/4\" (black)",
+      "quantity": 70,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_018",
+      "name": "Nut 8-32 Keps (black)",
+      "quantity": 170,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_019",
+      "name": "Nut 8-32 Nylock (black)",
+      "quantity": 30,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_020",
+      "name": "Standoff 8-32 x 1/2\"",
+      "quantity": 12,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_021",
+      "name": "Standoff 8-32 x 1\"",
+      "quantity": 7,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_022",
+      "name": "Standoff 8-32 x 2\"",
+      "quantity": 2,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_023",
+      "name": "Standoff 8-32 x 3\"",
+      "quantity": 1,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_024",
+      "name": "Short Silver Servo Horn Screw (M3)",
+      "quantity": 6,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_025",
+      "name": "18-8 Washer",
+      "quantity": 6,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_026",
+      "name": "Silver Servo Horn Nut (M3)",
+      "quantity": 10,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_027",
+      "name": "Silver Servo Horn Machine Screw (M3)",
+      "quantity": 10,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_028",
+      "name": "Threaded Rod 8-32 x 1\"",
+      "quantity": 10,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_029",
+      "name": "Threaded Rod 8-32 x 2\"",
+      "quantity": 2,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_030",
+      "name": "Threaded Rod 8-32 x 3\"",
+      "quantity": 2,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_031",
+      "name": "Threaded Rod 8-32 x 6\"",
+      "quantity": 1,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_032",
+      "name": "Brass Screws",
+      "quantity": 10,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_033",
+      "name": "2-56 1\" Caster Screw",
+      "quantity": 5,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_034",
+      "name": "2-56 3/8\" Micro Servo Mount Screw",
+      "quantity": 6,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_035",
+      "name": "M3 x 0.5\" x 6\" Mecanum Wheel Screw",
+      "quantity": 6,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_036",
+      "name": "Caster",
+      "quantity": 2,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "metal_037",
+      "name": "Screwdriver",
+      "quantity": 1,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": false
+    },
+    {
+      "id": "metal_038",
+      "name": "11/32\" Wrench",
+      "quantity": 1,
+      "group": "metal",
+      "source": "metal",
+      "source_page": 4,
+      "usable_on_robot": false
+    },
+    {
+      "id": "lego_32062",
+      "name": "# 2 Axle",
+      "part_number": "32062",
+      "quantity": 32,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_4519",
+      "name": "# 3 Axle",
+      "part_number": "4519",
+      "quantity": 48,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_6587",
+      "name": "#3 Axle w/ stud",
+      "part_number": "6587",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3705",
+      "name": "#4 Axle",
+      "part_number": "3705",
+      "quantity": 16,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_87083",
+      "name": "# 4 Axle w/ stop",
+      "part_number": "87083",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32073",
+      "name": "#5 Axle",
+      "part_number": "32073",
+      "quantity": 12,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32209",
+      "name": "#5.5 Axle w/ stop",
+      "part_number": "32209",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3706",
+      "name": "#6 Axle",
+      "part_number": "3706",
+      "quantity": 16,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 1,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_44294",
+      "name": "#7 Axle",
+      "part_number": "44294",
+      "quantity": 16,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3707",
+      "name": "#8 Axle",
+      "part_number": "3707",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3737",
+      "name": "#10 Axle",
+      "part_number": "3737",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3708",
+      "name": "#12 Axle",
+      "part_number": "3708",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32013",
+      "name": "#1 Angle Connector",
+      "part_number": "32013",
+      "quantity": 12,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32034",
+      "name": "#2 Angle Connector",
+      "part_number": "32034",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32016",
+      "name": "#3 Angle Connector",
+      "part_number": "32016",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32192",
+      "name": "#4 Angle Connector",
+      "part_number": "32192",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 2,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32015",
+      "name": "#5 Angle Connector",
+      "part_number": "32015",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32014",
+      "name": "#6 Angle Connector",
+      "part_number": "32014",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_6538c",
+      "name": "Axle Joiner Inline Smooth",
+      "part_number": "6538c",
+      "quantity": 32,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_45590",
+      "name": "Axle Connector Double Rubber",
+      "part_number": "45590",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_6536",
+      "name": "Axle Joiner Perpendicular",
+      "part_number": "6536",
+      "quantity": 48,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32184",
+      "name": "Axle Joiner Perpendicular 3 Long",
+      "part_number": "32184",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32291",
+      "name": "Axle Joiner Perpendicular Double",
+      "part_number": "32291",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_41678",
+      "name": "Axle Joiner Perpendicular Double Split",
+      "part_number": "41678",
+      "quantity": 6,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_63869",
+      "name": "Axle Joiner Perpendicular Triple",
+      "part_number": "63869",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 3,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_42003",
+      "name": "Axle Joiner Perpendicular w/ 2 Holes",
+      "part_number": "42003",
+      "quantity": 12,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_x346",
+      "name": "Bionicle Tooth",
+      "part_number": "x346",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_62462",
+      "name": "Pin Connector",
+      "part_number": "62462",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32557",
+      "name": "Pin Connector Perpendicular Double 3 Long",
+      "part_number": "32557",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_44809",
+      "name": "Pin Connector Perpendicular 2 x 2 Bent",
+      "part_number": "44809",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_6553",
+      "name": "Pole Reverser",
+      "part_number": "6553",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32039",
+      "name": "Axle Connector w/ Axle Hole",
+      "part_number": "32039",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_57585",
+      "name": "Axle Connector Hub w/ 3 Axles",
+      "part_number": "57585",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 4,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_60483",
+      "name": "1 x 2 Liftarm w/ Axle Hole",
+      "part_number": "60483",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 5,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32523",
+      "name": "1 x 3 Liftarm",
+      "part_number": "32523",
+      "quantity": 16,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 5,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32316",
+      "name": "1 x 5 Liftarm",
+      "part_number": "32316",
+      "quantity": 11,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 5,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32140",
+      "name": "1 x 5 Liftarm Bent (2 x 4)",
+      "part_number": "32140",
+      "quantity": 12,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 5,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32524",
+      "name": "1 x 7 Liftarm",
+      "part_number": "32524",
+      "quantity": 16,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 5,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32348",
+      "name": "1 x 7 Liftarm Bent (4 x 4)",
+      "part_number": "32348",
+      "quantity": 16,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 5,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32526",
+      "name": "1 x 7 Liftarm Bent (3 x 5)",
+      "part_number": "32526",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 5,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_40490",
+      "name": "1 x 9 Liftarm",
+      "part_number": "40490",
+      "quantity": 10,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 5,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32271",
+      "name": "1 x 9 Liftarm Bent (3 x 7)",
+      "part_number": "32271",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 6,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32525",
+      "name": "1 x 11 Liftarm",
+      "part_number": "32525",
+      "quantity": 10,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 6,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32009",
+      "name": "1 x 11.5 Liftarm Double Bent",
+      "part_number": "32009",
+      "quantity": 6,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 6,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_41239",
+      "name": "1 x 13 Liftarm",
+      "part_number": "41239",
+      "quantity": 10,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 6,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32278",
+      "name": "1 x 15 Liftarm",
+      "part_number": "32278",
+      "quantity": 14,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 6,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_4274",
+      "name": "Pin 1/2",
+      "part_number": "4274",
+      "quantity": 16,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 6,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32002",
+      "name": "Pin 3/4",
+      "part_number": "32002",
+      "quantity": 16,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 6,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3673",
+      "name": "Pin w/out Friction",
+      "part_number": "3673",
+      "quantity": 25,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 6,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_2780",
+      "name": "Pin w/ Friction",
+      "part_number": "2780",
+      "quantity": 122,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 7,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_6558",
+      "name": "Pin Long w/ Friction",
+      "part_number": "6558",
+      "quantity": 40,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 7,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32556",
+      "name": "Pin Long w/ out Friction",
+      "part_number": "32556",
+      "quantity": 13,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 7,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32054",
+      "name": "Pin w/ Friction 3 Long w/ Stop Bush",
+      "part_number": "32054",
+      "quantity": 16,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 7,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_6628",
+      "name": "Pin w/ Towball",
+      "part_number": "6628",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 7,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_2736",
+      "name": "Axle w/ Towball",
+      "part_number": "2736",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 7,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_43093",
+      "name": "Axle Pin w/ Friction",
+      "part_number": "43093",
+      "quantity": 80,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 7,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3749",
+      "name": "Axle Pin w/ out Friction",
+      "part_number": "3749",
+      "quantity": 20,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 7,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_48989",
+      "name": "Pin Connector Perpendicular 3 Long w/ 4 Pins",
+      "part_number": "48989",
+      "quantity": 12,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 7,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_55615",
+      "name": "Pin Connector Perpendicular 3 x 3 Bent w/ 4 Pins",
+      "part_number": "55615",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 8,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32138",
+      "name": "Pin Double w/ Axle Hole",
+      "part_number": "32138",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 8,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3647",
+      "name": "8 Tooth",
+      "part_number": "3647",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 8,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32270",
+      "name": "12 Tooth Double Bevel",
+      "part_number": "32270",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 8,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_6589",
+      "name": "12 Tooth Single Bevel",
+      "part_number": "6589",
+      "quantity": 3,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 8,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_4019",
+      "name": "16 Tooth",
+      "part_number": "4019",
+      "quantity": 6,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 8,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32269",
+      "name": "20 Tooth Double Bevel",
+      "part_number": "32269",
+      "quantity": 12,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 8,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3648",
+      "name": "24 Tooth",
+      "part_number": "3648",
+      "quantity": 6,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 8,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32498",
+      "name": "36 Tooth Double Bevel",
+      "part_number": "32498",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 9,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3649",
+      "name": "40 Tooth",
+      "part_number": "3649",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 9,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_4265c",
+      "name": "Bush 1/2",
+      "part_number": "4265c",
+      "quantity": 42,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 9,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3713",
+      "name": "Bush",
+      "part_number": "3713",
+      "quantity": 42,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 9,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_6575",
+      "name": "Cam",
+      "part_number": "6575",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 9,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_6573",
+      "name": "Differential",
+      "part_number": "6573",
+      "quantity": 1,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 9,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3743",
+      "name": "Gear Rack 1 x 4",
+      "part_number": "3743",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 9,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32072",
+      "name": "Knob Wheel",
+      "part_number": "32072",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 9,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_4185",
+      "name": "Pulley Wheel",
+      "part_number": "4185",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 9,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_4716",
+      "name": "Worm Gear",
+      "part_number": "4716",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 10,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_6632",
+      "name": "1 x 3 Liftarm Thin",
+      "part_number": "6632",
+      "quantity": 16,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 10,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_2905",
+      "name": "Triangle",
+      "part_number": "2905",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 10,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3069b",
+      "name": "1 x 2 Tile",
+      "part_number": "3069b",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 10,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3023",
+      "name": "1 x 2 Plate",
+      "part_number": "3023",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 10,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3710",
+      "name": "1 x 4 Plate",
+      "part_number": "3710",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 10,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3666",
+      "name": "1 x 6 Plate",
+      "part_number": "3666",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 10,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3460",
+      "name": "1 x 8 Plate",
+      "part_number": "3460",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 10,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_2654",
+      "name": "2 x 2 Round Dish",
+      "part_number": "2654",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 11,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_4032b",
+      "name": "2 x 2 Plate Round",
+      "part_number": "4032b",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 11,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3709b",
+      "name": "2 x 4 Plate w/ holes",
+      "part_number": "3709b",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 11,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32001",
+      "name": "2 x 6 Plate w/ holes",
+      "part_number": "32001",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 11,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3738",
+      "name": "2 x 8 Plate w/ holes",
+      "part_number": "3738",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 11,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_4589",
+      "name": "1 x 1 Cone",
+      "part_number": "4589",
+      "quantity": 3,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 11,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32064",
+      "name": "1 x 2 w/ axle hole",
+      "part_number": "32064",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 11,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3700",
+      "name": "1 x 2 w/ Hole",
+      "part_number": "3700",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 11,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3701",
+      "name": "1 x 4 w/ Holes",
+      "part_number": "3701",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 12,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3894",
+      "name": "1 x 6 w/ Holes",
+      "part_number": "3894",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 12,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3702",
+      "name": "1 x 8 w/ Holes",
+      "part_number": "3702",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 12,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3895",
+      "name": "1 x 12 w/ Holes",
+      "part_number": "3895",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 12,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_32018",
+      "name": "1 x 14 w/ Holes",
+      "part_number": "32018",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 12,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_3941",
+      "name": "2 x 2 Round",
+      "part_number": "3941",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 12,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_56145",
+      "name": "Wheel 30.4 x 20",
+      "part_number": "56145",
+      "quantity": 8,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 12,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_70162",
+      "name": "Technic Wedge Belt Wheel Tire",
+      "part_number": "70162",
+      "quantity": 4,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 12,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_55976",
+      "name": "Tire 56 x 26 Balloon",
+      "part_number": "55976",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 13,
+      "usable_on_robot": true
+    },
+    {
+      "id": "lego_44309",
+      "name": "Tire 43.2 x 22 ZR",
+      "part_number": "44309",
+      "quantity": 2,
+      "group": "lego",
+      "source": "lego",
+      "source_page": 13,
+      "usable_on_robot": true
+    }
+  ]
+}
