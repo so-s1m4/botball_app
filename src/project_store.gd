@@ -10,7 +10,7 @@ static func write_project(path: String, settings: Dictionary, assembly: Array = 
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"version": FORMAT_VERSION, "table": "training_delivery", "robot": settings, "assembly": assembly, "map": map_config, "program":program}, "\t"))
+	file.store_string(JSON.stringify({"version": FORMAT_VERSION, "geometry_revision":2, "table": "training_delivery", "robot": settings, "assembly": assembly, "map": map_config, "program":program}, "\t"))
 	file.close()
 	return OK
 
@@ -37,6 +37,15 @@ static func read_project(path: String) -> Dictionary:
 	if settings.speed < 0.2 or settings.speed > 1.0 or settings.wheel_base < 0.24 or settings.wheel_base > 0.4 or settings.noise < 0 or settings.noise > 0.15 or settings.seed < 1 or settings.seed > 999999 or float(settings.seed) != floor(float(settings.seed)):
 		return {"error": "Параметры выходят за допустимые пределы"}
 	var assembly = data.get("assembly", [])
+	if not assembly is Array:
+		return {"error":"Неверный формат сборки"}
+	if data.get("geometry_revision",1) == 1:
+		var migrated := PartLibrary.Connections.migrate_v1(assembly)
+		if migrated.has("error"):
+			return migrated
+		assembly = migrated.assembly
+	elif data.get("geometry_revision") != 2:
+		return {"error":"Версия моделей не поддерживается"}
 	var assembly_error := PartLibrary.validate(assembly)
 	if not assembly_error.is_empty():
 		return {"error": assembly_error}

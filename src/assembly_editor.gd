@@ -37,6 +37,7 @@ var advanced: VBoxContainer
 var advanced_toggle: CheckButton
 var simple_hint: Label
 var step_tabs: HBoxContainer
+var target_buttons: HBoxContainer
 var simple_tools: HBoxContainer
 var step_buttons: Array[Button] = []
 var simple_group := 0
@@ -144,10 +145,27 @@ func _ready() -> void:
 	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.environment.ambient_light_color = Color("dbe7f3")
 	env.environment.ambient_light_energy = 0.65
+	# A studio sky provides reflections even with a flat viewport background.
+	env.environment.sky = Sky.new()
+	var studio := ProceduralSkyMaterial.new()
+	studio.sky_top_color = Color("7c92ad")
+	studio.sky_horizon_color = Color("dce3e9")
+	studio.ground_bottom_color = Color("263447")
+	studio.ground_horizon_color = Color("bbc5cf")
+	env.environment.sky.sky_material = studio
+	env.environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	world.add_child(env)
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-50, -30, 0)
+	light.light_energy = 1.2
+	light.shadow_enabled = true
+	light.directional_shadow_max_distance = 2.0
 	world.add_child(light)
+	var fill := DirectionalLight3D.new()
+	fill.rotation_degrees = Vector3(-25,140,0)
+	fill.light_energy = .45
+	fill.light_color = Color("a8bfdb")
+	world.add_child(fill)
 	model_root = Node3D.new()
 	world.add_child(model_root)
 	selection_root = Node3D.new()
@@ -182,6 +200,12 @@ func _ready() -> void:
 	simple_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	simple_hint.add_theme_font_size_override("font_size", 18)
 	workspace.add_child(simple_hint)
+	target_buttons = HBoxContainer.new()
+	workspace.add_child(target_buttons)
+	var templates := HBoxContainer.new()
+	workspace.add_child(templates)
+	templates.add_child(action("Готовый робот", load_default_robot))
+	templates.add_child(action("Собрать с нуля", start_empty_robot))
 	simple_tools = HBoxContainer.new()
 	workspace.add_child(simple_tools)
 	simple_tools.add_child(action("Перевернуть", flip_assembly))
@@ -270,15 +294,17 @@ func _ready() -> void:
 	refresh_connections()
 	show_assembly()
 
-func set_assembly(value: Array) -> void:
+func set_assembly(value: Array, clear_history: bool = true) -> void:
 	cancel_pending(false)
-	undo_history.clear()
+	if clear_history:
+		undo_history.clear()
 	assembly = value.duplicate(true)
 	selected = -1
 	refresh_connections()
 	refresh_catalog()
 	refresh_installed()
 	show_assembly()
+	update_simple_hint()
 
 func used(id: String) -> int:
 	var count := 0
@@ -479,7 +505,7 @@ func update_actions() -> void:
 	if undo_button != null:
 		undo_button.disabled = undo_history.is_empty()
 	if fasten_button != null:
-		fasten_button.disabled = selected < 0 or assembly[selected].id != "electronics_010" or Easy.fastening_ports(assembly, selected).is_empty()
+		fasten_button.disabled = Easy.motor_to_fasten(assembly, selected) < 0
 	for field in fields:
 		field.editable = selected >= 0 and not previewing
 
@@ -700,6 +726,7 @@ func toggle_advanced(enabled: bool) -> void:
 	category.visible = enabled
 	simple_hint.visible = not enabled
 	simple_tools.visible = not enabled
+	target_buttons.visible = not enabled
 	refresh_catalog()
 	show_assembly(false)
 
@@ -734,10 +761,12 @@ func update_simple_hint() -> void:
 		return
 	if assembly.is_empty():
 		simple_hint.text = "1. Выбери платформу на картинке и нажми «Взять платформу»."
+	elif selected < 0 and preload("res://src/assembly_runtime.gd").inspect(assembly).can_drive:
+		simple_hint.text = "Робот готов. Нажми «Тестировать на карте» или выбери деталь, чтобы изменить сборку."
 	elif selected >= 0 and assembly[selected].id == "electronics_010":
-		simple_hint.text = "Мотор ещё не прикручен. Нажми «Прикрутить мотор»: возьмём 2 винта из набора." if not Easy.fastening_ports(assembly, selected).is_empty() else "Мотор прикручен. Выбери колёса и нажми на зелёный вал мотора."
+		simple_hint.text = "Нажми «Прикрутить мотор», чтобы закрепить мотор из старой сборки двумя винтами." if not Easy.fastening_ports(assembly, selected).is_empty() else "Мотор прикручен. Выбери колёса и нажми на зелёный вал мотора."
 	elif simple_group == 1:
-		simple_hint.text = "2. Выбери мотор на картинке и нажми на зелёное место платформы."
+		simple_hint.text = "2. Выбери мотор, затем «Слева» или «Справа». Мотор установится сразу с двумя винтами."
 	elif simple_group == 2:
 		simple_hint.text = "3. Выбери колесо Solarbotics и нажми на зелёный вал мотора."
 	elif selected >= 0 and assembly[selected].id in ["electronics_009", "electronics_011"]:
@@ -799,11 +828,25 @@ func refresh_simple_targets() -> void:
 	for child in port_root.get_children():
 		port_root.remove_child(child)
 		child.queue_free()
+	for button in target_buttons.get_children():
+		target_buttons.remove_child(button)
+		button.queue_free()
 	simple_targets.clear()
 	if pending_id.is_empty():
 		return
 	simple_targets = Easy.candidates(assembly, pending_id)
-	for candidate in simple_targets:
+	for candidate_index in range(simple_targets.size()):
+		var candidate: Dictionary = simple_targets[candidate_index]
+		if pending_id in ["electronics_010", "electronics_018", "electronics_009", "electronics_011"]:
+			var port: Dictionary = Connections.for_part(assembly[candidate.part].id)[candidate.port]
+			var title: String = port.get("label", "Установить")
+			if pending_id == "electronics_010":
+				title = "Слева · с винтами" if "Левый" in title else "Справа · с винтами"
+			elif pending_id == "electronics_018":
+				title = "Надеть колесо · мотор %d" % (candidate.part+1)
+			var button := action(title, func():place_simple(candidate_index))
+			button.custom_minimum_size.y = 42
+			target_buttons.add_child(button)
 		var visual := MeshInstance3D.new()
 		var sphere := SphereMesh.new()
 		sphere.radius = maxf(.002, zoom*.006)
@@ -864,21 +907,25 @@ func show_ghost(index: int) -> void:
 
 func place_simple(index: int) -> void:
 	remember_step()
-	var error := Easy.place(assembly, pending_id, simple_targets[index], pending_twist)
+	var placed_id := pending_id
+	var new_index := assembly.size()
+	var error := Easy.install_motor(assembly,simple_targets[index],pending_twist) if placed_id == "electronics_010" else Easy.place(assembly,placed_id,simple_targets[index],pending_twist)
 	if not error.is_empty():
 		undo_history.pop_back()
 		simple_hint.text = error
 		return
-	selected = assembly.size()-1
+	selected = new_index
 	cancel_pending(false)
 	commit()
 	select_installed(selected)
 	frame_assembly()
+	if placed_id == "electronics_010":
+		choose_step(2)
 	update_simple_hint()
 
 func fasten_selected() -> void:
 	remember_step()
-	var index := selected
+	var index := Easy.motor_to_fasten(assembly,selected)
 	var error := Easy.fasten_motor(assembly, index)
 	if not error.is_empty():
 		undo_history.pop_back()
@@ -913,3 +960,22 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		cancel_pending()
 		set_input_as_handled()
+
+
+func load_default_robot() -> void:
+	var robot := Easy.default_robot()
+	if robot.is_empty():
+		simple_hint.text = "Не удалось создать готового робота"
+		return
+	remember_step()
+	set_assembly(robot,false)
+	commit()
+	choose_step(4)
+	frame_assembly()
+	simple_hint.text = "Готовый робот: два мотора прикручены, колёса установлены. Нажми «Тестировать на карте»."
+
+func start_empty_robot() -> void:
+	remember_step()
+	set_assembly([],false)
+	commit()
+	choose_step(0)

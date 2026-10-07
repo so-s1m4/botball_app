@@ -198,3 +198,45 @@ static func validate(assembly: Array) -> String:
 				if dot > .001 and dot < .999:
 					return "Крестовая ось не совмещена с профилем отверстия"
 	return ""
+
+static func migrate_v1(assembly: Array) -> Dictionary:
+	# Validate against the geometry the file was written with before touching it.
+	ensure_loaded()
+	var current := ports
+	var legacy: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/parts/legacy/connections_v1.json")).parts
+	var extra: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/parts/legacy/easy_mounts_v1.json")).parts
+	for id in extra:
+		legacy[id].append_array(extra[id])
+	ports = legacy
+	var error: String = load("res://src/part_library.gd").validate(assembly)
+	ports = current
+	if not error.is_empty():
+		return {"error":error}
+	var result := assembly.duplicate(true)
+	for entry in result:
+		entry.erase("links")
+	var visited := {}
+	for start in range(result.size()):
+		if visited.has(start):
+			continue
+		visited[start] = true
+		var queue: Array[int] = [start]
+		var cursor := 0
+		while cursor < queue.size():
+			var fixed := queue[cursor]
+			cursor += 1
+			for link in assembly[fixed].get("links", []):
+				var moving := int(link.other)
+				if visited.has(moving):
+					continue
+				error = connect_parts(result,moving,int(link.other_port),fixed,int(link.port))
+				if not error.is_empty():
+					return {"error":"Не удалось обновить крепления старой сборки: " + error}
+				visited[moving] = true
+				queue.append(moving)
+	# Restore redundant links as well; refuse inconsistent closed constraints.
+	for index in range(result.size()):
+		if assembly[index].has("links"):
+			result[index].links = assembly[index].links.duplicate(true)
+	error = validate(result)
+	return {"assembly":result} if error.is_empty() else {"error":"Старой сборке требуется повторное крепление деталей: " + error}

@@ -40,8 +40,8 @@ static func create_part(id: String) -> Node3D:
 		var finishes: Array[StandardMaterial3D] = []
 		for surface in range(visual.mesh.get_surface_count()):
 			var original := visual.mesh.surface_get_material(surface)
-			var mat: StandardMaterial3D = original.duplicate() if original is StandardMaterial3D and models[id].quality == "kipr" else StandardMaterial3D.new()
-			apply_finish(mat, part, original is StandardMaterial3D and models[id].quality == "kipr")
+			var mat: StandardMaterial3D = original.duplicate() if original is StandardMaterial3D and models[id].quality != "ldraw" else StandardMaterial3D.new()
+			apply_finish(mat, part, original is StandardMaterial3D and models[id].quality != "ldraw")
 			finishes.append(mat)
 		materials[id] = finishes
 	for surface in range(visual.mesh.get_surface_count()):
@@ -68,8 +68,16 @@ static func surface_texture(kind: String) -> NoiseTexture2D:
 
 static func apply_finish(mat: StandardMaterial3D, part: Dictionary, keep_color: bool) -> void:
 	var name_lower: String = part.name.to_lower()
-	var rubber: bool = "tire" in name_lower or "rubber" in name_lower or part.id == "electronics_018"
-	var metal: bool = part.group == "metal" and not "servo horn" in name_lower and part.id != "metal_036"
+	var finish_name := mat.resource_name.to_lower()
+	var dark_surface := keep_color and mat.albedo_color.get_luminance() < .15
+	var rubber: bool = "tire" in name_lower or "rubber" in name_lower or finish_name == "rubber" or (part.id in ["electronics_018", "electronics_019"] and dark_surface)
+	var metal: bool = finish_name in ["silver", "brass"] or part.group == "metal" and not "servo horn" in name_lower and part.id != "metal_036"
+	if part.id == "electronics_018" and not rubber:
+		metal = false
+	if part.id in ["electronics_009", "electronics_010"] and keep_color and not dark_surface:
+		metal = true
+	if keep_color and dark_surface:
+		mat.albedo_color = mat.albedo_color.lightened(.025)
 	var kind := "rubber" if rubber else "metal" if metal else "plastic"
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	if not keep_color:
@@ -81,14 +89,14 @@ static func apply_finish(mat: StandardMaterial3D, part: Dictionary, keep_color: 
 		if "brass" in name_lower:
 			mat.albedo_color = Color("b99a50")
 	mat.metallic = 0.8 if metal else 0.0
-	mat.roughness = 0.92 if rubber else 0.32 if metal else 0.28
+	mat.roughness = 0.88 if rubber else 0.38 if metal and dark_surface else 0.27 if metal else 0.4
 	mat.normal_enabled = true
 	mat.normal_texture = surface_texture(kind)
-	mat.normal_scale = 0.65 if rubber else 0.3
+	mat.normal_scale = 0.35 if rubber else 0.12 if metal else 0.08
 	mat.uv1_triplanar = true
 	mat.uv1_scale = Vector3.ONE * (280.0 if rubber else 140.0)
 	mat.clearcoat_enabled = not metal and not rubber
-	mat.clearcoat = 0.18
+	mat.clearcoat = 0.10
 	mat.clearcoat_roughness = 0.3
 
 static func thumbnail(id: String) -> Texture2D:

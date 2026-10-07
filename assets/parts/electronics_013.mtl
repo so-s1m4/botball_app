@@ -1,0 +1,6 @@
+newmtl plastic
+Kd 0.055 0.06 0.065
+
+newmtl lens
+Kd 0.025 0.1 0.16
+

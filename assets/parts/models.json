@@ -25,7 +25,8 @@
         0.015
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "electronics_003": {
       "path": "res://assets/parts/electronics_003.obj",
@@ -50,7 +51,8 @@
         0.015
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "electronics_005": {
       "path": "res://assets/parts/electronics_005.obj",
@@ -60,7 +62,8 @@
         0.015
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "electronics_006": {
       "path": "res://assets/parts/electronics_006.obj",
@@ -85,7 +88,8 @@
         0.015
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "electronics_008": {
       "path": "res://assets/parts/electronics_008.obj",
@@ -140,7 +144,8 @@
         0.011
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "electronics_012": {
       "path": "res://assets/parts/electronics_012.obj",
@@ -165,7 +170,8 @@
         0.02
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "electronics_014": {
       "path": "res://assets/parts/electronics_014.obj",
@@ -175,7 +181,8 @@
         0.038
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "electronics_015": {
       "path": "res://assets/parts/electronics_015.obj",
@@ -200,7 +207,8 @@
         0.13
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "electronics_017": {
       "path": "res://assets/parts/electronics_017.obj",
@@ -210,7 +218,8 @@
         0.13
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "electronics_018": {
       "path": "res://assets/parts/electronics_018.obj",
@@ -236,7 +245,8 @@
         0.116
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_001": {
       "path": "res://assets/parts/metal_001.obj",
@@ -246,7 +256,8 @@
         0.2413
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_002": {
       "path": "res://assets/parts/metal_002.obj",
@@ -256,37 +267,41 @@
         0.127
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_003": {
       "path": "res://assets/parts/metal_003.obj",
       "size": [
-        0.0635,
-        0.1016,
+        0.0396,
+        0.02615,
         0.1016
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_004": {
       "path": "res://assets/parts/metal_004.obj",
       "size": [
-        0.0635,
-        0.1524,
+        0.0396,
+        0.02615,
         0.1524
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_005": {
       "path": "res://assets/parts/metal_005.obj",
       "size": [
-        0.0635,
-        0.2032,
+        0.0396,
+        0.02615,
         0.2032
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_006": {
       "path": "res://assets/parts/metal_006.obj",
@@ -296,17 +311,19 @@
         0.1524
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_007": {
       "path": "res://assets/parts/metal_007.obj",
       "size": [
-        0.0762,
-        0.1524,
+        0.0523,
+        0.02615,
         0.1524
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_008": {
       "path": "res://assets/parts/metal_008.obj",
@@ -316,7 +333,8 @@
         0.03885
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_009": {
       "path": "res://assets/parts/metal_009.obj",
@@ -326,7 +344,8 @@
         0.03885
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_010": {
       "path": "res://assets/parts/metal_010.obj",
@@ -336,7 +355,8 @@
         0.0381
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_011": {
       "path": "res://assets/parts/metal_011.obj",
@@ -361,7 +381,8 @@
         0.028
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_013": {
       "path": "res://assets/parts/metal_013.obj",
@@ -386,7 +407,8 @@
         0.03885
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_015": {
       "path": "res://assets/parts/metal_015.obj",
@@ -396,7 +418,8 @@
         0.007
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_016": {
       "path": "res://assets/parts/metal_016.obj",
@@ -451,7 +474,8 @@
         0.0077942
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_020": {
       "path": "res://assets/parts/metal_020.obj",
@@ -461,7 +485,8 @@
         0.006
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_021": {
       "path": "res://assets/parts/metal_021.obj",
@@ -471,7 +496,8 @@
         0.006
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_022": {
       "path": "res://assets/parts/metal_022.obj",
@@ -481,7 +507,8 @@
         0.006
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_023": {
       "path": "res://assets/parts/metal_023.obj",
@@ -491,7 +518,8 @@
         0.006
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_024": {
       "path": "res://assets/parts/metal_024.obj",
@@ -516,7 +544,8 @@
         0.009
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_026": {
       "path": "res://assets/parts/metal_026.obj",
@@ -536,52 +565,57 @@
     "metal_027": {
       "path": "res://assets/parts/metal_027.obj",
       "size": [
-        0.028,
-        0.004,
-        0.028
+        0.007,
+        0.0147,
+        0.007
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_028": {
       "path": "res://assets/parts/metal_028.obj",
       "size": [
         0.0036,
-        0.0254,
+        0.0255984,
         0.0036
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_029": {
       "path": "res://assets/parts/metal_029.obj",
       "size": [
         0.0036,
-        0.0508,
+        0.0509984,
         0.0036
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_030": {
       "path": "res://assets/parts/metal_030.obj",
       "size": [
         0.0036,
-        0.0762,
+        0.0763984,
         0.0036
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_031": {
       "path": "res://assets/parts/metal_031.obj",
       "size": [
         0.0036,
-        0.1524,
+        0.1525984,
         0.0036
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_032": {
       "path": "res://assets/parts/metal_032.obj",
@@ -591,7 +625,8 @@
         0.007
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_033": {
       "path": "res://assets/parts/metal_033.obj",
@@ -601,17 +636,19 @@
         0.007
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_034": {
       "path": "res://assets/parts/metal_034.obj",
       "size": [
-        0.0254,
-        0.02615,
-        0.03885
+        0.007,
+        0.011525,
+        0.007
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_035": {
       "path": "res://assets/parts/metal_035.obj",
@@ -621,7 +658,8 @@
         0.007
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "metal_036": {
       "path": "res://assets/parts/metal_036.obj",
@@ -631,7 +669,8 @@
         0.03
       ],
       "quality": "estimated",
-      "source": null
+      "source": null,
+      "detail": "chamfered surfaces, high resolution holes and visible fastener threads"
     },
     "lego_32062": {
       "path": "res://assets/parts/lego_32062.obj",
@@ -1643,5 +1682,6 @@
       "quality": "ldraw",
       "source": "ldraw/parts/44309.dat"
     }
-  }
+  },
+  "geometry_revision": 2
 }

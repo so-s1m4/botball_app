@@ -207,12 +207,16 @@ func _ready() -> void:
 	program_editor.run_requested.connect(run_robot_program)
 	program_editor.stop_requested.connect(func():sim.stop_program())
 	program_editor.source_changed.connect(func(source):current_program = source)
+	var starter: Array = preload("res://src/easy_assembly.gd").default_robot()
+	sim.robot.set_assembly(starter)
+	assembly_editor.set_assembly(starter)
+	assembly_editor.choose_step(4)
 	refresh_actuator_controls()
 	sim.changed.connect(update_status)
 	sim.event.connect(log_event)
 	apply_settings()
 	update_status()
-	log_event("Учебное поле готово. Нажми «Автономная попытка».")
+	log_event("Готовый робот установлен. Нажми «Ручное управление» или запусти пример в «Код робота».")
 	if not OS.has_feature("editor"):
 		update_checker.call_deferred("check", false)
 

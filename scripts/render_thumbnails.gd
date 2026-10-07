@@ -19,6 +19,15 @@ func run() -> void:
 	environment.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.environment.ambient_light_color = Color("dbe7f3")
 	environment.environment.ambient_light_energy = 0.55
+	# A studio sky provides reflections even with a flat viewport background.
+	environment.environment.sky = Sky.new()
+	var studio := ProceduralSkyMaterial.new()
+	studio.sky_top_color = Color("7c92ad")
+	studio.sky_horizon_color = Color("dce3e9")
+	studio.ground_bottom_color = Color("263447")
+	studio.ground_horizon_color = Color("bbc5cf")
+	environment.environment.sky.sky_material = studio
+	environment.environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	world.add_child(environment)
 	var key := DirectionalLight3D.new()
 	key.rotation_degrees = Vector3(-45, -30, 0)

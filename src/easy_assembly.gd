@@ -41,6 +41,14 @@ static func place(assembly: Array, id: String, candidate: Dictionary, twist: flo
 		return "Эти детали закончились в наборе"
 	var snapshot := assembly.duplicate(true)
 	assembly.append({"id":id,"position":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0]})
+	if id == "electronics_010" and candidate.get("part",-1) >= 0 and candidate.part < snapshot.size() and candidate.get("port",-1) >= 0 and candidate.port < Connections.for_part(assembly[int(candidate.part)].id).size():
+		var fixed: Dictionary = assembly[int(candidate.part)]
+		var mount: Dictionary = Connections.for_part(fixed.id)[int(candidate.port)]
+		var local_basis := Basis(Vector3.RIGHT,PI/2)
+		if mount.normal[0] > 0:
+			local_basis = Basis(Vector3.UP,PI) * Basis(Vector3.RIGHT,-PI/2)
+		var basis := Connections.transform(fixed).basis * local_basis
+		Connections.set_transform(assembly.back(),Transform3D(basis,Vector3.ZERO))
 	var error := Connections.connect_parts(assembly, assembly.size()-1, candidate.get("own",-1), candidate.get("part",-1), candidate.get("port",-1), twist)
 	if error.is_empty():
 		error = Library.validate(assembly)
@@ -62,6 +70,12 @@ static func fasten_motor(assembly: Array, index: int) -> String:
 	var holes := fastening_ports(assembly, index)
 	if holes.is_empty():
 		return "Мотор уже закреплён"
+	var mounted := false
+	for link in assembly[index].get("links", []):
+		if Connections.for_part(assembly[index].id)[int(link.port)].kind == "motor_body_mount":
+			mounted = true
+	if not mounted:
+		return "Сначала установи мотор на платформу: выбери мотор и место «Слева» или «Справа»"
 	var snapshot := assembly.duplicate(true)
 	for hole in holes:
 		var error := place(assembly, "metal_015", {"part":index,"port":hole,"own":0})
@@ -69,3 +83,33 @@ static func fasten_motor(assembly: Array, index: int) -> String:
 			assembly.assign(snapshot)
 			return error
 	return ""
+
+
+static func install_motor(assembly: Array, candidate: Dictionary, twist: float = 0) -> String:
+	var snapshot := assembly.duplicate(true)
+	var motor := assembly.size()
+	var error := place(assembly,"electronics_010",candidate,twist)
+	if error.is_empty():
+		error = fasten_motor(assembly,motor)
+	if not error.is_empty():
+		assembly.assign(snapshot)
+	return error
+
+static func default_robot() -> Array:
+	var assembly: Array = [{"id":"metal_007","position":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0]}]
+	for side in range(2):
+		var targets := candidates(assembly,"electronics_010")
+		if targets.is_empty() or not install_motor(assembly,targets[0]).is_empty():
+			return []
+		var wheels := candidates(assembly,"electronics_018")
+		if wheels.is_empty() or not place(assembly,"electronics_018",wheels[0]).is_empty():
+			return []
+	return assembly
+
+static func motor_to_fasten(assembly: Array, selected: int) -> int:
+	if selected >= 0 and selected < assembly.size() and assembly[selected].id == "electronics_010" and not fastening_ports(assembly,selected).is_empty():
+		return selected
+	for index in range(assembly.size()):
+		if assembly[index].id == "electronics_010" and not fastening_ports(assembly,index).is_empty():
+			return index
+	return -1

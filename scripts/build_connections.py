@@ -96,7 +96,7 @@ for part in catalog:
             origin=[(lo[0]+hi[0])/2,lo[1],(lo[2]+hi[2])/2]
             panels=[(rows,cols,(0,0,0),False)]
             if 'channel' in name or 'chassis' in name:
-                panels += [(2,cols,(sign*rows*.0127/2,.0127,0),True) for sign in (-1,1)]
+                panels += [(2,cols,(sign*rows*.0127/2,.0127,0),'side') for sign in (-1,1)]
             elif 'bracket' in name or 'mount' in name:
                 panels.append((rows,2,(0,.0127,cols*.0127/2),True))
             for r,c,at,vertical in panels:
@@ -104,8 +104,8 @@ for part in catalog:
                     for col in range(c):
                         for sign in (-1,1):
                             x=(row-(r-1)/2)*.0127; y=sign*.0015/2; zz=(col-(c-1)/2)*.0127
-                            p=(at[0]+x,at[1]+(zz if vertical else y),at[2]+(-y if vertical else zz))
-                            n=(0,0,-sign) if vertical else (0,sign,0)
+                            p=(at[0]+y,at[1]+x,at[2]+zz) if vertical=='side' else (at[0]+x,at[1]+(zz if vertical else y),at[2]+(-y if vertical else zz))
+                            n=(sign,0,0) if vertical=='side' else (0,0,-sign) if vertical else (0,sign,0)
                             ports.append(port('hole_8_32',[p[i]-origin[i] for i in range(3)],n,'estimated'))
         if 'screw' in name and 'mount' not in name and 'machine' not in name and 'mecanum' not in name:
             thread='m3' if '(m3)' in name else '8_32' if '8-32' in name else ''
