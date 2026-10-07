@@ -1,28 +1,282 @@
 extends Control
 
+const Simulation = preload("res://src/simulation.gd")
+const Store = preload("res://src/project_store.gd")
+var sim: Node3D
+var viewport: SubViewport
+var view_container: SubViewportContainer
+var status_label: Label
+var score_label: Label
+var timer_label: Label
+var telemetry_label: Label
+var stage_label: Label
+var log_text: RichTextLabel
+var pause_button: Button
+var speed_input: SpinBox
+var base_input: SpinBox
+var noise_input: SpinBox
+var seed_input: SpinBox
+var save_dialog: FileDialog
+var open_dialog: FileDialog
+var inputs: Array[SpinBox] = []
 
 func _ready() -> void:
+	build_theme()
+	var background := ColorRect.new()
+	background.color = Color("101927")
+	background.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	add_child(background)
 	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side in ["left", "top", "right", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 32)
+	margin.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 20)
 	add_child(margin)
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 14)
+	margin.add_child(root)
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 12)
+	root.add_child(header)
+	var title := label("BOTBALL  /  LAB", 26)
+	title.size_flags_horizontal = SIZE_EXPAND_FILL
+	header.add_child(title)
+	header.add_child(label("ПРОТОТИП  0.1", 13, Color("51d8bb")))
+	header.add_child(button("Открыть…", func(): open_dialog.popup_centered_ratio(0.7)))
+	header.add_child(button("Сохранить…", func(): save_dialog.popup_centered_ratio(0.7)))
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", 16)
+	columns.size_flags_vertical = SIZE_EXPAND_FILL
+	root.add_child(columns)
+	var left := VBoxContainer.new()
+	left.size_flags_horizontal = SIZE_EXPAND_FILL
+	columns.add_child(left)
+	var info := HBoxContainer.new()
+	left.add_child(info)
+	var table_name := label("01  /  Учебный стол", 19)
+	table_name.size_flags_horizontal = SIZE_EXPAND_FILL
+	info.add_child(table_name)
+	status_label = label("Готов к запуску", 14, Color("51d8bb"))
+	info.add_child(status_label)
+	view_container = SubViewportContainer.new()
+	view_container.stretch = true
+	view_container.focus_mode = Control.FOCUS_ALL
+	view_container.size_flags_horizontal = SIZE_EXPAND_FILL
+	view_container.size_flags_vertical = SIZE_EXPAND_FILL
+	view_container.custom_minimum_size = Vector2(480, 360)
+	left.add_child(view_container)
+	viewport = SubViewport.new()
+	viewport.size = Vector2i(800, 600)
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	viewport.physics_object_picking = false
+	view_container.add_child(viewport)
+	sim = Simulation.new()
+	viewport.add_child(sim)
+	view_container.gui_input.connect(camera_input)
+	left.add_child(label("Камера: перетаскивай правой кнопкой · колёсико — масштаб", 13, Color("93a9bd")))
+	var sidebar := VBoxContainer.new()
+	sidebar.custom_minimum_size.x = 310
+	sidebar.add_theme_constant_override("separation", 10)
+	var sidebar_scroll := ScrollContainer.new()
+	sidebar_scroll.custom_minimum_size.x = 326
+	sidebar_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	columns.add_child(sidebar_scroll)
+	sidebar_scroll.add_child(sidebar)
+	sidebar.size_flags_horizontal = SIZE_EXPAND_FILL
+	sidebar.add_child(label("ПОПЫТКА", 13, Color("93a9bd")))
+	var stats := HBoxContainer.new()
+	sidebar.add_child(stats)
+	score_label = label("0 / 100", 30, Color("51d8bb"))
+	score_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	stats.add_child(score_label)
+	timer_label = label("60.0 с", 26)
+	stats.add_child(timer_label)
+	var task := label("Захвати оранжевый куб и отпусти его целиком в зелёной зоне. Доставка: 100 баллов.", 15)
+	task.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sidebar.add_child(task)
+	sidebar.add_child(button("Автономная попытка", func(): start_attempt(true), true))
+	sidebar.add_child(button("Ручное управление", func(): start_attempt(false)))
+	var actions := HBoxContainer.new()
+	sidebar.add_child(actions)
+	pause_button = button("Пауза", func(): sim.toggle_pause())
+	pause_button.size_flags_horizontal = SIZE_EXPAND_FILL
+	actions.add_child(pause_button)
+	var reset_button := button("Сброс", func(): sim.reset_attempt(); log_event("Поле сброшено"))
+	reset_button.size_flags_horizontal = SIZE_EXPAND_FILL
+	actions.add_child(reset_button)
+	sidebar.add_child(button("Захват / отпустить · Пробел", func(): sim.toggle_grip()))
+	var keys := label("W / ↑ — вперёд    S / ↓ — назад\nA / ←, D / → — поворот    P — пауза", 13, Color("93a9bd"))
+	sidebar.add_child(keys)
+	sidebar.add_child(HSeparator.new())
+	sidebar.add_child(label("ПАРАМЕТРЫ РОБОТА", 13, Color("93a9bd")))
+	speed_input = setting(sidebar, "Скорость, м/с", 0.2, 1.0, 0.05, 0.65)
+	base_input = setting(sidebar, "Колея, м", 0.24, 0.40, 0.01, 0.30)
+	noise_input = setting(sidebar, "Ошибка приводов, %", 0, 15, 1, 2)
+	seed_input = setting(sidebar, "Seed попытки", 1, 999999, 1, 42)
+	for control in inputs:
+		control.value_changed.connect(func(_value): apply_settings())
+	sidebar.add_child(HSeparator.new())
+	stage_label = label("Ожидание запуска", 14, Color("51d8bb"))
+	sidebar.add_child(stage_label)
+	telemetry_label = label("", 13, Color("93a9bd"))
+	sidebar.add_child(telemetry_label)
+	log_text = RichTextLabel.new()
+	log_text.custom_minimum_size.y = 70
+	log_text.size_flags_vertical = SIZE_EXPAND_FILL
+	log_text.scroll_following = true
+	log_text.add_theme_font_size_override("normal_font_size", 12)
+	sidebar.add_child(log_text)
+	var footer := label("Учебные размеры и правила. Упрощённая физика; автопилот использует известные координаты поля.", 12, Color("93a9bd"))
+	footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	root.add_child(footer)
+	save_dialog = dialog(FileDialog.FILE_MODE_SAVE_FILE)
+	save_dialog.current_file = "robot.botball.json"
+	save_dialog.file_selected.connect(save_project)
+	open_dialog = dialog(FileDialog.FILE_MODE_OPEN_FILE)
+	open_dialog.file_selected.connect(open_project)
+	sim.changed.connect(update_status)
+	sim.event.connect(log_event)
+	apply_settings()
+	update_status()
+	log_event("Учебное поле готово. Нажми «Автономная попытка».")
 
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 20)
-	margin.add_child(column)
+func _process(_delta: float) -> void:
+	if sim == null or not sim.running or sim.paused or sim.autonomous:
+		return
+	var focused := get_viewport().gui_get_focus_owner()
+	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible:
+		sim.manual_forward = 0
+		sim.manual_turn = 0
+		return
+	sim.manual_forward = float(pressed(KEY_W, KEY_UP)) - float(pressed(KEY_S, KEY_DOWN))
+	sim.manual_turn = float(pressed(KEY_A, KEY_LEFT)) - float(pressed(KEY_D, KEY_RIGHT))
 
-	var title := Label.new()
-	title.text = "Botball Simulator"
-	title.add_theme_font_size_override("font_size", 32)
-	column.add_child(title)
+func pressed(first: Key, second: Key) -> bool:
+	return Input.is_physical_key_pressed(first) or Input.is_physical_key_pressed(second)
 
-	var status := Label.new()
-	status.text = "Начальная структура проекта. Симуляция пока не реализована."
-	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	column.add_child(status)
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_SPACE:
+			sim.toggle_grip()
+			get_viewport().set_input_as_handled()
+		elif event.physical_keycode == KEY_P:
+			sim.toggle_pause()
+			get_viewport().set_input_as_handled()
 
-	var next_steps := Label.new()
-	next_steps.text = "Следующий этап: модель стола, настройка коллайдеров, один робот и одно задание.\nДля начала нужны модель GLB/GLTF, год комплекта и проверенные правила."
-	next_steps.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	column.add_child(next_steps)
+func camera_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and event.button_mask & MOUSE_BUTTON_MASK_RIGHT:
+		sim.orbit -= event.relative.x * 0.008
+		sim.elevation = clampf(sim.elevation + event.relative.y * 0.008, 0.25, 1.4)
+		sim.update_camera()
+	elif event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			sim.zoom = maxf(2.3, sim.zoom - 0.2)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			sim.zoom = minf(6, sim.zoom + 0.2)
+		sim.update_camera()
+
+func start_attempt(auto: bool) -> void:
+	apply_settings()
+	sim.start(auto)
+	view_container.grab_focus()
+
+func apply_settings() -> void:
+	sim.robot.max_speed = speed_input.value
+	sim.robot.wheel_base = base_input.value
+	sim.robot.motor_error = noise_input.value / 100.0
+	sim.seed_value = int(seed_input.value)
+
+func update_status() -> void:
+	score_label.text = "%d / 100" % sim.score
+	timer_label.text = "%.1f с" % (sim.LIMIT - sim.elapsed)
+	status_label.text = "Пауза" if sim.paused else ("Автономно" if sim.autonomous else "Вручную") if sim.running else ("Доставлено" if sim.score > 0 else "Готов к запуску" if sim.elapsed == 0 else "Попытка завершена")
+	pause_button.text = "Продолжить" if sim.paused else "Пауза"
+	pause_button.disabled = not sim.running
+	for control in inputs:
+		control.editable = not sim.running
+	var stages := ["Едем к кубу", "Закрываем захват", "Едем к зоне", "Отпускаем куб", "Проверяем доставку"]
+	stage_label.text = stages[sim.phase] if sim.running and sim.autonomous else ("Куб в захвате" if sim.robot.carrying else "Ожидание команды")
+	telemetry_label.text = "Дальномер: %.2f м\nЭнкодеры L / R: %.2f / %.2f м" % [sim.robot.distance_sensor(), sim.robot.left_encoder, sim.robot.right_encoder]
+
+func save_project(path: String) -> void:
+	var result := Store.write_project(path, {"speed": speed_input.value, "wheel_base": base_input.value, "noise": noise_input.value / 100.0, "seed": int(seed_input.value)})
+	log_event("Настройки проекта сохранены" if result == OK else "Ошибка сохранения: " + error_string(result))
+
+func open_project(path: String) -> void:
+	var result := Store.read_project(path)
+	if result.has("error"):
+		log_event(result.error)
+		return
+	sim.reset_attempt()
+	var settings: Dictionary = result.settings
+	speed_input.value = settings.speed
+	base_input.value = settings.wheel_base
+	noise_input.value = settings.noise * 100
+	seed_input.value = settings.seed
+	apply_settings()
+	log_event("Проект открыт. Поле сброшено.")
+
+func log_event(message: String) -> void:
+	log_text.append_text("[%04.1f] %s\n" % [sim.elapsed, message])
+
+func dialog(mode: FileDialog.FileMode) -> FileDialog:
+	var file_dialog := FileDialog.new()
+	file_dialog.file_mode = mode
+	file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	file_dialog.filters = PackedStringArray(["*.json ; Проект Botball"])
+	file_dialog.use_native_dialog = true
+	add_child(file_dialog)
+	return file_dialog
+
+func setting(parent: VBoxContainer, text: String, low: float, high: float, step_value: float, initial: float) -> SpinBox:
+	var row := HBoxContainer.new()
+	parent.add_child(row)
+	var caption := label(text, 13, Color("b1c3d3"))
+	caption.size_flags_horizontal = SIZE_EXPAND_FILL
+	row.add_child(caption)
+	var input := SpinBox.new()
+	input.min_value = low
+	input.max_value = high
+	input.step = step_value
+	input.value = initial
+	input.custom_minimum_size.x = 115
+	row.add_child(input)
+	inputs.append(input)
+	return input
+
+func label(text: String, size: int, color := Color("e6eef6")) -> Label:
+	var result := Label.new()
+	result.text = text
+	result.add_theme_font_size_override("font_size", size)
+	result.add_theme_color_override("font_color", color)
+	return result
+
+func button(text: String, action: Callable, primary := false) -> Button:
+	var result := Button.new()
+	result.text = text
+	result.custom_minimum_size.y = 36
+	result.focus_mode = Control.FOCUS_NONE
+	result.pressed.connect(action)
+	if primary:
+		result.add_theme_stylebox_override("normal", style(Color("176e62")))
+		result.add_theme_stylebox_override("hover", style(Color("208574")))
+	return result
+
+func style(color: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = color
+	box.set_corner_radius_all(6)
+	box.content_margin_left = 12
+	box.content_margin_right = 12
+	box.content_margin_top = 6
+	box.content_margin_bottom = 6
+	return box
+
+func build_theme() -> void:
+	theme = Theme.new()
+	theme.default_font_size = 14
+	theme.set_color("font_color", "Label", Color("e6eef6"))
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		theme.set_stylebox(state, "Button", style(Color("2c4257") if state == "hover" else Color("1e3043")))
+	theme.set_color("font_color", "Button", Color("e6eef6"))
+	theme.set_stylebox("normal", "LineEdit", style(Color("1e3043")))
+	theme.set_stylebox("read_only", "LineEdit", style(Color("172535")))

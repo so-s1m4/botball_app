@@ -1,0 +1,40 @@
+name: Test and build macOS
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prototype:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.5.2 and macOS template
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, urllib.request, zipfile
+          base = 'https://github.com/godotengine/godot/releases/download/4.5.2-stable/'
+          urllib.request.urlretrieve(base + 'Godot_v4.5.2-stable_linux.x86_64.zip', '/tmp/godot.zip')
+          with zipfile.ZipFile('/tmp/godot.zip') as z:
+              z.extractall('/tmp/godot-bin')
+          os.chmod('/tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64', 0o755)
+          urllib.request.urlretrieve(base + 'Godot_v4.5.2-stable_export_templates.tpz', '/tmp/templates.tpz')
+          target = pathlib.Path.home() / '.local/share/godot/export_templates/4.5.2.stable'
+          target.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile('/tmp/templates.tpz') as z:
+              (target / 'macos.zip').write_bytes(z.read('templates/macos.zip'))
+          PY
+      - name: Import project
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --editor --import --quit
+      - name: Test simulation
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/smoke.gd --fixed-fps 120
+      - name: Build universal macOS app
+        env:
+          GODOT_BIN: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64
+        run: scripts/build_macos.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Botball-Lab-macOS
+          path: build/Botball-Lab-macOS.zip
