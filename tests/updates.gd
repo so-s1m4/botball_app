@@ -22,7 +22,10 @@ func _initialize() -> void:
 func check_responses() -> void:
 	var updater := Updater.new()
 	root.add_child(updater)
-	updater.completed(HTTPRequest.RESULT_SUCCESS, 200, [], '{"tag_name":"v0.3.0","assets":[{"name":"Botball-Lab-macOS.dmg","size":1024,"browser_download_url":"https://github.com/so-s1m4/botball_app/releases/download/v0.3.0/Botball-Lab-macOS.dmg"}]}'.to_utf8_buffer())
+	var current := Updater.version_numbers(ProjectSettings.get_setting("application/config/version"))
+	var next := "v%d.%d.%d" % [current[0], current[1], current[2]+1]
+	var release := {"tag_name":next, "assets":[{"name":"Botball-Lab-macOS.dmg", "size":1024, "browser_download_url":Updater.DOWNLOAD_PREFIX+next+"/Botball-Lab-macOS.dmg"}]}
+	updater.completed(HTTPRequest.RESULT_SUCCESS, 200, [], JSON.stringify(release).to_utf8_buffer())
 	assert(updater.download_button.visible)
 	assert(updater.dialog.visible)
 	updater.dialog.hide()

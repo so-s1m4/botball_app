@@ -1,5 +1,6 @@
 extends Window
 signal assembly_changed(assembly: Array)
+const Connections = preload("res://src/assembly_connections.gd")
 const Library = preload("res://src/part_library.gd")
 var assembly: Array = []
 var catalog_ids: Array[String] = []
@@ -20,6 +21,16 @@ var selected := -1
 var catalog_id := ""
 var syncing := false
 var previewing := false
+var own_port: OptionButton
+var target_part: OptionButton
+var target_port: OptionButton
+var twist: SpinBox
+var connect_button: Button
+var detach_button: Button
+var connection_status: Label
+var connection_mode: CheckButton
+var port_root: Node3D
+var picked_ports: Array = []
 var orbit := 0.5
 var elevation := 0.6
 var zoom := 0.65
@@ -28,8 +39,8 @@ var target := Vector3(0, 0.08, 0)
 func _ready() -> void:
 	Library.ensure_loaded()
 	title = "Конструктор · Botball 2026"
-	size = Vector2i(1000, 720)
-	min_size = Vector2i(850, 600)
+	size = Vector2i(1100, 860)
+	min_size = Vector2i(1000, 780)
 	close_requested.connect(hide)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -102,6 +113,8 @@ func _ready() -> void:
 	world.add_child(model_root)
 	selection_root = Node3D.new()
 	world.add_child(selection_root)
+	port_root = Node3D.new()
+	world.add_child(port_root)
 	var grid := ImmediateMesh.new()
 	grid.surface_begin(Mesh.PRIMITIVE_LINES)
 	for i in range(-30,31):
@@ -122,7 +135,51 @@ func _ready() -> void:
 	camera.current = true
 	world.add_child(camera)
 	view.gui_input.connect(camera_input)
-	workspace.add_child(caption("ЛКМ — разместить · ПКМ — камера · колесо — масштаб · сетка 8 мм"))
+	workspace.add_child(caption("ЛКМ — точка крепления · ПКМ — камера · колесо — масштаб"))
+	connection_mode = CheckButton.new()
+	connection_mode.text = "Сборка по креплениям (свободное размещение — выключить)"
+	connection_mode.button_pressed = true
+	connection_mode.toggled.connect(func(_enabled): mark_ports())
+	workspace.add_child(connection_mode)
+	var own_row := HBoxContainer.new()
+	workspace.add_child(own_row)
+	own_row.add_child(caption("Крепление выбранной детали"))
+	own_port = OptionButton.new()
+	own_port.clip_text = true
+	own_port.custom_minimum_size.x = 150
+	own_port.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	own_port.item_selected.connect(func(_index): twist.value = 0; refresh_destinations())
+	own_row.add_child(own_port)
+	var target_row := HBoxContainer.new()
+	workspace.add_child(target_row)
+	target_row.add_child(caption("Соединить с"))
+	target_part = OptionButton.new()
+	target_part.clip_text = true
+	target_part.custom_minimum_size.x = 150
+	target_part.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	target_part.item_selected.connect(func(_index): refresh_target_ports())
+	target_row.add_child(target_part)
+	target_port = OptionButton.new()
+	target_port.clip_text = true
+	target_port.custom_minimum_size.x = 150
+	target_port.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	target_port.item_selected.connect(func(_index): update_connection_actions())
+	target_row.add_child(target_port)
+	var attach_row := HBoxContainer.new()
+	workspace.add_child(attach_row)
+	attach_row.add_child(caption("Угол вокруг крепления, °"))
+	twist = SpinBox.new()
+	twist.min_value = -180
+	twist.max_value = 180
+	twist.step = 90
+	attach_row.add_child(twist)
+	connect_button = action("Соединить", attach_selected)
+	attach_row.add_child(connect_button)
+	detach_button = action("Отсоединить", detach_selected)
+	attach_row.add_child(detach_button)
+	connection_status = caption("Добавь основание, затем пин, ось или винт и выбери точки крепления.")
+	connection_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	workspace.add_child(connection_status)
 	var show_button := action("Показать всю сборку", show_assembly)
 	workspace.add_child(show_button)
 	for key in ["Положение, мм", "Поворот, °"]:
@@ -140,16 +197,18 @@ func _ready() -> void:
 			fields.append(field)
 			field.value_changed.connect(transform_selected)
 			row.add_child(field)
-	var hint := caption("Модели: LDraw.org и KIPR Simulator. Остальные помечены как приближённые.\nСоединения вручную; физика поля использует учебный корпус и захват.")
+	var hint := caption("Модели: LDraw.org и KIPR Simulator. Остальные помечены как приближённые.\nЦветные точки — крепления; соединённые детали перемещаются вместе.\nКрепления металла приближённые. Физика поля использует учебный корпус и захват.")
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	workspace.add_child(hint)
 	refresh_catalog()
 	refresh_installed()
+	refresh_connections()
 	show_assembly()
 
 func set_assembly(value: Array) -> void:
 	assembly = value.duplicate(true)
 	selected = -1
+	refresh_connections()
 	refresh_catalog()
 	refresh_installed()
 	show_assembly()
@@ -190,6 +249,7 @@ func select_catalog(index: int) -> void:
 	previewing = true
 	count_label.text = "Просмотр детали: " + part.name
 	clear_selection()
+	mark_ports()
 	target = Vector3(0, dims[1]/2, 0)
 	zoom = maxf(.04, maxf(dims[0], maxf(dims[1], dims[2]))*2.4)
 	update_camera()
@@ -204,7 +264,8 @@ func add_part() -> void:
 	var entry := {"id":catalog_id,"position":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0]}
 	if selected >= 0 and selected < assembly.size():
 		entry.position = assembly[selected].position.duplicate()
-		entry.position[1] += Library.models[assembly[selected].id].size[1]
+		entry.position[0] += (Library.models[assembly[selected].id].size[0] + Library.models[catalog_id].size[0])/2 + .016
+		entry.position[0] = clampf(entry.position[0], -.5, .5)
 	assembly.append(entry)
 	selected = assembly.size()-1
 	commit()
@@ -213,7 +274,7 @@ func add_part() -> void:
 func remove_part() -> void:
 	if selected < 0:
 		return
-	assembly.remove_at(selected)
+	Connections.remove(assembly, selected)
 	selected = mini(selected,assembly.size()-1)
 	commit()
 	if selected >= 0:
@@ -224,7 +285,8 @@ func remove_part() -> void:
 func commit() -> void:
 	refresh_catalog()
 	refresh_installed()
-	show_assembly()
+	refresh_connections()
+	show_assembly(false)
 	assembly_changed.emit(assembly.duplicate(true))
 
 func refresh_installed() -> void:
@@ -242,7 +304,8 @@ func select_installed(index: int) -> void:
 		fields[i].value = assembly[index].position[i]*1000
 		fields[i+3].value = assembly[index].rotation[i]
 	syncing = false
-	show_assembly()
+	refresh_connections()
+	show_assembly(false)
 	var p: Array = assembly[index].position
 	target = Vector3(p[0],p[1],p[2])
 	update_camera()
@@ -251,22 +314,32 @@ func select_installed(index: int) -> void:
 func transform_selected(_value: float) -> void:
 	if syncing or selected < 0:
 		return
-	for i in range(3):
-		assembly[selected].position[i] = fields[i].value/1000
-		assembly[selected].rotation[i] = fields[i+3].value
+	var backup := assembly.duplicate(true)
+	var position := Vector3(fields[0].value, fields[1].value, fields[2].value)/1000
+	var rotation := Vector3(fields[3].value, fields[4].value, fields[5].value)*PI/180
+	Connections.move_group(assembly, selected, Transform3D(Basis.from_euler(rotation), position))
+	var error := Library.validate(assembly)
+	if not error.is_empty():
+		assembly = backup
+		select_installed(selected)
+		connection_status.text = error
+		return
 	Library.populate(model_root,assembly)
 	previewing = false
 	mark_selection()
+	mark_ports()
 	assembly_changed.emit(assembly.duplicate(true))
 
-func show_assembly() -> void:
+func show_assembly(reset_camera: bool = true) -> void:
 	previewing = false
 	Library.populate(model_root,assembly)
-	target = Vector3(0,.05,0)
-	zoom = .65
+	if reset_camera:
+		target = Vector3(0,.05,0)
+		zoom = .65
 	count_label.text = "Сборка: %d деталей" % assembly.size()
 	update_actions()
 	mark_selection()
+	mark_ports()
 	update_camera()
 
 func clear_selection() -> void:
@@ -311,6 +384,9 @@ func update_actions() -> void:
 
 func camera_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and selected >= 0 and not previewing:
+		if connection_mode.button_pressed:
+			pick_port(event.position)
+			return
 		var viewport_position: Vector2 = event.position * Vector2(view.get_child(0).size) / view.size
 		var origin := camera.project_ray_origin(viewport_position)
 		var direction := camera.project_ray_normal(viewport_position)
@@ -345,3 +421,147 @@ func action(text: String, callback: Callable) -> Button:
 	result.text = text
 	result.pressed.connect(callback)
 	return result
+
+func port_label(port: Dictionary, index: int) -> String:
+	return "%d · %s%s" % [index+1, Connections.LABELS.get(port.kind, port.kind), " ≈" if port.quality == "estimated" else ""]
+
+func refresh_connections() -> void:
+	own_port.clear()
+	twist.value = 0
+	if selected >= 0:
+		var ports := Connections.for_part(assembly[selected].id)
+		for i in range(ports.size()):
+			own_port.add_item(port_label(ports[i], i), i)
+			own_port.set_item_disabled(i, Connections.occupied(assembly, selected, i))
+		for i in range(ports.size()):
+			if not own_port.is_item_disabled(i):
+				own_port.select(i)
+				break
+	refresh_destinations()
+
+func refresh_destinations() -> void:
+	if own_port.selected >= 0:
+		var kind: String = Connections.for_part(assembly[selected].id)[own_port.selected].kind
+		twist.step = 90 if kind in ["axle", "axle_hole", "stud", "stud_socket"] else 15
+	var previous := target_part.get_selected_id()
+	target_part.clear()
+	if selected >= 0 and own_port.item_count > 0:
+		var group := Connections.component(assembly, selected)
+		for i in range(assembly.size()):
+			if group.has(i) or Connections.for_part(assembly[i].id).is_empty():
+				continue
+			target_part.add_item("%d · %s" % [i+1, Library.find_part(assembly[i].id).name], i)
+			if i == previous:
+				target_part.select(target_part.item_count-1)
+	refresh_target_ports()
+
+func refresh_target_ports() -> void:
+	target_port.clear()
+	var other := target_part.get_selected_id()
+	if selected >= 0 and other >= 0 and own_port.item_count > 0:
+		var own: Dictionary = Connections.for_part(assembly[selected].id)[own_port.selected]
+		var ports := Connections.for_part(assembly[other].id)
+		for i in range(ports.size()):
+			if Connections.compatible(own.kind, ports[i].kind) and not Connections.occupied(assembly, other, i):
+				target_port.add_item(port_label(ports[i], i), i)
+	update_connection_actions()
+
+func update_connection_actions() -> void:
+	connect_button.disabled = selected < 0 or own_port.selected < 0 or target_port.item_count == 0
+	if selected >= 0 and own_port.selected >= 0:
+		connect_button.disabled = connect_button.disabled or own_port.is_item_disabled(own_port.selected)
+	detach_button.disabled = selected < 0 or assembly[selected].get("links", []).is_empty()
+	if selected < 0:
+		connection_status.text = "Добавь основание, затем следующую деталь."
+	elif own_port.item_count == 0:
+		connection_status.text = "Для этой детали крепления ещё не размечены. Доступно свободное размещение."
+	else:
+		connection_status.text = "Соединений: %d · В группе: %d деталей. Выбери крепление и оранжевую точку, затем «Соединить»." % [assembly[selected].get("links", []).size(), Connections.component(assembly, selected).size()]
+	mark_ports()
+
+func attach_selected() -> void:
+	if connect_button.disabled:
+		return
+	var error := Connections.connect_parts(assembly, selected, own_port.selected, target_part.get_selected_id(), target_port.get_selected_id(), twist.value)
+	if not error.is_empty():
+		connection_status.text = error
+		return
+	commit()
+	select_installed(selected)
+	connection_status.text = "Соединено. Группа перемещается вместе; для отдельной детали нажми «Отсоединить»."
+
+func detach_selected() -> void:
+	if selected < 0:
+		return
+	Connections.detach(assembly, selected)
+	commit()
+	connection_status.text = "Деталь отсоединена; крепления свободны."
+
+func mark_ports() -> void:
+	if port_root == null:
+		return
+	for child in port_root.get_children():
+		port_root.remove_child(child)
+		child.queue_free()
+	picked_ports.clear()
+	if previewing or selected < 0 or own_port == null or not connection_mode.button_pressed:
+		return
+	var group := Connections.component(assembly, selected)
+	var source_kind := ""
+	if own_port.selected >= 0:
+		source_kind = Connections.for_part(assembly[selected].id)[own_port.selected].kind
+	for i in range(assembly.size()):
+		var ports := Connections.for_part(assembly[i].id)
+		for j in range(ports.size()):
+			if Connections.occupied(assembly, i, j):
+				continue
+			if i != selected and (group.has(i) or not Connections.compatible(source_kind, ports[j].kind)):
+				continue
+			var point: Vector3 = Connections.world_port(assembly[i], j).position
+			var visual := MeshInstance3D.new()
+			var sphere := SphereMesh.new()
+			sphere.radius = .0014
+			sphere.height = .0028
+			sphere.radial_segments = 8
+			sphere.rings = 4
+			visual.mesh = sphere
+			visual.position = point
+			var mat := StandardMaterial3D.new()
+			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			mat.albedo_color = Color("51e9c2") if i == selected else Color("ffb35a")
+			if i == selected and j == own_port.selected:
+				mat.albedo_color = Color.WHITE
+			if i == target_part.get_selected_id() and j == target_port.get_selected_id():
+				mat.albedo_color = Color("ff655a")
+			visual.material_override = mat
+			port_root.add_child(visual)
+			picked_ports.append({"part":i, "port":j, "position":point})
+
+func pick_port(mouse_position: Vector2) -> void:
+	var viewport_position := mouse_position * Vector2(view.get_child(0).size) / view.size
+	var nearest: Dictionary = {}
+	var best := 14.0 * Vector2(view.get_child(0).size).x/view.size.x
+	for candidate in picked_ports:
+		if camera.is_position_behind(candidate.position):
+			continue
+		var distance := camera.unproject_position(candidate.position).distance_to(viewport_position)
+		if distance < best:
+			best = distance
+			nearest = candidate
+	if nearest.is_empty():
+		connection_status.text = "Нажми на цветную точку крепления или выбери её в списке."
+		return
+	if nearest.part == selected:
+		own_port.select(nearest.port)
+		refresh_destinations()
+	else:
+		for i in range(target_part.item_count):
+			if target_part.get_item_id(i) == nearest.part:
+				target_part.select(i)
+				break
+		refresh_target_ports()
+		for i in range(target_port.item_count):
+			if target_port.get_item_id(i) == nearest.port:
+				target_port.select(i)
+				break
+		update_connection_actions()

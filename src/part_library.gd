@@ -1,5 +1,6 @@
 extends RefCounted
 ## Meshes and inventory share stable IDs; dimensions are metres.
+const Connections = preload("res://src/assembly_connections.gd")
 static var parts: Array = []
 static var models: Dictionary = {}
 static var meshes: Dictionary = {}
@@ -75,4 +76,4 @@ static func validate(assembly: Variant) -> String:
 					return "Неверные координаты детали"
 				if not is_finite(float(value)) or absf(float(value)) > (0.6 if key == "position" else 360.0):
 					return "Координаты детали вне диапазона"
-	return ""
+	return Connections.validate(assembly)
