@@ -73,8 +73,7 @@ static func connect_parts(assembly: Array, moving: int, own: int, fixed: int, de
 	var fixed_ports := for_part(assembly[fixed].id)
 	if own < 0 or destination < 0 or own >= own_ports.size() or destination >= fixed_ports.size():
 		return "Выбери две точки крепления"
-	if component(assembly, moving).has(fixed):
-		return "Эти детали уже входят в одну сборку"
+	var same_group := component(assembly, moving).has(fixed)
 	if occupied(assembly, moving, own) or occupied(assembly, fixed, destination):
 		return "Точка крепления занята; сначала отсоедини деталь"
 	if not compatible(own_ports[own].kind, fixed_ports[destination].kind):
@@ -109,7 +108,17 @@ static func connect_parts(assembly: Array, moving: int, own: int, fixed: int, de
 		var p: Vector3 = (delta * transform(assembly[member])).origin
 		if maxf(absf(p.x), maxf(absf(p.y), absf(p.z))) > 0.6:
 			return "Соединение выходит за пределы рабочей области"
-	move_group(assembly, moving, pose)
+	if same_group:
+		if source.position.distance_to(target.position) > .0001 or from.dot(target.normal) > -.999 or absf(twist) > .001:
+			return "Для дополнительного крепежа точки должны уже совпадать. Отсоедини деталь, если нужно изменить её положение."
+		if keyed:
+			var first_tangent := transform(assembly[moving]).basis * vector(own_ports[own].tangent)
+			var second_tangent := transform(assembly[fixed]).basis * vector(fixed_ports[destination].tangent)
+			var dot := absf(first_tangent.dot(second_tangent))
+			if dot > .001 and dot < .999:
+				return "Крестовая ось не совмещена с профилем отверстия"
+	else:
+		move_group(assembly, moving, pose)
 	if not assembly[moving].has("links"):
 		assembly[moving].links = []
 	if not assembly[fixed].has("links"):

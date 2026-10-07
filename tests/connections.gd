@@ -72,6 +72,21 @@ func run() -> void:
 	var occupied: Array = [entry("lego_32524"),entry("lego_2780"),entry("lego_2780",.1)]
 	Connections.connect_parts(occupied,1,pin,0,0)
 	check(Connections.occupied(occupied,0,1) and not Connections.connect_parts(occupied,2,pin,0,1).is_empty(), "Cannot insert another pin through opposite face of occupied hole")
+	var loop: Array = [entry("lego_32524"),entry("lego_2780"),entry("lego_32524"),entry("lego_2780")]
+	Connections.connect_parts(loop,1,pin,0,0)
+	Connections.connect_parts(loop,2,0,1,1)
+	Connections.connect_parts(loop,3,pin,0,3)
+	var source := Connections.world_port(loop[3],1)
+	var matching := -1
+	for i in range(Connections.for_part(loop[2].id).size()):
+		var candidate := Connections.world_port(loop[2],i)
+		if source.position.distance_to(candidate.position) < .0001 and source.normal.dot(candidate.normal) < -.999:
+			matching = i
+	var loop_error := Connections.connect_parts(loop,3,1,2,matching)
+	check(matching >= 0 and loop_error.is_empty(), "Second pin closes connection loop without moving existing assembly")
+	check(Library.validate(loop).is_empty(), "Two beams with two pins validate")
+	Connections.detach(loop,1)
+	check(Connections.component(loop,0).size() == 3, "Removing one of two fasteners preserves connection through remaining pin")
 	var plates: Array = [entry("lego_3023"),entry("lego_3710",.1)]
 	check(Connections.connect_parts(plates,1,find_port("lego_3710","stud_socket"),0,find_port("lego_3023","stud"),90).is_empty() and Library.validate(plates).is_empty(), "LEGO plates snap socket to stud")
 	check(is_equal_approx(plates[1].position[1],.0032), "Plate body height excludes protruding studs")

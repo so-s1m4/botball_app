@@ -446,9 +446,8 @@ func refresh_destinations() -> void:
 	var previous := target_part.get_selected_id()
 	target_part.clear()
 	if selected >= 0 and own_port.item_count > 0:
-		var group := Connections.component(assembly, selected)
 		for i in range(assembly.size()):
-			if group.has(i) or Connections.for_part(assembly[i].id).is_empty():
+			if i == selected or Connections.for_part(assembly[i].id).is_empty():
 				continue
 			target_part.add_item("%d · %s" % [i+1, Library.find_part(assembly[i].id).name], i)
 			if i == previous:
@@ -515,9 +514,11 @@ func mark_ports() -> void:
 		for j in range(ports.size()):
 			if Connections.occupied(assembly, i, j):
 				continue
-			if i != selected and (group.has(i) or not Connections.compatible(source_kind, ports[j].kind)):
+			if i != selected and (not Connections.compatible(source_kind, ports[j].kind)):
 				continue
 			var point: Vector3 = Connections.world_port(assembly[i], j).position
+			if i != selected and group.has(i) and point.distance_to(Connections.world_port(assembly[selected], own_port.selected).position) > .0001:
+				continue
 			var visual := MeshInstance3D.new()
 			var sphere := SphereMesh.new()
 			sphere.radius = .0014
