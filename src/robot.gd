@@ -12,6 +12,10 @@ var carrying := false
 var rng := RandomNumberGenerator.new()
 var sensor: RayCast3D
 var fingers: Array[MeshInstance3D] = []
+const PartLibrary = preload("res://src/part_library.gd")
+var assembly: Array = []
+var assembly_root: Node3D
+var training_visuals: Array[MeshInstance3D] = []
 
 func _ready() -> void:
 	var collider := CollisionShape3D.new()
@@ -37,6 +41,11 @@ func _ready() -> void:
 			add_child(wheel)
 	for x in [-0.13, 0.13]:
 		fingers.append(box(Vector3(0.035, 0.08, 0.26), Vector3(x, 0.13, -0.29), Color("f7b64c")))
+	for child in get_children():
+		if child is MeshInstance3D and not fingers.has(child):
+			training_visuals.append(child)
+	assembly_root = Node3D.new()
+	add_child(assembly_root)
 	sensor = RayCast3D.new()
 	sensor.position = Vector3(0, 0.19, -0.23)
 	sensor.target_position = Vector3(0, 0, -2.0)
@@ -100,3 +109,9 @@ func material(color: Color) -> StandardMaterial3D:
 	mat.albedo_color = color
 	mat.roughness = 0.7
 	return mat
+
+func set_assembly(value: Array) -> void:
+	assembly = value.duplicate(true)
+	PartLibrary.populate(assembly_root, assembly)
+	for visual in training_visuals:
+		visual.visible = assembly.is_empty()

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://nn6kv3t5ccju"
+path="res://.godot/imported/lego_3701.obj-2bf0b311bb806e0bdcd2b471a33ee9c3.mesh"
+
+[deps]
+
+files=["res://.godot/imported/lego_3701.obj-2bf0b311bb806e0bdcd2b471a33ee9c3.mesh"]
+
+source_file="res://assets/parts/lego_3701.obj"
+dest_files=["res://.godot/imported/lego_3701.obj-2bf0b311bb806e0bdcd2b471a33ee9c3.mesh", "res://.godot/imported/lego_3701.obj-2bf0b311bb806e0bdcd2b471a33ee9c3.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

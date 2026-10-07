@@ -1,0 +1,1647 @@
+{
+  "schema_version": 1,
+  "library_sha256": "f3e496d0ede69ca7942fa4aa198e661ee2d22723906101e2e339d8917a4dd5f2",
+  "models": {
+    "electronics_001": {
+      "path": "res://assets/parts/electronics_001.obj",
+      "size": [
+        0.04460000083781779,
+        0.015055771917104721,
+        0.03200966864824295
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "ET Sensor-1"
+      ],
+      "license": "GPL-3.0"
+    },
+    "electronics_002": {
+      "path": "res://assets/parts/electronics_002.obj",
+      "size": [
+        0.025,
+        0.015,
+        0.015
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "electronics_003": {
+      "path": "res://assets/parts/electronics_003.obj",
+      "size": [
+        0.02419999986886978,
+        0.008702200721018016,
+        0.024202551692724228
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "Small IR Sensor-1"
+      ],
+      "license": "GPL-3.0"
+    },
+    "electronics_004": {
+      "path": "res://assets/parts/electronics_004.obj",
+      "size": [
+        0.025,
+        0.015,
+        0.015
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "electronics_005": {
+      "path": "res://assets/parts/electronics_005.obj",
+      "size": [
+        0.025,
+        0.015,
+        0.015
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "electronics_006": {
+      "path": "res://assets/parts/electronics_006.obj",
+      "size": [
+        0.07721599098294973,
+        0.018284790217876434,
+        0.010158139280974865
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "Leversensor-1"
+      ],
+      "license": "GPL-3.0"
+    },
+    "electronics_007": {
+      "path": "res://assets/parts/electronics_007.obj",
+      "size": [
+        0.025,
+        0.015,
+        0.015
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "electronics_008": {
+      "path": "res://assets/parts/electronics_008.obj",
+      "size": [
+        0.024197155609726906,
+        0.013400385156273842,
+        0.026000000536441803
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "Large Touch Sensor-1"
+      ],
+      "license": "GPL-3.0"
+    },
+    "electronics_009": {
+      "path": "res://assets/parts/electronics_009.obj",
+      "size": [
+        0.03758777305483818,
+        0.05426032841205597,
+        0.020014354959130287
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "servo-1"
+      ],
+      "license": "GPL-3.0"
+    },
+    "electronics_010": {
+      "path": "res://assets/parts/electronics_010.obj",
+      "size": [
+        0.03758777305483818,
+        0.05426032841205597,
+        0.020014354959130287
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "black motor-1"
+      ],
+      "license": "GPL-3.0"
+    },
+    "electronics_011": {
+      "path": "res://assets/parts/electronics_011.obj",
+      "size": [
+        0.0297,
+        0.022,
+        0.011
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "electronics_012": {
+      "path": "res://assets/parts/electronics_012.obj",
+      "size": [
+        0.12866149116075246,
+        0.03660786434958556,
+        0.13898441940546036
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "KIPR_Lower_final_062119-1"
+      ],
+      "license": "GPL-3.0"
+    },
+    "electronics_013": {
+      "path": "res://assets/parts/electronics_013.obj",
+      "size": [
+        0.035,
+        0.033,
+        0.02
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "electronics_014": {
+      "path": "res://assets/parts/electronics_014.obj",
+      "size": [
+        0.07,
+        0.029,
+        0.038
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "electronics_015": {
+      "path": "res://assets/parts/electronics_015.obj",
+      "size": [
+        0.09271000325679779,
+        0.018295273184776306,
+        0.0464710108935833
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "Battery-1"
+      ],
+      "license": "GPL-3.0"
+    },
+    "electronics_016": {
+      "path": "res://assets/parts/electronics_016.obj",
+      "size": [
+        0.01,
+        0.007,
+        0.13
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "electronics_017": {
+      "path": "res://assets/parts/electronics_017.obj",
+      "size": [
+        0.01,
+        0.007,
+        0.13
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "electronics_018": {
+      "path": "res://assets/parts/electronics_018.obj",
+      "size": [
+        0.06932679563760757,
+        0.007622674573212862,
+        0.06932679563760757
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "matte rubber",
+        "pw-mt11040"
+      ],
+      "license": "GPL-3.0"
+    },
+    "electronics_019": {
+      "path": "res://assets/parts/electronics_019.obj",
+      "size": [
+        0.116,
+        0.028,
+        0.116
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_001": {
+      "path": "res://assets/parts/metal_001.obj",
+      "size": [
+        0.0127,
+        0.0015,
+        0.2413
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_002": {
+      "path": "res://assets/parts/metal_002.obj",
+      "size": [
+        0.0127,
+        0.0015,
+        0.127
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_003": {
+      "path": "res://assets/parts/metal_003.obj",
+      "size": [
+        0.0635,
+        0.1016,
+        0.1016
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_004": {
+      "path": "res://assets/parts/metal_004.obj",
+      "size": [
+        0.0635,
+        0.1524,
+        0.1524
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_005": {
+      "path": "res://assets/parts/metal_005.obj",
+      "size": [
+        0.0635,
+        0.2032,
+        0.2032
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_006": {
+      "path": "res://assets/parts/metal_006.obj",
+      "size": [
+        0.0508,
+        0.0015,
+        0.1524
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_007": {
+      "path": "res://assets/parts/metal_007.obj",
+      "size": [
+        0.0762,
+        0.1524,
+        0.1524
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_008": {
+      "path": "res://assets/parts/metal_008.obj",
+      "size": [
+        0.0254,
+        0.02615,
+        0.03885
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_009": {
+      "path": "res://assets/parts/metal_009.obj",
+      "size": [
+        0.0254,
+        0.02615,
+        0.03885
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_010": {
+      "path": "res://assets/parts/metal_010.obj",
+      "size": [
+        0.0254,
+        0.0015,
+        0.0381
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_011": {
+      "path": "res://assets/parts/metal_011.obj",
+      "size": [
+        0.057999998331069946,
+        0.03870560601353645,
+        0.02068217098712921
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "Servo Bracket-1 2"
+      ],
+      "license": "GPL-3.0"
+    },
+    "metal_012": {
+      "path": "res://assets/parts/metal_012.obj",
+      "size": [
+        0.028,
+        0.004,
+        0.028
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_013": {
+      "path": "res://assets/parts/metal_013.obj",
+      "size": [
+        0.07610740512609482,
+        0.012714764103293419,
+        0.0031589474529027956
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "color-31"
+      ],
+      "license": "GPL-3.0"
+    },
+    "metal_014": {
+      "path": "res://assets/parts/metal_014.obj",
+      "size": [
+        0.0254,
+        0.02615,
+        0.03885
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_015": {
+      "path": "res://assets/parts/metal_015.obj",
+      "size": [
+        0.007,
+        0.00835,
+        0.007
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_016": {
+      "path": "res://assets/parts/metal_016.obj",
+      "size": [
+        0.015719127317424864,
+        0.00818626582622528,
+        0.008163237944245338
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "SCREW-832-0500-1 4"
+      ],
+      "license": "GPL-3.0"
+    },
+    "metal_017": {
+      "path": "res://assets/parts/metal_017.obj",
+      "size": [
+        0.02206912584370002,
+        0.008183479309082031,
+        0.008183479309082031
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "SCREW-832-0750-1 2"
+      ],
+      "license": "GPL-3.0"
+    },
+    "metal_018": {
+      "path": "res://assets/parts/metal_018.obj",
+      "size": [
+        0.007332347799092531,
+        0.003567487292457372,
+        0.007282221224159002
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "NUT-832-KEPS-1 3"
+      ],
+      "license": "GPL-3.0"
+    },
+    "metal_019": {
+      "path": "res://assets/parts/metal_019.obj",
+      "size": [
+        0.009,
+        0.004,
+        0.0077942
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_020": {
+      "path": "res://assets/parts/metal_020.obj",
+      "size": [
+        0.006,
+        0.0127,
+        0.006
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_021": {
+      "path": "res://assets/parts/metal_021.obj",
+      "size": [
+        0.006,
+        0.0254,
+        0.006
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_022": {
+      "path": "res://assets/parts/metal_022.obj",
+      "size": [
+        0.006,
+        0.0508,
+        0.006
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_023": {
+      "path": "res://assets/parts/metal_023.obj",
+      "size": [
+        0.006,
+        0.0762,
+        0.006
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_024": {
+      "path": "res://assets/parts/metal_024.obj",
+      "size": [
+        0.006518644280731678,
+        0.00679746363312006,
+        0.006518644280731678
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "satin finish stainless steel-4"
+      ],
+      "license": "GPL-3.0"
+    },
+    "metal_025": {
+      "path": "res://assets/parts/metal_025.obj",
+      "size": [
+        0.009,
+        0.002,
+        0.009
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_026": {
+      "path": "res://assets/parts/metal_026.obj",
+      "size": [
+        0.0023105558939278126,
+        0.006305819842964411,
+        0.005461733788251877
+      ],
+      "quality": "kipr",
+      "source": "https://github.com/kipr/Simulator/blob/master/static/object_binaries/demobot_v6.glb",
+      "source_sha256": "e6cd58a1049ca5a09032e9c75d9a7ff947256595bae18c4244625007489e4205",
+      "nodes": [
+        "M3 Nut-1"
+      ],
+      "license": "GPL-3.0"
+    },
+    "metal_027": {
+      "path": "res://assets/parts/metal_027.obj",
+      "size": [
+        0.028,
+        0.004,
+        0.028
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_028": {
+      "path": "res://assets/parts/metal_028.obj",
+      "size": [
+        0.0036,
+        0.0254,
+        0.0036
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_029": {
+      "path": "res://assets/parts/metal_029.obj",
+      "size": [
+        0.0036,
+        0.0508,
+        0.0036
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_030": {
+      "path": "res://assets/parts/metal_030.obj",
+      "size": [
+        0.0036,
+        0.0762,
+        0.0036
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_031": {
+      "path": "res://assets/parts/metal_031.obj",
+      "size": [
+        0.0036,
+        0.1524,
+        0.0036
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_032": {
+      "path": "res://assets/parts/metal_032.obj",
+      "size": [
+        0.007,
+        0.0147,
+        0.007
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_033": {
+      "path": "res://assets/parts/metal_033.obj",
+      "size": [
+        0.007,
+        0.0274,
+        0.007
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_034": {
+      "path": "res://assets/parts/metal_034.obj",
+      "size": [
+        0.0254,
+        0.02615,
+        0.03885
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_035": {
+      "path": "res://assets/parts/metal_035.obj",
+      "size": [
+        0.007,
+        0.129,
+        0.007
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "metal_036": {
+      "path": "res://assets/parts/metal_036.obj",
+      "size": [
+        0.025,
+        0.0185,
+        0.03
+      ],
+      "quality": "estimated",
+      "source": null
+    },
+    "lego_32062": {
+      "path": "res://assets/parts/lego_32062.obj",
+      "size": [
+        0.0156,
+        0.0048,
+        0.0048
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32062.dat"
+    },
+    "lego_4519": {
+      "path": "res://assets/parts/lego_4519.obj",
+      "size": [
+        0.0236,
+        0.0048,
+        0.0048
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/4519.dat"
+    },
+    "lego_6587": {
+      "path": "res://assets/parts/lego_6587.obj",
+      "size": [
+        0.0254,
+        0.0064,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/6587.dat"
+    },
+    "lego_3705": {
+      "path": "res://assets/parts/lego_3705.obj",
+      "size": [
+        0.0316,
+        0.0048,
+        0.0048
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3705.dat"
+    },
+    "lego_87083": {
+      "path": "res://assets/parts/lego_87083.obj",
+      "size": [
+        0.0318,
+        0.0064,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/87083.dat"
+    },
+    "lego_32073": {
+      "path": "res://assets/parts/lego_32073.obj",
+      "size": [
+        0.0396,
+        0.0048,
+        0.0048
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32073.dat"
+    },
+    "lego_32209": {
+      "path": "res://assets/parts/lego_32209.obj",
+      "size": [
+        0.043,
+        0.0064,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32209.dat"
+    },
+    "lego_3706": {
+      "path": "res://assets/parts/lego_3706.obj",
+      "size": [
+        0.0476,
+        0.0048,
+        0.0048
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3706.dat"
+    },
+    "lego_44294": {
+      "path": "res://assets/parts/lego_44294.obj",
+      "size": [
+        0.0556,
+        0.0048,
+        0.0048
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/44294.dat"
+    },
+    "lego_3707": {
+      "path": "res://assets/parts/lego_3707.obj",
+      "size": [
+        0.0636,
+        0.0048,
+        0.0048
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3707.dat"
+    },
+    "lego_3737": {
+      "path": "res://assets/parts/lego_3737.obj",
+      "size": [
+        0.0796,
+        0.0048,
+        0.0048
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3737.dat"
+    },
+    "lego_3708": {
+      "path": "res://assets/parts/lego_3708.obj",
+      "size": [
+        0.0956,
+        0.0048,
+        0.0048
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3708.dat"
+    },
+    "lego_32013": {
+      "path": "res://assets/parts/lego_32013.obj",
+      "size": [
+        0.008,
+        0.0072,
+        0.0156002
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32013.dat"
+    },
+    "lego_32034": {
+      "path": "res://assets/parts/lego_32034.obj",
+      "size": [
+        0.008,
+        0.0072,
+        0.0240004
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32034.dat"
+    },
+    "lego_32016": {
+      "path": "res://assets/parts/lego_32016.obj",
+      "size": [
+        0.008,
+        0.0114163,
+        0.0244222
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32016.dat"
+    },
+    "lego_32192": {
+      "path": "res://assets/parts/lego_32192.obj",
+      "size": [
+        0.008,
+        0.014553,
+        0.0229532
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32192.dat"
+    },
+    "lego_32015": {
+      "path": "res://assets/parts/lego_32015.obj",
+      "size": [
+        0.008,
+        0.016022,
+        0.0198165
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32015.dat"
+    },
+    "lego_32014": {
+      "path": "res://assets/parts/lego_32014.obj",
+      "size": [
+        0.008,
+        0.0156002,
+        0.0156002
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32014.dat"
+    },
+    "lego_6538c": {
+      "path": "res://assets/parts/lego_6538c.obj",
+      "size": [
+        0.0068,
+        0.0069795,
+        0.016
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/59443.dat"
+    },
+    "lego_45590": {
+      "path": "res://assets/parts/lego_45590.obj",
+      "size": [
+        0.0152002,
+        0.0072002,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/45590.dat"
+    },
+    "lego_6536": {
+      "path": "res://assets/parts/lego_6536.obj",
+      "size": [
+        0.008,
+        0.0152,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/6536.dat"
+    },
+    "lego_32184": {
+      "path": "res://assets/parts/lego_32184.obj",
+      "size": [
+        0.008,
+        0.0232,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32184.dat"
+    },
+    "lego_32291": {
+      "path": "res://assets/parts/lego_32291.obj",
+      "size": [
+        0.0152,
+        0.0152,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32291.dat"
+    },
+    "lego_41678": {
+      "path": "res://assets/parts/lego_41678.obj",
+      "size": [
+        0.016,
+        0.008,
+        0.0156
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/41678.dat"
+    },
+    "lego_63869": {
+      "path": "res://assets/parts/lego_63869.obj",
+      "size": [
+        0.0232,
+        0.0152,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/63869.dat"
+    },
+    "lego_42003": {
+      "path": "res://assets/parts/lego_42003.obj",
+      "size": [
+        0.008,
+        0.0232,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/42003.dat"
+    },
+    "lego_x346": {
+      "path": "res://assets/parts/lego_x346.obj",
+      "size": [
+        0.0072,
+        0.008,
+        0.0228
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/41669.dat"
+    },
+    "lego_62462": {
+      "path": "res://assets/parts/lego_62462.obj",
+      "size": [
+        0.016,
+        0.008,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/62462.dat"
+    },
+    "lego_32557": {
+      "path": "res://assets/parts/lego_32557.obj",
+      "size": [
+        0.0152,
+        0.0232,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32557.dat"
+    },
+    "lego_44809": {
+      "path": "res://assets/parts/lego_44809.obj",
+      "size": [
+        0.0156,
+        0.008,
+        0.0156
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/44809.dat"
+    },
+    "lego_6553": {
+      "path": "res://assets/parts/lego_6553.obj",
+      "size": [
+        0.008,
+        0.0234,
+        0.0072
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/6553.dat"
+    },
+    "lego_32039": {
+      "path": "res://assets/parts/lego_32039.obj",
+      "size": [
+        0.008,
+        0.0072,
+        0.0156
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32039.dat"
+    },
+    "lego_57585": {
+      "path": "res://assets/parts/lego_57585.obj",
+      "size": [
+        0.0221424,
+        0.008,
+        0.0194106
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/57585.dat"
+    },
+    "lego_60483": {
+      "path": "res://assets/parts/lego_60483.obj",
+      "size": [
+        0.0072,
+        0.008,
+        0.0152
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/60483.dat"
+    },
+    "lego_32523": {
+      "path": "res://assets/parts/lego_32523.obj",
+      "size": [
+        0.0072,
+        0.008,
+        0.0232
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32523.dat"
+    },
+    "lego_32316": {
+      "path": "res://assets/parts/lego_32316.obj",
+      "size": [
+        0.0072,
+        0.008,
+        0.0392
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32316.dat"
+    },
+    "lego_32140": {
+      "path": "res://assets/parts/lego_32140.obj",
+      "size": [
+        0.0152,
+        0.008,
+        0.0312
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32140.dat"
+    },
+    "lego_32524": {
+      "path": "res://assets/parts/lego_32524.obj",
+      "size": [
+        0.0072,
+        0.008,
+        0.0552
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32524.dat"
+    },
+    "lego_32348": {
+      "path": "res://assets/parts/lego_32348.obj",
+      "size": [
+        0.026364,
+        0.008,
+        0.0455638
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32348.dat"
+    },
+    "lego_32526": {
+      "path": "res://assets/parts/lego_32526.obj",
+      "size": [
+        0.0232,
+        0.008,
+        0.0392
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32526.dat"
+    },
+    "lego_40490": {
+      "path": "res://assets/parts/lego_40490.obj",
+      "size": [
+        0.0072,
+        0.008,
+        0.0712
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/40490.dat"
+    },
+    "lego_32271": {
+      "path": "res://assets/parts/lego_32271.obj",
+      "size": [
+        0.019964,
+        0.008,
+        0.0647638
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32271.dat"
+    },
+    "lego_32525": {
+      "path": "res://assets/parts/lego_32525.obj",
+      "size": [
+        0.0072,
+        0.008,
+        0.0872
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32525.dat"
+    },
+    "lego_32009": {
+      "path": "res://assets/parts/lego_32009.obj",
+      "size": [
+        0.0392,
+        0.008,
+        0.0712
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32009.dat"
+    },
+    "lego_41239": {
+      "path": "res://assets/parts/lego_41239.obj",
+      "size": [
+        0.0072,
+        0.008,
+        0.1032
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/41239.dat"
+    },
+    "lego_32278": {
+      "path": "res://assets/parts/lego_32278.obj",
+      "size": [
+        0.0072,
+        0.008,
+        0.1192
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32278.dat"
+    },
+    "lego_4274": {
+      "path": "res://assets/parts/lego_4274.obj",
+      "size": [
+        0.0096,
+        0.0064,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/4274.dat"
+    },
+    "lego_32002": {
+      "path": "res://assets/parts/lego_32002.obj",
+      "size": [
+        0.012,
+        0.0064,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32002.dat"
+    },
+    "lego_3673": {
+      "path": "res://assets/parts/lego_3673.obj",
+      "size": [
+        0.016,
+        0.0064,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3673.dat"
+    },
+    "lego_2780": {
+      "path": "res://assets/parts/lego_2780.obj",
+      "size": [
+        0.016,
+        0.0062408,
+        0.0064004
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/2780.dat"
+    },
+    "lego_6558": {
+      "path": "res://assets/parts/lego_6558.obj",
+      "size": [
+        0.024,
+        0.0062408,
+        0.0064004
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/6558.dat"
+    },
+    "lego_32556": {
+      "path": "res://assets/parts/lego_32556.obj",
+      "size": [
+        0.024,
+        0.0061565,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32556.dat"
+    },
+    "lego_32054": {
+      "path": "res://assets/parts/lego_32054.obj",
+      "size": [
+        0.024,
+        0.0072,
+        0.0072
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32054.dat"
+    },
+    "lego_6628": {
+      "path": "res://assets/parts/lego_6628.obj",
+      "size": [
+        0.0152,
+        0.0064,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/6628.dat"
+    },
+    "lego_2736": {
+      "path": "res://assets/parts/lego_2736.obj",
+      "size": [
+        0.0148,
+        0.0064,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/2736.dat"
+    },
+    "lego_43093": {
+      "path": "res://assets/parts/lego_43093.obj",
+      "size": [
+        0.0158,
+        0.0064,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/43093.dat"
+    },
+    "lego_3749": {
+      "path": "res://assets/parts/lego_3749.obj",
+      "size": [
+        0.0158,
+        0.0064,
+        0.0064
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3749.dat"
+    },
+    "lego_48989": {
+      "path": "res://assets/parts/lego_48989.obj",
+      "size": [
+        0.008,
+        0.0232,
+        0.024
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/48989.dat"
+    },
+    "lego_55615": {
+      "path": "res://assets/parts/lego_55615.obj",
+      "size": [
+        0.008,
+        0.0316,
+        0.0316
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/55615.dat"
+    },
+    "lego_32138": {
+      "path": "res://assets/parts/lego_32138.obj",
+      "size": [
+        0.024,
+        0.0152,
+        0.0072
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32138.dat"
+    },
+    "lego_3647": {
+      "path": "res://assets/parts/lego_3647.obj",
+      "size": [
+        0.009944,
+        0.009944,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3647.dat"
+    },
+    "lego_32270": {
+      "path": "res://assets/parts/lego_32270.obj",
+      "size": [
+        0.0136,
+        0.0136,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32270.dat"
+    },
+    "lego_6589": {
+      "path": "res://assets/parts/lego_6589.obj",
+      "size": [
+        0.0128,
+        0.0128,
+        0.004
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/6589.dat"
+    },
+    "lego_4019": {
+      "path": "res://assets/parts/lego_4019.obj",
+      "size": [
+        0.017312,
+        0.017312,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/4019.dat"
+    },
+    "lego_32269": {
+      "path": "res://assets/parts/lego_32269.obj",
+      "size": [
+        0.0216,
+        0.0216,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32269.dat"
+    },
+    "lego_3648": {
+      "path": "res://assets/parts/lego_3648.obj",
+      "size": [
+        0.025912,
+        0.025912,
+        0.0077
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3648.dat"
+    },
+    "lego_32498": {
+      "path": "res://assets/parts/lego_32498.obj",
+      "size": [
+        0.0376,
+        0.0376,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32498.dat"
+    },
+    "lego_3649": {
+      "path": "res://assets/parts/lego_3649.obj",
+      "size": [
+        0.04188,
+        0.04188,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3649.dat"
+    },
+    "lego_4265c": {
+      "path": "res://assets/parts/lego_4265c.obj",
+      "size": [
+        0.0072,
+        0.0072,
+        0.004
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/4265c.dat"
+    },
+    "lego_3713": {
+      "path": "res://assets/parts/lego_3713.obj",
+      "size": [
+        0.0072,
+        0.0072,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3713.dat"
+    },
+    "lego_6575": {
+      "path": "res://assets/parts/lego_6575.obj",
+      "size": [
+        0.0152,
+        0.0232,
+        0.004
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/6575.dat"
+    },
+    "lego_6573": {
+      "path": "res://assets/parts/lego_6573.obj",
+      "size": [
+        0.025912,
+        0.025912,
+        0.032
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/6573.dat"
+    },
+    "lego_3743": {
+      "path": "res://assets/parts/lego_3743.obj",
+      "size": [
+        0.032,
+        0.0056,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3743.dat"
+    },
+    "lego_32072": {
+      "path": "res://assets/parts/lego_32072.obj",
+      "size": [
+        0.024,
+        0.024,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32072.dat"
+    },
+    "lego_4185": {
+      "path": "res://assets/parts/lego_4185.obj",
+      "size": [
+        0.024,
+        0.024,
+        0.004
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/4185.dat"
+    },
+    "lego_4716": {
+      "path": "res://assets/parts/lego_4716.obj",
+      "size": [
+        0.01016,
+        0.01016,
+        0.016
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/4716.dat"
+    },
+    "lego_6632": {
+      "path": "res://assets/parts/lego_6632.obj",
+      "size": [
+        0.0072,
+        0.004,
+        0.0232
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/6632.dat"
+    },
+    "lego_2905": {
+      "path": "res://assets/parts/lego_2905.obj",
+      "size": [
+        0.0392,
+        0.004,
+        0.0232
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/2905.dat"
+    },
+    "lego_3069b": {
+      "path": "res://assets/parts/lego_3069b.obj",
+      "size": [
+        0.016,
+        0.0032,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3069b.dat"
+    },
+    "lego_3023": {
+      "path": "res://assets/parts/lego_3023.obj",
+      "size": [
+        0.016,
+        0.0048,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3023.dat"
+    },
+    "lego_3710": {
+      "path": "res://assets/parts/lego_3710.obj",
+      "size": [
+        0.032,
+        0.0048,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3710.dat"
+    },
+    "lego_3666": {
+      "path": "res://assets/parts/lego_3666.obj",
+      "size": [
+        0.048,
+        0.0048,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3666.dat"
+    },
+    "lego_3460": {
+      "path": "res://assets/parts/lego_3460.obj",
+      "size": [
+        0.064,
+        0.0048,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3460.dat"
+    },
+    "lego_2654": {
+      "path": "res://assets/parts/lego_2654.obj",
+      "size": [
+        0.0160008,
+        0.0048,
+        0.0160008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/2654.dat"
+    },
+    "lego_4032b": {
+      "path": "res://assets/parts/lego_4032b.obj",
+      "size": [
+        0.0160004,
+        0.0048,
+        0.0160004
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/4032b.dat"
+    },
+    "lego_3709b": {
+      "path": "res://assets/parts/lego_3709b.obj",
+      "size": [
+        0.032,
+        0.0048,
+        0.016
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3709b.dat"
+    },
+    "lego_32001": {
+      "path": "res://assets/parts/lego_32001.obj",
+      "size": [
+        0.048,
+        0.0048,
+        0.016
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32001.dat"
+    },
+    "lego_3738": {
+      "path": "res://assets/parts/lego_3738.obj",
+      "size": [
+        0.064,
+        0.0048,
+        0.016
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3738.dat"
+    },
+    "lego_4589": {
+      "path": "res://assets/parts/lego_4589.obj",
+      "size": [
+        0.008,
+        0.0112,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/4589.dat"
+    },
+    "lego_32064": {
+      "path": "res://assets/parts/lego_32064.obj",
+      "size": [
+        0.016,
+        0.0112,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32064.dat"
+    },
+    "lego_3700": {
+      "path": "res://assets/parts/lego_3700.obj",
+      "size": [
+        0.016,
+        0.0112,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3700.dat"
+    },
+    "lego_3701": {
+      "path": "res://assets/parts/lego_3701.obj",
+      "size": [
+        0.032,
+        0.0112,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3701.dat"
+    },
+    "lego_3894": {
+      "path": "res://assets/parts/lego_3894.obj",
+      "size": [
+        0.048,
+        0.0112,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3894.dat"
+    },
+    "lego_3702": {
+      "path": "res://assets/parts/lego_3702.obj",
+      "size": [
+        0.064,
+        0.0112,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3702.dat"
+    },
+    "lego_3895": {
+      "path": "res://assets/parts/lego_3895.obj",
+      "size": [
+        0.096,
+        0.0112,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3895.dat"
+    },
+    "lego_32018": {
+      "path": "res://assets/parts/lego_32018.obj",
+      "size": [
+        0.112,
+        0.0112,
+        0.008
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/32018.dat"
+    },
+    "lego_3941": {
+      "path": "res://assets/parts/lego_3941.obj",
+      "size": [
+        0.0160004,
+        0.0112,
+        0.0160004
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/3941.dat"
+    },
+    "lego_56145": {
+      "path": "res://assets/parts/lego_56145.obj",
+      "size": [
+        0.0304,
+        0.0304,
+        0.02
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/56145.dat"
+    },
+    "lego_70162": {
+      "path": "res://assets/parts/lego_70162.obj",
+      "size": [
+        0.0304,
+        0.0304,
+        0.0032
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/70162.dat"
+    },
+    "lego_55976": {
+      "path": "res://assets/parts/lego_55976.obj",
+      "size": [
+        0.0568,
+        0.0568,
+        0.0256
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/55976.dat"
+    },
+    "lego_44309": {
+      "path": "res://assets/parts/lego_44309.obj",
+      "size": [
+        0.0432,
+        0.0432,
+        0.0216
+      ],
+      "quality": "ldraw",
+      "source": "ldraw/parts/44309.dat"
+    }
+  }
+}

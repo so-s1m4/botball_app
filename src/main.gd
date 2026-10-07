@@ -2,6 +2,10 @@ extends Control
 
 const Simulation = preload("res://src/simulation.gd")
 const Store = preload("res://src/project_store.gd")
+const UpdateChecker = preload("res://src/update_checker.gd")
+var update_checker: Node
+const AssemblyEditor = preload("res://src/assembly_editor.gd")
+var assembly_editor: Window
 var sim: Node3D
 var viewport: SubViewport
 var view_container: SubViewportContainer
@@ -40,7 +44,11 @@ func _ready() -> void:
 	var title := label("BOTBALL  /  LAB", 26)
 	title.size_flags_horizontal = SIZE_EXPAND_FILL
 	header.add_child(title)
-	header.add_child(label("ПРОТОТИП  0.1", 13, Color("51d8bb")))
+	header.add_child(label("v" + str(ProjectSettings.get_setting("application/config/version")), 13, Color("51d8bb")))
+	header.add_child(button("3D-конструктор", open_constructor))
+	update_checker = UpdateChecker.new()
+	add_child(update_checker)
+	header.add_child(button("Обновления", func(): update_checker.check()))
 	header.add_child(button("Открыть…", func(): open_dialog.popup_centered_ratio(0.7)))
 	header.add_child(button("Сохранить…", func(): save_dialog.popup_centered_ratio(0.7)))
 	var columns := HBoxContainer.new()
@@ -133,11 +141,17 @@ func _ready() -> void:
 	save_dialog.file_selected.connect(save_project)
 	open_dialog = dialog(FileDialog.FILE_MODE_OPEN_FILE)
 	open_dialog.file_selected.connect(open_project)
+	assembly_editor = AssemblyEditor.new()
+	assembly_editor.visible = false
+	add_child(assembly_editor)
+	assembly_editor.assembly_changed.connect(func(assembly): sim.robot.set_assembly(assembly))
 	sim.changed.connect(update_status)
 	sim.event.connect(log_event)
 	apply_settings()
 	update_status()
 	log_event("Учебное поле готово. Нажми «Автономная попытка».")
+	if not OS.has_feature("editor"):
+		update_checker.call_deferred("check", false)
 
 func _process(_delta: float) -> void:
 	if sim == null or not sim.running or sim.paused or sim.autonomous:
@@ -198,7 +212,7 @@ func update_status() -> void:
 	telemetry_label.text = "Дальномер: %.2f м\nЭнкодеры L / R: %.2f / %.2f м" % [sim.robot.distance_sensor(), sim.robot.left_encoder, sim.robot.right_encoder]
 
 func save_project(path: String) -> void:
-	var result := Store.write_project(path, {"speed": speed_input.value, "wheel_base": base_input.value, "noise": noise_input.value / 100.0, "seed": int(seed_input.value)})
+	var result := Store.write_project(path, {"speed": speed_input.value, "wheel_base": base_input.value, "noise": noise_input.value / 100.0, "seed": int(seed_input.value)}, sim.robot.assembly)
 	log_event("Настройки проекта сохранены" if result == OK else "Ошибка сохранения: " + error_string(result))
 
 func open_project(path: String) -> void:
@@ -212,6 +226,8 @@ func open_project(path: String) -> void:
 	base_input.value = settings.wheel_base
 	noise_input.value = settings.noise * 100
 	seed_input.value = settings.seed
+	sim.robot.set_assembly(result.assembly)
+	assembly_editor.set_assembly(result.assembly)
 	apply_settings()
 	log_event("Проект открыт. Поле сброшено.")
 
@@ -280,3 +296,8 @@ func build_theme() -> void:
 	theme.set_color("font_color", "Button", Color("e6eef6"))
 	theme.set_stylebox("normal", "LineEdit", style(Color("1e3043")))
 	theme.set_stylebox("read_only", "LineEdit", style(Color("172535")))
+
+func open_constructor() -> void:
+	sim.reset_attempt()
+	assembly_editor.set_assembly(sim.robot.assembly)
+	assembly_editor.popup_centered()

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://b8ny25hgxkghw"
+path="res://.godot/imported/lego_32013.obj-2140ad3995325f1a2c78649f25f9d51e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/lego_32013.obj-2140ad3995325f1a2c78649f25f9d51e.mesh"]
+
+source_file="res://assets/parts/lego_32013.obj"
+dest_files=["res://.godot/imported/lego_32013.obj-2140ad3995325f1a2c78649f25f9d51e.mesh", "res://.godot/imported/lego_32013.obj-2140ad3995325f1a2c78649f25f9d51e.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

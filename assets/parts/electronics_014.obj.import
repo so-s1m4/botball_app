@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://t1lclpdubvo5"
+path="res://.godot/imported/electronics_014.obj-74c6625e1eaa14687c570ad62a27f12e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/electronics_014.obj-74c6625e1eaa14687c570ad62a27f12e.mesh"]
+
+source_file="res://assets/parts/electronics_014.obj"
+dest_files=["res://.godot/imported/electronics_014.obj-74c6625e1eaa14687c570ad62a27f12e.mesh", "res://.godot/imported/electronics_014.obj-74c6625e1eaa14687c570ad62a27f12e.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

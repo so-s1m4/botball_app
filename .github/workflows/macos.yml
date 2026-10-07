@@ -1,4 +1,4 @@
-name: Test and build macOS
+name: Test, build and release macOS
 on:
   push:
     branches: [main]
@@ -30,6 +30,10 @@ jobs:
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --editor --import --quit
       - name: Test simulation
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/smoke.gd --fixed-fps 120
+      - name: Test parts and constructor
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/parts.gd
+      - name: Test update checker
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/updates.gd
       - name: Build universal macOS app
         env:
           GODOT_BIN: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64
@@ -38,3 +42,51 @@ jobs:
         with:
           name: Botball-Lab-macOS
           path: build/Botball-Lab-macOS.zip
+
+  dmg:
+    needs: prototype
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot and macOS export template
+        run: |
+          curl -fL --retry 3 https://github.com/godotengine/godot/releases/download/4.5.2-stable/Godot_v4.5.2-stable_macos.universal.zip -o /tmp/godot-macos.zip
+          ditto -x -k /tmp/godot-macos.zip /tmp/godot-bin
+          curl -fL --retry 3 https://github.com/godotengine/godot/releases/download/4.5.2-stable/Godot_v4.5.2-stable_export_templates.tpz -o /tmp/templates.tpz
+          mkdir -p "$HOME/Library/Application Support/Godot/export_templates/4.5.2.stable"
+          unzip -p /tmp/templates.tpz templates/macos.zip > "$HOME/Library/Application Support/Godot/export_templates/4.5.2.stable/macos.zip"
+      - name: Build and verify universal DMG
+        env:
+          GODOT_BIN: /tmp/godot-bin/Godot.app/Contents/MacOS/Godot
+        run: scripts/build_dmg.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Botball-Lab-DMG
+          path: |
+            build/Botball-Lab-macOS.dmg
+            build/SHA256SUMS.txt
+      - name: Publish versioned release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(sed -n 's/^config\/version="\(.*\)"/\1/p' project.godot)
+          TAG="v$VERSION"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; bump application version to publish an update."
+            exit 0
+          fi
+          cat > /tmp/release-notes.md <<'NOTES'
+          macOS installer for Apple Silicon and Intel.
+
+          Download Botball-Lab-macOS.dmg, open it and drag Botball Lab.app into Applications.
+          To update, quit Botball Lab and replace the previous app. Saved projects are preserved.
+          The app checks for newer versions at startup; use «Обновления» to check manually.
+
+          Includes the 3D constructor, 117 sourced part models and 39 approximate models.
+          This build has an ad-hoc signature and is not Apple-notarized.
+          Source code and third-party model licenses are included in this repository.
+          NOTES
+          gh release create "$TAG" build/Botball-Lab-macOS.dmg build/Botball-Lab-macOS.zip build/SHA256SUMS.txt --target "$GITHUB_SHA" --title "Botball Lab $VERSION" --notes-file /tmp/release-notes.md --latest

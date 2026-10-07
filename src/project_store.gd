@@ -1,12 +1,15 @@
 extends RefCounted
 ## A settings project, not a saved mid-attempt physics snapshot.
 const FORMAT_VERSION := 1
+const PartLibrary = preload("res://src/part_library.gd")
 
-static func write_project(path: String, settings: Dictionary) -> Error:
+static func write_project(path: String, settings: Dictionary, assembly: Array = []) -> Error:
+	if not PartLibrary.validate(assembly).is_empty():
+		return ERR_INVALID_DATA
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"version": FORMAT_VERSION, "table": "training_delivery", "robot": settings}, "\t"))
+	file.store_string(JSON.stringify({"version": FORMAT_VERSION, "table": "training_delivery", "robot": settings, "assembly": assembly}, "\t"))
 	file.close()
 	return OK
 
@@ -32,4 +35,8 @@ static func read_project(path: String) -> Dictionary:
 			return {"error": "Недопустимое число: " + key}
 	if settings.speed < 0.2 or settings.speed > 1.0 or settings.wheel_base < 0.24 or settings.wheel_base > 0.4 or settings.noise < 0 or settings.noise > 0.15 or settings.seed < 1 or settings.seed > 999999 or float(settings.seed) != floor(float(settings.seed)):
 		return {"error": "Параметры выходят за допустимые пределы"}
-	return {"settings": settings}
+	var assembly = data.get("assembly", [])
+	var assembly_error := PartLibrary.validate(assembly)
+	if not assembly_error.is_empty():
+		return {"error": assembly_error}
+	return {"settings": settings, "assembly": assembly}
