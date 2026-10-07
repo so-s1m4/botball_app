@@ -1,15 +1,16 @@
 extends RefCounted
 ## A settings project, not a saved mid-attempt physics snapshot.
 const FORMAT_VERSION := 1
+const MapLoader = preload("res://src/map_loader.gd")
 const PartLibrary = preload("res://src/part_library.gd")
 
-static func write_project(path: String, settings: Dictionary, assembly: Array = []) -> Error:
-	if not PartLibrary.validate(assembly).is_empty():
+static func write_project(path: String, settings: Dictionary, assembly: Array = [], map_config: Dictionary = {"id":"training_delivery"}) -> Error:
+	if not PartLibrary.validate(assembly).is_empty() or not MapLoader.validate(map_config).is_empty():
 		return ERR_INVALID_DATA
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"version": FORMAT_VERSION, "table": "training_delivery", "robot": settings, "assembly": assembly}, "\t"))
+	file.store_string(JSON.stringify({"version": FORMAT_VERSION, "table": "training_delivery", "robot": settings, "assembly": assembly, "map": map_config}, "\t"))
 	file.close()
 	return OK
 
@@ -39,4 +40,8 @@ static func read_project(path: String) -> Dictionary:
 	var assembly_error := PartLibrary.validate(assembly)
 	if not assembly_error.is_empty():
 		return {"error": assembly_error}
-	return {"settings": settings, "assembly": assembly}
+	var map_config = data.get("map", {"id":"training_delivery"})
+	var map_error := MapLoader.validate(map_config)
+	if not map_error.is_empty():
+		return {"error":map_error}
+	return {"settings": settings, "assembly": assembly, "map": map_config}

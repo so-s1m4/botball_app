@@ -100,6 +100,7 @@ func run() -> void:
 	editor.visible = false
 	root.add_child(editor)
 	await process_frame
+	editor.advanced_toggle.button_pressed = true
 	editor.set_assembly([entry("lego_32524"),entry("lego_2780",.1)])
 	editor.select_installed(1)
 	check(not editor.connect_button.disabled and not editor.picked_ports.is_empty(), "Editor presents compatible ports and markers")

@@ -74,6 +74,7 @@ func run() -> void:
 		check(Library.find_part(id).group == "metal", "Picture catalog category filter")
 	editor.category.select(0)
 	editor.refresh_catalog()
+	editor.advanced_toggle.button_pressed = true
 	var index := editor.catalog_ids.find(entry.id)
 	editor.select_catalog(index)
 	check(editor.previewing and editor.model_root.get_child_count() == 1,"Catalog selection previews real model")

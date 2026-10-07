@@ -1,5 +1,6 @@
 extends Control
 
+const MapLoader = preload("res://src/map_loader.gd")
 const Simulation = preload("res://src/simulation.gd")
 const Store = preload("res://src/project_store.gd")
 const UpdateChecker = preload("res://src/update_checker.gd")
@@ -23,6 +24,13 @@ var seed_input: SpinBox
 var save_dialog: FileDialog
 var open_dialog: FileDialog
 var inputs: Array[SpinBox] = []
+var map_dialog: FileDialog
+var map_selector: OptionButton
+var map_name: Label
+var map_options: VBoxContainer
+var map_fit: CheckButton
+var map_scale: SpinBox
+var syncing_map := false
 
 func _ready() -> void:
 	build_theme()
@@ -60,9 +68,13 @@ func _ready() -> void:
 	columns.add_child(left)
 	var info := HBoxContainer.new()
 	left.add_child(info)
-	var table_name := label("01  /  Учебный стол", 19)
-	table_name.size_flags_horizontal = SIZE_EXPAND_FILL
-	info.add_child(table_name)
+	map_selector = OptionButton.new()
+	for name in ["Учебный стол", "Полоса препятствий", "Своя карта (.glb)…"]:
+		map_selector.add_item(name)
+	map_selector.size_flags_horizontal = SIZE_EXPAND_FILL
+	map_selector.item_selected.connect(select_map)
+	info.add_child(map_selector)
+	info.add_child(button("Загрузить GLB…", func(): map_dialog.popup_centered_ratio(.7)))
 	status_label = label("Готов к запуску", 14, Color("51d8bb"))
 	info.add_child(status_label)
 	view_container = SubViewportContainer.new()
@@ -90,6 +102,27 @@ func _ready() -> void:
 	columns.add_child(sidebar_scroll)
 	sidebar_scroll.add_child(sidebar)
 	sidebar.size_flags_horizontal = SIZE_EXPAND_FILL
+	map_name = label("Учебный стол · 3 × 2,4 м", 13, Color("93a9bd"))
+	map_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sidebar.add_child(map_name)
+	map_options = VBoxContainer.new()
+	map_options.visible = false
+	sidebar.add_child(map_options)
+	map_fit = CheckButton.new()
+	map_fit.text = "Вписать карту в размер стола"
+	map_fit.button_pressed = true
+	map_fit.toggled.connect(func(_value): adjust_map())
+	map_options.add_child(map_fit)
+	var scale_row := HBoxContainer.new()
+	map_options.add_child(scale_row)
+	scale_row.add_child(label("Масштаб карты", 13))
+	map_scale = SpinBox.new()
+	map_scale.min_value = .001
+	map_scale.max_value = 10000
+	map_scale.step = .01
+	map_scale.value = 1
+	map_scale.value_changed.connect(func(_value): adjust_map())
+	scale_row.add_child(map_scale)
 	sidebar.add_child(label("ПОПЫТКА", 13, Color("93a9bd")))
 	var stats := HBoxContainer.new()
 	sidebar.add_child(stats)
@@ -141,6 +174,14 @@ func _ready() -> void:
 	save_dialog.file_selected.connect(save_project)
 	open_dialog = dialog(FileDialog.FILE_MODE_OPEN_FILE)
 	open_dialog.file_selected.connect(open_project)
+	map_dialog = FileDialog.new()
+	map_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	map_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	map_dialog.filters = PackedStringArray(["*.glb ; 3D-карта GLB"])
+	map_dialog.use_native_dialog = true
+	map_dialog.file_selected.connect(load_map_file)
+	map_dialog.canceled.connect(sync_map_controls)
+	add_child(map_dialog)
 	assembly_editor = AssemblyEditor.new()
 	assembly_editor.visible = false
 	add_child(assembly_editor)
@@ -157,7 +198,7 @@ func _process(_delta: float) -> void:
 	if sim == null or not sim.running or sim.paused or sim.autonomous:
 		return
 	var focused := get_viewport().gui_get_focus_owner()
-	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible:
+	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible or map_dialog.visible:
 		sim.manual_forward = 0
 		sim.manual_turn = 0
 		return
@@ -183,9 +224,9 @@ func camera_input(event: InputEvent) -> void:
 		sim.update_camera()
 	elif event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			sim.zoom = maxf(2.3, sim.zoom - 0.2)
+			sim.zoom = maxf(sim.camera_min_zoom, sim.zoom * .9)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			sim.zoom = minf(6, sim.zoom + 0.2)
+			sim.zoom = minf(sim.camera_max_zoom, sim.zoom / .9)
 		sim.update_camera()
 
 func start_attempt(auto: bool) -> void:
@@ -212,7 +253,7 @@ func update_status() -> void:
 	telemetry_label.text = "Дальномер: %.2f м\nЭнкодеры L / R: %.2f / %.2f м" % [sim.robot.distance_sensor(), sim.robot.left_encoder, sim.robot.right_encoder]
 
 func save_project(path: String) -> void:
-	var result := Store.write_project(path, {"speed": speed_input.value, "wheel_base": base_input.value, "noise": noise_input.value / 100.0, "seed": int(seed_input.value)}, sim.robot.assembly)
+	var result := Store.write_project(path, {"speed": speed_input.value, "wheel_base": base_input.value, "noise": noise_input.value / 100.0, "seed": int(seed_input.value)}, sim.robot.assembly, sim.map_config)
 	log_event("Настройки проекта сохранены" if result == OK else "Ошибка сохранения: " + error_string(result))
 
 func open_project(path: String) -> void:
@@ -220,7 +261,11 @@ func open_project(path: String) -> void:
 	if result.has("error"):
 		log_event(result.error)
 		return
-	sim.reset_attempt()
+	var map_error: String = sim.set_map(result.map)
+	if not map_error.is_empty():
+		show_map_error(map_error)
+		return
+	sync_map_controls()
 	var settings: Dictionary = result.settings
 	speed_input.value = settings.speed
 	base_input.value = settings.wheel_base
@@ -301,3 +346,58 @@ func open_constructor() -> void:
 	sim.reset_attempt()
 	assembly_editor.set_assembly(sim.robot.assembly)
 	assembly_editor.popup_centered()
+
+func select_map(index: int) -> void:
+	if syncing_map:
+		return
+	if index == 2:
+		map_dialog.popup_centered_ratio(.7)
+		return
+	var error: String = sim.set_map({"id":"training_delivery" if index == 0 else "obstacles"})
+	if not error.is_empty():
+		show_map_error(error)
+	sync_map_controls()
+
+func load_map_file(path: String) -> void:
+	var loaded := MapLoader.import_glb(path)
+	if loaded.has("error"):
+		show_map_error(loaded.error)
+		sync_map_controls()
+		return
+	var error: String = sim.set_map(loaded.config)
+	if not error.is_empty():
+		show_map_error(error)
+	sync_map_controls()
+
+func sync_map_controls() -> void:
+	if sim == null:
+		return
+	syncing_map = true
+	var custom: bool = sim.map_config.id == "custom"
+	map_selector.select(2 if custom else 1 if sim.map_config.id == "obstacles" else 0)
+	map_options.visible = custom
+	map_name.text = "Своя карта: " + sim.map_config.get("name","GLB") if custom else "Полоса препятствий" if sim.map_config.id == "obstacles" else "Учебный стол · 3 × 2,4 м"
+	map_fit.button_pressed = sim.map_config.get("fit",true)
+	map_scale.value = sim.map_config.get("scale",1.0)
+	syncing_map = false
+
+func adjust_map() -> void:
+	if syncing_map or sim == null or sim.map_config.id != "custom":
+		return
+	var config: Dictionary = sim.map_config.duplicate(true)
+	config.fit = map_fit.button_pressed
+	config.scale = map_scale.value
+	var error: String = sim.set_map(config)
+	if not error.is_empty():
+		show_map_error(error)
+		sync_map_controls()
+
+func show_map_error(message: String) -> void:
+	log_event(message)
+	var popup := AcceptDialog.new()
+	popup.title = "Не удалось загрузить карту"
+	popup.dialog_text = message
+	popup.confirmed.connect(popup.queue_free)
+	popup.canceled.connect(popup.queue_free)
+	add_child(popup)
+	popup.popup_centered()

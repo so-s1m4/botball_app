@@ -34,6 +34,10 @@ jobs:
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/parts.gd
       - name: Test mechanical connections
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/connections.gd
+      - name: Test simple assembly
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/easy.gd
+      - name: Test map switching and runtime GLB import
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/maps.gd
       - name: Test update checker
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/updates.gd
       - name: Build universal macOS app
@@ -86,6 +90,10 @@ jobs:
           Download Botball-Lab-macOS.dmg, open it and drag Botball Lab.app into Applications.
           To update, quit Botball Lab and replace the previous app. Saved projects are preserved.
           The app checks for newer versions at startup; use «Обновления» to check manually.
+
+          Includes simple assembly: choose a platform, flip it, click highlighted motor mounts, fasten with inventory screws, and attach wheels. Placement preview and undo are included; the advanced connector editor remains available. Motor mounting locations are approximate teaching geometry.
+
+          Includes map switching and runtime GLB import with materials, static collision, automatic fitting and saved map selection. The training task and controller remain educational rather than imported season rules.
 
           Includes a picture catalog for all 156 installable parts and textured plastic, metal and rubber finishes.
 
