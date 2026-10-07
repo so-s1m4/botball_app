@@ -5,6 +5,7 @@ const Simulation = preload("res://src/simulation.gd")
 const Store = preload("res://src/project_store.gd")
 const UpdateChecker = preload("res://src/update_checker.gd")
 var update_checker: Node
+const ProgramEditor = preload("res://src/program_editor.gd")
 const AssemblyEditor = preload("res://src/assembly_editor.gd")
 var assembly_editor: Window
 var sim: Node3D
@@ -31,6 +32,10 @@ var map_options: VBoxContainer
 var map_fit: CheckButton
 var map_scale: SpinBox
 var syncing_map := false
+var program_editor: Window
+var actuator_panel: VBoxContainer
+var hardware_label: Label
+var current_program: String = ProgramEditor.EXAMPLES[0]
 
 func _ready() -> void:
 	build_theme()
@@ -54,6 +59,7 @@ func _ready() -> void:
 	header.add_child(title)
 	header.add_child(label("v" + str(ProjectSettings.get_setting("application/config/version")), 13, Color("51d8bb")))
 	header.add_child(button("3D-конструктор", open_constructor))
+	header.add_child(button("Код робота", open_program_editor))
 	update_checker = UpdateChecker.new()
 	add_child(update_checker)
 	header.add_child(button("Обновления", func(): update_checker.check()))
@@ -123,6 +129,11 @@ func _ready() -> void:
 	map_scale.value = 1
 	map_scale.value_changed.connect(func(_value): adjust_map())
 	scale_row.add_child(map_scale)
+	hardware_label = label("",13,Color("51d8bb"))
+	hardware_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sidebar.add_child(hardware_label)
+	actuator_panel = VBoxContainer.new()
+	sidebar.add_child(actuator_panel)
 	sidebar.add_child(label("ПОПЫТКА", 13, Color("93a9bd")))
 	var stats := HBoxContainer.new()
 	sidebar.add_child(stats)
@@ -185,7 +196,18 @@ func _ready() -> void:
 	assembly_editor = AssemblyEditor.new()
 	assembly_editor.visible = false
 	add_child(assembly_editor)
-	assembly_editor.assembly_changed.connect(func(assembly): sim.robot.set_assembly(assembly))
+	assembly_editor.assembly_changed.connect(func(assembly):
+		sim.robot.set_assembly(assembly)
+		refresh_actuator_controls()
+	)
+	assembly_editor.test_requested.connect(test_assembled_robot)
+	program_editor = ProgramEditor.new()
+	program_editor.visible = false
+	add_child(program_editor)
+	program_editor.run_requested.connect(run_robot_program)
+	program_editor.stop_requested.connect(func():sim.stop_program())
+	program_editor.source_changed.connect(func(source):current_program = source)
+	refresh_actuator_controls()
 	sim.changed.connect(update_status)
 	sim.event.connect(log_event)
 	apply_settings()
@@ -195,10 +217,10 @@ func _ready() -> void:
 		update_checker.call_deferred("check", false)
 
 func _process(_delta: float) -> void:
-	if sim == null or not sim.running or sim.paused or sim.autonomous:
+	if sim == null or not sim.running or sim.paused or sim.autonomous or sim.program_mode:
 		return
 	var focused := get_viewport().gui_get_focus_owner()
-	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible or map_dialog.visible:
+	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible or map_dialog.visible or program_editor.visible:
 		sim.manual_forward = 0
 		sim.manual_turn = 0
 		return
@@ -209,6 +231,8 @@ func pressed(first: Key, second: Key) -> bool:
 	return Input.is_physical_key_pressed(first) or Input.is_physical_key_pressed(second)
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if program_editor.visible:
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_SPACE:
 			sim.toggle_grip()
@@ -242,18 +266,27 @@ func apply_settings() -> void:
 
 func update_status() -> void:
 	score_label.text = "%d / 100" % sim.score
-	timer_label.text = "%.1f с" % (sim.LIMIT - sim.elapsed)
-	status_label.text = "Пауза" if sim.paused else ("Автономно" if sim.autonomous else "Вручную") if sim.running else ("Доставлено" if sim.score > 0 else "Готов к запуску" if sim.elapsed == 0 else "Попытка завершена")
+	timer_label.text = "%.1f с" % (sim.elapsed if sim.program_mode else sim.LIMIT - sim.elapsed)
+	status_label.text = "Пауза" if sim.paused else ("Программа" if sim.program_mode else "Автономно" if sim.autonomous else "Вручную") if sim.running else ("Доставлено" if sim.score > 0 else "Готов к запуску" if sim.elapsed == 0 else "Попытка завершена")
 	pause_button.text = "Продолжить" if sim.paused else "Пауза"
 	pause_button.disabled = not sim.running
 	for control in inputs:
 		control.editable = not sim.running
 	var stages := ["Едем к кубу", "Закрываем захват", "Едем к зоне", "Отпускаем куб", "Проверяем доставку"]
-	stage_label.text = stages[sim.phase] if sim.running and sim.autonomous else ("Куб в захвате" if sim.robot.carrying else "Ожидание команды")
+	stage_label.text = ("Код · строка %d" % sim.program.line if sim.running else "Программа остановлена") if sim.program_mode else stages[sim.phase] if sim.running and sim.autonomous else ("Куб в захвате" if sim.robot.carrying else "Ожидание команды")
+	if program_editor != null and program_editor.status != null and sim.program_mode:
+		program_editor.status.text = "Пауза" if sim.paused else "Выполняется строка %d · %.1f с" % [sim.program.line,sim.elapsed] if sim.running else sim.program.error if not sim.program.error.is_empty() else "Программа завершена"
+	for row in actuator_panel.get_children():
+		for control in row.get_children():
+			if control is SpinBox:
+				var port: int = control.get_meta("servo_port")
+				var servo: Dictionary = sim.robot.actuators.servos[port]
+				control.set_value_no_signal(servo.angle)
+				control.editable = not servo.locked and not (sim.running and sim.program_mode)
 	telemetry_label.text = "Дальномер: %.2f м\nЭнкодеры L / R: %.2f / %.2f м" % [sim.robot.distance_sensor(), sim.robot.left_encoder, sim.robot.right_encoder]
 
 func save_project(path: String) -> void:
-	var result := Store.write_project(path, {"speed": speed_input.value, "wheel_base": base_input.value, "noise": noise_input.value / 100.0, "seed": int(seed_input.value)}, sim.robot.assembly, sim.map_config)
+	var result := Store.write_project(path, {"speed": speed_input.value, "wheel_base": base_input.value, "noise": noise_input.value / 100.0, "seed": int(seed_input.value)}, sim.robot.assembly, sim.map_config, current_program)
 	log_event("Настройки проекта сохранены" if result == OK else "Ошибка сохранения: " + error_string(result))
 
 func open_project(path: String) -> void:
@@ -273,11 +306,18 @@ func open_project(path: String) -> void:
 	seed_input.value = settings.seed
 	sim.robot.set_assembly(result.assembly)
 	assembly_editor.set_assembly(result.assembly)
+	current_program = result.program if not result.program.is_empty() else ProgramEditor.EXAMPLES[0]
+	program_editor.set_source(current_program)
+	refresh_actuator_controls()
 	apply_settings()
 	log_event("Проект открыт. Поле сброшено.")
 
 func log_event(message: String) -> void:
+	if log_text.text.length() > 24000:
+		log_text.text = log_text.text.right(12000)
 	log_text.append_text("[%04.1f] %s\n" % [sim.elapsed, message])
+	if program_editor != null:
+		program_editor.append_output(message)
 
 func dialog(mode: FileDialog.FileMode) -> FileDialog:
 	var file_dialog := FileDialog.new()
@@ -401,3 +441,55 @@ func show_map_error(message: String) -> void:
 	popup.canceled.connect(popup.queue_free)
 	add_child(popup)
 	popup.popup_centered()
+
+func refresh_actuator_controls() -> void:
+	for child in actuator_panel.get_children():
+		actuator_panel.remove_child(child)
+		child.queue_free()
+	hardware_label.text = sim.robot.hardware_status()
+	var labels := ""
+	if sim.robot.assembly.is_empty():
+		labels = "Учебный робот: мотор 1 — левый, мотор 2 — правый. Серво нет: установи его в конструкторе."
+	else:
+		for port in range(sim.robot.actuators.motors.size()):
+			var index: int = sim.robot.actuators.motors[port]
+			labels += "Мотор %d → деталь %d. " % [port+1,index+1]
+		for port in range(sim.robot.actuators.servos.size()):
+			var servo: Dictionary = sim.robot.actuators.servos[port]
+			labels += "Серво %d → деталь %d%s. " % [port+1,servo.index+1," (добавь рычаг)" if servo.followers.is_empty() else " (рычаг закреплён неподвижно)" if servo.locked else ""]
+			var row := HBoxContainer.new()
+			actuator_panel.add_child(row)
+			row.add_child(label("Серво %d, °" % [port+1],13))
+			var angle := SpinBox.new()
+			angle.min_value = 0
+			angle.max_value = 180
+			angle.value = servo.angle
+			angle.set_meta("servo_port",port)
+			angle.editable = not servo.locked
+			angle.value_changed.connect(func(value):sim.robot.command_servo(port+1,value))
+			row.add_child(angle)
+	if labels.is_empty():
+		labels = "В сборке пока нет приводов. Поставь моторы и серво в конструкторе."
+	if program_editor != null:
+		program_editor.set_ports(labels)
+
+func test_assembled_robot() -> void:
+	assembly_editor.hide()
+	sim.start(false)
+	refresh_actuator_controls()
+	log_event(sim.robot.hardware_status())
+
+func open_program_editor() -> void:
+	program_editor.set_source(current_program)
+	refresh_actuator_controls()
+	program_editor.popup_centered()
+
+func run_robot_program(source: String) -> void:
+	current_program = source
+	program_editor.console.clear()
+	var error: String = sim.start_program(source)
+	if not error.is_empty():
+		program_editor.status.text = error
+		log_event(error)
+	else:
+		refresh_actuator_controls()

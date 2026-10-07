@@ -3,6 +3,7 @@ extends Node3D
 signal changed
 signal event(message: String)
 
+const Program = preload("res://src/robot_program.gd")
 const MapLoader = preload("res://src/map_loader.gd")
 const Robot = preload("res://src/robot.gd")
 const LIMIT := 60.0
@@ -16,6 +17,11 @@ var camera_target := Vector3.ZERO
 var camera_min_zoom := 2.3
 var camera_max_zoom := 6.0
 var map_revision := 0
+var program: RefCounted
+var program_mode := false
+var program_output_count := 0
+var program_source := ""
+var paused_commands: Dictionary = {}
 var map_ground := 0.0
 var robot_spawn_y := .015
 var cube_spawn_y := .10
@@ -87,8 +93,15 @@ func build_world() -> void:
 func _physics_process(delta: float) -> void:
 	if not running or paused:
 		return
-	elapsed = minf(elapsed + delta, LIMIT)
-	if autonomous:
+	elapsed = elapsed + delta if program_mode else minf(elapsed + delta, LIMIT)
+	if program_mode:
+		program.advance(delta,robot)
+		while not program.output.is_empty():
+			event.emit("print: " + program.output.pop_front())
+		if not program.running:
+			finish(program.error if not program.error.is_empty() else "Программа завершена")
+			return
+	elif autonomous:
 		auto_step(delta)
 	else:
 		robot.drive(manual_forward, manual_turn)
@@ -98,12 +111,15 @@ func _physics_process(delta: float) -> void:
 		cube.rotation = Vector3.ZERO
 	if not robot.carrying and cube_in_goal() and cube.linear_velocity.length() < 0.12:
 		release_wait += delta
-		if release_wait >= 0.4:
+		if release_wait >= 0.4 and score < 100:
 			score = 100
-			finish("Куб доставлен: +100 баллов")
+			if program_mode:
+				event.emit("Куб доставлен: +100 баллов")
+			else:
+				finish("Куб доставлен: +100 баллов")
 	else:
 		release_wait = 0.0
-	if running and elapsed >= LIMIT:
+	if running and not program_mode and elapsed >= LIMIT:
 		finish("Время истекло")
 	changed.emit()
 
@@ -115,6 +131,9 @@ func start(auto: bool) -> void:
 	changed.emit()
 
 func reset_attempt() -> void:
+	if program != null:
+		program.running = false
+	program_mode = false
 	running = false
 	paused = false
 	autonomous = false
@@ -142,13 +161,22 @@ func toggle_pause() -> void:
 	if not running:
 		return
 	paused = not paused
-	robot.stop()
+	if paused:
+		paused_commands = {"left":robot.left_command,"right":robot.right_command,"motors":robot.motor_commands.duplicate()}
+		robot.stop()
+	elif program_mode and not paused_commands.is_empty():
+		robot.left_command = paused_commands.left
+		robot.right_command = paused_commands.right
+		robot.motor_commands = paused_commands.motors.duplicate()
 	cube.freeze = paused or robot.carrying
 	event.emit("Пауза" if paused else "Продолжение")
 	changed.emit()
 
 func toggle_grip() -> void:
 	if not running or paused:
+		return
+	if not robot.assembly.is_empty():
+		event.emit("Для своей сборки управлять рычагом можно командой servo. Учебный захват доступен у учебного робота.")
 		return
 	if robot.carrying:
 		robot.set_grip(false)
@@ -222,6 +250,8 @@ func cube_in_goal() -> bool:
 
 func finish(message: String) -> void:
 	running = false
+	if program != null:
+		program.running = false
 	robot.stop()
 	event.emit(message)
 	changed.emit()
@@ -347,3 +377,23 @@ func place_on_imported_ground(revision: int) -> void:
 	reset_attempt()
 	visual_box(Vector3(GOAL_HALF.x*2,.005,GOAL_HALF.y*2),GOAL+Vector3(0,map_ground+.006,0),Color("52baa0"))
 	label_3d("ДОСТАВКА · 100",GOAL+Vector3(0,map_ground+.016,.23),Color("125f50"))
+
+func start_program(source: String) -> String:
+	var compiled := Program.compile(source)
+	if compiled.has("error"):
+		return compiled.error
+	reset_attempt()
+	program_source = source
+	program = Program.new()
+	program.start(compiled)
+	program_mode = true
+	program_output_count = 0
+	running = true
+	event.emit("Программа запущена")
+	changed.emit()
+	return ""
+
+func stop_program() -> void:
+	if program != null:
+		program.running = false
+	finish("Программа остановлена")

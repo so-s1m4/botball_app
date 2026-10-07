@@ -1,5 +1,6 @@
 extends Window
 signal assembly_changed(assembly: Array)
+signal test_requested
 const Connections = preload("res://src/assembly_connections.gd")
 const Library = preload("res://src/part_library.gd")
 const Easy = preload("res://src/easy_assembly.gd")
@@ -118,7 +119,11 @@ func _ready() -> void:
 	workspace.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	columns.add_child(workspace)
 	count_label = caption("")
-	workspace.add_child(count_label)
+	var top_row := HBoxContainer.new()
+	workspace.add_child(top_row)
+	count_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_row.add_child(count_label)
+	top_row.add_child(action("Тестировать на карте", func(): test_requested.emit()))
 	view = SubViewportContainer.new()
 	view.stretch = true
 	view.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -376,7 +381,7 @@ func commit() -> void:
 func refresh_installed() -> void:
 	installed.clear()
 	for entry in assembly:
-		installed.add_item(Easy.display_name(entry.id), Library.thumbnail(entry.id))
+		installed.add_item("%d. %s" % [installed.item_count+1,Easy.display_name(entry.id)], Library.thumbnail(entry.id))
 	count_label.text = "Сборка: %d деталей" % assembly.size()
 	update_actions()
 
@@ -735,6 +740,8 @@ func update_simple_hint() -> void:
 		simple_hint.text = "2. Выбери мотор на картинке и нажми на зелёное место платформы."
 	elif simple_group == 2:
 		simple_hint.text = "3. Выбери колесо Solarbotics и нажми на зелёный вал мотора."
+	elif selected >= 0 and assembly[selected].id in ["electronics_009", "electronics_011"]:
+		simple_hint.text = "Серво установлен. Выбери рычаг в «Моторы», затем нажми на зелёный выход серво."
 	else:
 		simple_hint.text = "Выбери деталь на картинке. Зелёные места покажут подходящие крепления."
 
@@ -811,7 +818,7 @@ func refresh_simple_targets() -> void:
 		port_root.add_child(visual)
 	if simple_targets.is_empty():
 		if pending_id in ["electronics_009", "electronics_011"]:
-			simple_hint.text = "Сервомотор пока можно разместить как 3D-деталь. Управление углом ещё не подключено."
+			simple_hint.text = "Свободного места для серво нет. Начни с платформы робота."
 		elif pending_id == "electronics_018":
 			simple_hint.text = "Свободного вала пока нет. Сначала установи и прикрути мотор."
 		else:

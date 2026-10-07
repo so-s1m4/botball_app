@@ -38,6 +38,8 @@ jobs:
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/easy.gd
       - name: Test map switching and runtime GLB import
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/maps.gd
+      - name: Test assembled robot actuators and programs
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/programs.gd --fixed-fps 120
       - name: Test update checker
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/updates.gd
       - name: Build universal macOS app
@@ -90,6 +92,8 @@ jobs:
           Download Botball-Lab-macOS.dmg, open it and drag Botball Lab.app into Applications.
           To update, quit Botball Lab and replace the previous app. Saved projects are preserved.
           The app checks for newer versions at startup; use «Обновления» to check manually.
+
+          Includes a Python-like code editor: numbered motor and servo control, wait, drive, stop, variables, loops, conditions, print, virtual distance and encoder readings. Assembled motors/wheels drive the robot with its measured track; servo output rotates its attached horn. Programs are saved with projects. The physics and motor mounts remain simplified.
 
           Includes simple assembly: choose a platform, flip it, click highlighted motor mounts, fasten with inventory screws, and attach wheels. Placement preview and undo are included; the advanced connector editor remains available. Motor mounting locations are approximate teaching geometry.
 

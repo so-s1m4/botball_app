@@ -7,13 +7,13 @@ static func in_group(part: Dictionary, group: int) -> bool:
 	var name: String = part.name.to_lower()
 	match group:
 		0: return part.id == "metal_007" or "plate" in name or "channel" in name or "liftarm" in name
-		1: return part.id in ["electronics_009", "electronics_010", "electronics_011"]
+		1: return part.id in ["electronics_009", "electronics_010", "electronics_011", "metal_012", "metal_013"]
 		2: return ("wheel" in name or "tire" in name) and not "screw" in name
 		3: return part.group == "metal" and ("screw" in name or "nut" in name or "washer" in name) or part.group == "lego" and ("pin" in name or "axle" in name)
 	return true
 
 static func display_name(id: String) -> String:
-	return {"metal_007":"Платформа робота", "electronics_010":"Мотор", "electronics_009":"Сервомотор", "electronics_011":"Маленький сервомотор", "electronics_018":"Колесо Solarbotics", "metal_015":"Винт крепления мотора"}.get(id, Library.find_part(id).get("name", id))
+	return {"metal_007":"Платформа робота", "electronics_010":"Мотор", "electronics_009":"Сервомотор", "electronics_011":"Маленький сервомотор", "electronics_018":"Колесо Solarbotics", "metal_015":"Винт крепления мотора", "metal_012":"Круглый рычаг серво", "metal_013":"Длинный рычаг серво"}.get(id, Library.find_part(id).get("name", id))
 
 static func candidates(assembly: Array, id: String) -> Array:
 	var result: Array = []

@@ -1,7 +1,7 @@
 extends RefCounted
 ## Connections refer to stable inventory instance and port indices.
 static var ports: Dictionary = {}
-const LABELS := {"pin_hole":"Отверстие для пина", "axle_hole":"Крестовое отверстие", "pin":"Пин", "axle":"Ось", "stud":"Шип LEGO", "stud_socket":"Гнездо LEGO", "hole_8_32":"Отверстие 8-32", "bolt_8_32":"Винт 8-32", "bolt_m3":"Винт M3", "thread_8_32":"Резьба 8-32", "thread_m3":"Резьба M3", "nut_8_32":"Гайка / стойка 8-32", "nut_m3":"Гайка M3", "motor_mount":"Место для мотора", "motor_body_mount":"Крепление мотора", "motor_shaft":"Вал мотора", "motor_wheel_socket":"Ступица колеса"}
+const LABELS := {"pin_hole":"Отверстие для пина", "axle_hole":"Крестовое отверстие", "pin":"Пин", "axle":"Ось", "stud":"Шип LEGO", "stud_socket":"Гнездо LEGO", "hole_8_32":"Отверстие 8-32", "bolt_8_32":"Винт 8-32", "bolt_m3":"Винт M3", "thread_8_32":"Резьба 8-32", "thread_m3":"Резьба M3", "nut_8_32":"Гайка / стойка 8-32", "nut_m3":"Гайка M3", "motor_mount":"Место для мотора", "motor_body_mount":"Крепление мотора", "motor_shaft":"Вал мотора", "motor_wheel_socket":"Ступица колеса", "servo_mount":"Место для серво", "servo_body_mount":"Крепление серво", "servo_output":"Выход серво", "servo_socket":"Крепление рычага"}
 
 static func ensure_loaded() -> void:
 	if ports.is_empty():
@@ -17,7 +17,7 @@ static func for_part(id: String) -> Array:
 	return ports.get(id, [])
 
 static func compatible(a: String, b: String) -> bool:
-	var pairs := [["motor_mount", "motor_body_mount"], ["motor_shaft", "motor_wheel_socket"], ["pin", "pin_hole"], ["axle", "axle_hole"], ["axle", "pin_hole"], ["stud", "stud_socket"], ["bolt_8_32", "hole_8_32"], ["thread_8_32", "nut_8_32"], ["thread_m3", "nut_m3"]]
+	var pairs := [["servo_mount", "servo_body_mount"], ["servo_output", "servo_socket"], ["motor_mount", "motor_body_mount"], ["motor_shaft", "motor_wheel_socket"], ["pin", "pin_hole"], ["axle", "axle_hole"], ["axle", "pin_hole"], ["stud", "stud_socket"], ["bolt_8_32", "hole_8_32"], ["thread_8_32", "nut_8_32"], ["thread_m3", "nut_m3"]]
 	for pair in pairs:
 		if (a == pair[0] and b == pair[1]) or (a == pair[1] and b == pair[0]):
 			return true

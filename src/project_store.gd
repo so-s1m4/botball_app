@@ -4,13 +4,13 @@ const FORMAT_VERSION := 1
 const MapLoader = preload("res://src/map_loader.gd")
 const PartLibrary = preload("res://src/part_library.gd")
 
-static func write_project(path: String, settings: Dictionary, assembly: Array = [], map_config: Dictionary = {"id":"training_delivery"}) -> Error:
-	if not PartLibrary.validate(assembly).is_empty() or not MapLoader.validate(map_config).is_empty():
+static func write_project(path: String, settings: Dictionary, assembly: Array = [], map_config: Dictionary = {"id":"training_delivery"}, program: String = "") -> Error:
+	if not PartLibrary.validate(assembly).is_empty() or not MapLoader.validate(map_config).is_empty() or program.length() > 100000:
 		return ERR_INVALID_DATA
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"version": FORMAT_VERSION, "table": "training_delivery", "robot": settings, "assembly": assembly, "map": map_config}, "\t"))
+	file.store_string(JSON.stringify({"version": FORMAT_VERSION, "table": "training_delivery", "robot": settings, "assembly": assembly, "map": map_config, "program":program}, "\t"))
 	file.close()
 	return OK
 
@@ -44,4 +44,7 @@ static func read_project(path: String) -> Dictionary:
 	var map_error := MapLoader.validate(map_config)
 	if not map_error.is_empty():
 		return {"error":map_error}
-	return {"settings": settings, "assembly": assembly, "map": map_config}
+	var program = data.get("program", "")
+	if not program is String or program.length() > 100000:
+		return {"error":"Неверный текст программы"}
+	return {"settings": settings, "assembly": assembly, "map": map_config, "program":program}
