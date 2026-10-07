@@ -51,7 +51,7 @@ func _ready() -> void:
 	columns.add_theme_constant_override("separation", 14)
 	margin.add_child(columns)
 	var inventory := VBoxContainer.new()
-	inventory.custom_minimum_size.x = 300
+	inventory.custom_minimum_size.x = 332
 	columns.add_child(inventory)
 	inventory.add_child(caption("ДЕТАЛИ НАБОРА 2026"))
 	search = LineEdit.new()
@@ -66,6 +66,13 @@ func _ready() -> void:
 	catalog = ItemList.new()
 	catalog.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	catalog.custom_minimum_size.y = 160
+	catalog.max_columns = 2
+	catalog.same_column_width = true
+	catalog.fixed_column_width = 148
+	catalog.icon_mode = ItemList.ICON_MODE_TOP
+	catalog.fixed_icon_size = Vector2i(140, 104)
+	catalog.max_text_lines = 3
+	catalog.add_theme_font_size_override("font_size", 12)
 	catalog.item_selected.connect(select_catalog)
 	inventory.add_child(catalog)
 	details = caption("Выбери деталь для просмотра в 3D")
@@ -75,7 +82,8 @@ func _ready() -> void:
 	inventory.add_child(add_button)
 	inventory.add_child(caption("СОБРАНО"))
 	installed = ItemList.new()
-	installed.custom_minimum_size.y = 130
+	installed.custom_minimum_size.y = 150
+	installed.fixed_icon_size = Vector2i(64, 48)
 	installed.item_selected.connect(select_installed)
 	inventory.add_child(installed)
 	remove_button = action("Удалить выбранную деталь", remove_part)
@@ -233,8 +241,10 @@ func refresh_catalog() -> void:
 			continue
 		var remaining: int = part.quantity - used(part.id)
 		catalog_ids.append(part.id)
-		catalog.add_item("%s  ·  %d/%d" % [part.name, remaining, part.quantity])
-		catalog.set_item_tooltip(catalog.item_count-1, part.name + "\n" + part.id)
+		catalog.add_item("%s\n%d / %d в наборе" % [part.name, remaining, part.quantity], Library.thumbnail(part.id))
+		catalog.set_item_tooltip(catalog.item_count-1, part.name + "\n" + part.id + "\n" + ("Приближённая модель" if Library.models[part.id].quality == "estimated" else "Модель " + Library.models[part.id].quality.to_upper()))
+		if remaining == 0:
+			catalog.set_item_custom_fg_color(catalog.item_count-1, Color("8793a0"))
 		if part.id == catalog_id:
 			catalog.select(catalog.item_count-1)
 	update_actions()
@@ -292,7 +302,7 @@ func commit() -> void:
 func refresh_installed() -> void:
 	installed.clear()
 	for entry in assembly:
-		installed.add_item(Library.find_part(entry.id).name)
+		installed.add_item(Library.find_part(entry.id).name, Library.thumbnail(entry.id))
 	count_label.text = "Сборка: %d деталей" % assembly.size()
 	update_actions()
 

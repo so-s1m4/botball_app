@@ -87,6 +87,8 @@ jobs:
           To update, quit Botball Lab and replace the previous app. Saved projects are preserved.
           The app checks for newer versions at startup; use «Обновления» to check manually.
 
+          Includes a picture catalog for all 156 installable parts and textured plastic, metal and rubber finishes.
+
           Includes connection-based assembly: LEGO pins, axles, studs and 8-32/M3 fasteners. Connected groups move together and connections are saved with the project. Some connection geometry is approximate; full mechanical dynamics is not included.
           This build has an ad-hoc signature and is not Apple-notarized.
           Source code and third-party model licenses are included in this repository.

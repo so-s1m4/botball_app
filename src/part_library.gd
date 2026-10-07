@@ -4,6 +4,9 @@ const Connections = preload("res://src/assembly_connections.gd")
 static var parts: Array = []
 static var models: Dictionary = {}
 static var meshes: Dictionary = {}
+static var materials: Dictionary = {}
+static var thumbnails: Dictionary = {}
+static var surface_textures: Dictionary = {}
 
 static func ensure_loaded() -> void:
 	if not parts.is_empty():
@@ -31,17 +34,69 @@ static func create_part(id: String) -> Node3D:
 		meshes[id] = load(models[id].path)
 	var visual := MeshInstance3D.new()
 	visual.mesh = meshes[id]
-	var mat := StandardMaterial3D.new()
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.albedo_color = Color("b8c5d1") if part.group == "metal" else Color("273e56") if part.group == "electronics" else Color("efb541")
-	if "Tire" in part.name or "Wheel" in part.name or "Pin" in part.name:
-		mat.albedo_color = Color("344457")
-	mat.metallic = 0.65 if part.group == "metal" else 0.0
-	mat.roughness = 0.55
-	if models[id].quality != "kipr":
-		visual.material_override = mat
+	# Keep imported multi-material colours while adding the same surface finish
+	# used by generated models. Triplanar mapping also works on OBJ files without UVs.
+	if not materials.has(id):
+		var finishes: Array[StandardMaterial3D] = []
+		for surface in range(visual.mesh.get_surface_count()):
+			var original := visual.mesh.surface_get_material(surface)
+			var mat: StandardMaterial3D = original.duplicate() if original is StandardMaterial3D and models[id].quality == "kipr" else StandardMaterial3D.new()
+			apply_finish(mat, part, original is StandardMaterial3D and models[id].quality == "kipr")
+			finishes.append(mat)
+		materials[id] = finishes
+	for surface in range(visual.mesh.get_surface_count()):
+		visual.set_surface_override_material(surface, materials[id][surface])
 	root.add_child(visual)
 	return root
+
+static func surface_texture(kind: String) -> NoiseTexture2D:
+	if surface_textures.has(kind):
+		return surface_textures[kind]
+	var noise := FastNoiseLite.new()
+	noise.seed = 2026
+	noise.frequency = 0.18 if kind == "metal" else 0.45
+	noise.fractal_octaves = 3
+	var texture := NoiseTexture2D.new()
+	texture.width = 256
+	texture.height = 256
+	texture.seamless = true
+	texture.noise = noise
+	texture.as_normal_map = true
+	texture.bump_strength = 0.45 if kind == "rubber" else 0.12 if kind == "metal" else 0.06
+	surface_textures[kind] = texture
+	return texture
+
+static func apply_finish(mat: StandardMaterial3D, part: Dictionary, keep_color: bool) -> void:
+	var name_lower: String = part.name.to_lower()
+	var rubber: bool = "tire" in name_lower or "rubber" in name_lower or part.id == "electronics_018"
+	var metal: bool = part.group == "metal" and not "servo horn" in name_lower and part.id != "metal_036"
+	var kind := "rubber" if rubber else "metal" if metal else "plastic"
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	if not keep_color:
+		mat.albedo_color = Color("b8c5d1") if metal else Color("273e56") if part.group == "electronics" else Color("efb541")
+		if rubber or "pin" in name_lower or "axle" in name_lower:
+			mat.albedo_color = Color("303b48")
+		if "(black)" in name_lower:
+			mat.albedo_color = Color("34383e")
+		if "brass" in name_lower:
+			mat.albedo_color = Color("b99a50")
+	mat.metallic = 0.8 if metal else 0.0
+	mat.roughness = 0.92 if rubber else 0.32 if metal else 0.28
+	mat.normal_enabled = true
+	mat.normal_texture = surface_texture(kind)
+	mat.normal_scale = 0.65 if rubber else 0.3
+	mat.uv1_triplanar = true
+	mat.uv1_scale = Vector3.ONE * (280.0 if rubber else 140.0)
+	mat.clearcoat_enabled = not metal and not rubber
+	mat.clearcoat = 0.18
+	mat.clearcoat_roughness = 0.3
+
+static func thumbnail(id: String) -> Texture2D:
+	if not thumbnails.has(id):
+		var path := "res://assets/parts/thumbnails/%s.png" % id
+		if ResourceLoader.exists(path):
+			thumbnails[id] = load(path)
+	return thumbnails.get(id)
 
 static func populate(parent: Node3D, assembly: Array) -> void:
 	for child in parent.get_children():

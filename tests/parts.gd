@@ -23,6 +23,9 @@ func run() -> void:
 		var bounds := mesh.get_aabb().size
 		var sizes: Array = Library.models[part.id].size
 		check(bounds.is_equal_approx(Vector3(sizes[0],sizes[1],sizes[2])),"Manifest dimensions must match mesh: " + part.id)
+		var material: StandardMaterial3D = instance.get_child(0).get_surface_override_material(0)
+		check(material != null and material.normal_enabled and material.normal_texture != null, "Surface texture missing: " + part.id)
+		check(Library.thumbnail(part.id) != null, "Catalog picture missing: " + part.id)
 		instance.free()
 	var entry := {"id":"lego_32524","position":[0.016,0.008,-0.032],"rotation":[0,90,0]}
 	check(Library.validate([entry]).is_empty(),"Valid assembly")
@@ -58,6 +61,19 @@ func run() -> void:
 	editor.visible = false
 	root.add_child(editor)
 	await process_frame
+	check(editor.catalog.max_columns == 2 and editor.catalog.icon_mode == ItemList.ICON_MODE_TOP, "Catalog must show picture tiles")
+	for i in range(editor.catalog.item_count):
+		check(editor.catalog.get_item_icon(i) != null, "Visible catalog tile needs a picture")
+	editor.search.text = "32524"
+	editor.refresh_catalog()
+	check(editor.catalog_ids.size() == 1 and editor.catalog_ids[0] == entry.id, "Picture catalog search preserves IDs")
+	editor.search.text = ""
+	editor.category.select(2)
+	editor.refresh_catalog()
+	for id in editor.catalog_ids:
+		check(Library.find_part(id).group == "metal", "Picture catalog category filter")
+	editor.category.select(0)
+	editor.refresh_catalog()
 	var index := editor.catalog_ids.find(entry.id)
 	editor.select_catalog(index)
 	check(editor.previewing and editor.model_root.get_child_count() == 1,"Catalog selection previews real model")
