@@ -105,7 +105,7 @@ func _ready() -> void:
 	inventory.add_child(step_tabs)
 	for i in range(Easy.GROUPS.size()):
 		var tab := action(Easy.GROUPS[i], choose_step.bind(i))
-		tab.add_theme_font_size_override("font_size", 11)
+		tab.add_theme_font_size_override("font_size", 13)
 		tab.toggle_mode = true
 		step_buttons.append(tab)
 		step_tabs.add_child(tab)
@@ -120,7 +120,7 @@ func _ready() -> void:
 	catalog.icon_mode = ItemList.ICON_MODE_TOP
 	catalog.fixed_icon_size = Vector2i(140, 104)
 	catalog.max_text_lines = 3
-	catalog.add_theme_font_size_override("font_size", 12)
+	catalog.add_theme_font_size_override("font_size", 14)
 	catalog.item_selected.connect(select_catalog)
 	inventory.add_child(catalog)
 	details = caption("Выбери деталь для просмотра в 3D")
@@ -199,7 +199,7 @@ func _ready() -> void:
 	workspace.add_child(camera_hint)
 	simple_hint = caption("1. Выбери платформу на картинке и нажми «Взять платформу».")
 	simple_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	simple_hint.add_theme_font_size_override("font_size", 18)
+	simple_hint.add_theme_font_size_override("font_size", 20)
 	workspace.add_child(simple_hint)
 	simple_source = OptionButton.new()
 	simple_source.visible = false
@@ -253,8 +253,8 @@ func _ready() -> void:
 	history_tools.add_child(redo_button)
 	simple_tools.add_child(action("Отложить", cancel_pending))
 	for tool in simple_tools.get_children():
-		tool.add_theme_font_size_override("font_size", 14)
-		tool.custom_minimum_size.y = 36
+		tool.add_theme_font_size_override("font_size", 16)
+		tool.custom_minimum_size.y = 40
 	advanced_toggle = CheckButton.new()
 	advanced_toggle.text = "Дополнительно: координаты и отдельные крепления"
 	advanced_toggle.toggled.connect(toggle_advanced)
