@@ -97,6 +97,8 @@ jobs:
           To update, quit Botball Lab and replace the previous app. Saved projects are preserved.
           The app checks for newer versions at startup; use «Обновления» to check manually.
 
+          Allows direct rigid attachment through any free marked holes, including LEGO beams and metal sheets. Motors and servos can be placed at arbitrary holes; motor fastening remains automatic. Simple mode offers a source attachment selector, click-to-place target holes, preview and undo. Both hole faces share occupancy; saved projects and physics preserve the new connections. Direct hole joints and motor mounting hardware remain approximate.
+
           Adds force-driven rigid-body physics: estimated part masses, center of gravity, inertia, wheel traction/slip, gravity and tipping. Moving servo payloads update balance; the interface shows mass, lateral balance, tilt and a center-of-gravity marker. Physics regressions cover air traction, overhanging weight, pause/reset and collisions. Wheel joints, mass values and contact loads remain approximate.
 
           Starts with a working assembled robot: platform, two fastened motors and two wheels. Restore it with «Готовый робот» or start an empty build with «Собрать с нуля». Motor placement offers large left/right buttons and adds both inventory screws automatically. Corrected chassis side walls and motor output direction; all 156 models have crease-aware surface normals, with detailed estimated fasteners, chamfered electronics and studio reflections. Old standard robot projects are realigned on opening.

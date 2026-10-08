@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "note": "Approximate teaching mounting locations. Motor/bracket engineering and load-bearing checks are not simulated. Existing connection indices are preserved by appending these ports.",
+  "note": "Approximate teaching mounts. Unmapped parts expose a bottom body attachment rather than an inferred drilled hole. Direct body/hole joints and motor hardware are simplified rigid attachments. Existing connection indices are preserved by appending these ports.",
   "parts": {
     "metal_007": [
       {
@@ -16,7 +16,7 @@
           0
         ],
         "quality": "estimated",
-        "label": "Левый мотор"
+        "label": "\u041b\u0435\u0432\u044b\u0439 \u043c\u043e\u0442\u043e\u0440"
       },
       {
         "kind": "motor_mount",
@@ -31,7 +31,7 @@
           0
         ],
         "quality": "estimated",
-        "label": "Правый мотор"
+        "label": "\u041f\u0440\u0430\u0432\u044b\u0439 \u043c\u043e\u0442\u043e\u0440"
       },
       {
         "kind": "servo_mount",
@@ -46,7 +46,7 @@
           0
         ],
         "quality": "estimated",
-        "label": "Место для сервомотора"
+        "label": "\u041c\u0435\u0441\u0442\u043e \u0434\u043b\u044f \u0441\u0435\u0440\u0432\u043e\u043c\u043e\u0442\u043e\u0440\u0430"
       }
     ],
     "electronics_010": [
@@ -63,7 +63,7 @@
           0
         ],
         "quality": "estimated",
-        "label": "Крепление мотора"
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043c\u043e\u0442\u043e\u0440\u0430"
       },
       {
         "kind": "motor_shaft",
@@ -78,7 +78,7 @@
           0
         ],
         "quality": "estimated",
-        "label": "Вал мотора"
+        "label": "\u0412\u0430\u043b \u043c\u043e\u0442\u043e\u0440\u0430"
       },
       {
         "kind": "hole_8_32",
@@ -94,7 +94,7 @@
         ],
         "quality": "estimated",
         "purpose": "motor_fastener",
-        "label": "Винт крепления мотора"
+        "label": "\u0412\u0438\u043d\u0442 \u043a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u044f \u043c\u043e\u0442\u043e\u0440\u0430"
       },
       {
         "kind": "hole_8_32",
@@ -110,7 +110,7 @@
         ],
         "quality": "estimated",
         "purpose": "motor_fastener",
-        "label": "Винт крепления мотора"
+        "label": "\u0412\u0438\u043d\u0442 \u043a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u044f \u043c\u043e\u0442\u043e\u0440\u0430"
       }
     ],
     "electronics_018": [
@@ -127,7 +127,7 @@
           0
         ],
         "quality": "estimated",
-        "label": "Ступица колеса"
+        "label": "\u0421\u0442\u0443\u043f\u0438\u0446\u0430 \u043a\u043e\u043b\u0435\u0441\u0430"
       }
     ],
     "electronics_009": [
@@ -144,7 +144,7 @@
           0
         ],
         "quality": "estimated",
-        "label": "Крепление сервомотора"
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u0441\u0435\u0440\u0432\u043e\u043c\u043e\u0442\u043e\u0440\u0430"
       },
       {
         "kind": "servo_output",
@@ -159,7 +159,7 @@
           0
         ],
         "quality": "estimated",
-        "label": "Выход сервомотора"
+        "label": "\u0412\u044b\u0445\u043e\u0434 \u0441\u0435\u0440\u0432\u043e\u043c\u043e\u0442\u043e\u0440\u0430"
       }
     ],
     "electronics_011": [
@@ -176,7 +176,7 @@
           -1
         ],
         "quality": "estimated",
-        "label": "Крепление сервомотора"
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u0441\u0435\u0440\u0432\u043e\u043c\u043e\u0442\u043e\u0440\u0430"
       },
       {
         "kind": "servo_output",
@@ -191,7 +191,7 @@
           1
         ],
         "quality": "estimated",
-        "label": "Выход сервомотора"
+        "label": "\u0412\u044b\u0445\u043e\u0434 \u0441\u0435\u0440\u0432\u043e\u043c\u043e\u0442\u043e\u0440\u0430"
       }
     ],
     "metal_012": [
@@ -208,7 +208,7 @@
           0
         ],
         "quality": "estimated",
-        "label": "Крепление рычага к серво"
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u0440\u044b\u0447\u0430\u0433\u0430 \u043a \u0441\u0435\u0440\u0432\u043e"
       }
     ],
     "metal_013": [
@@ -225,7 +225,653 @@
           0
         ],
         "quality": "estimated",
-        "label": "Крепление рычага к серво"
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u0440\u044b\u0447\u0430\u0433\u0430 \u043a \u0441\u0435\u0440\u0432\u043e"
+      }
+    ],
+    "electronics_001": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_002": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_003": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_004": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_005": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_006": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_007": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_008": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_012": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_013": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_014": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_015": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_016": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_017": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "electronics_019": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_011": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_025": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_027": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_028": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_029": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_030": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_031": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_032": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_033": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_034": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_035": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "metal_036": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_x346": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_2736": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_6589": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_4019": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_32269": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_3648": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_6573": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_3743": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_70162": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_55976": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
+      }
+    ],
+    "lego_44309": [
+      {
+        "kind": "body_mount",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "quality": "estimated",
+        "label": "\u041a\u0440\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043f\u0443\u0441\u0430"
       }
     ]
   }

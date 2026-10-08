@@ -32,7 +32,7 @@ func run() -> void:
 	var assembly: Array = [entry("lego_32524"), entry("lego_2780", .1), entry("lego_32523", .2)]
 	check(Connections.connect_parts(assembly,1,pin,0,0).is_empty(), "Insert friction pin into beam")
 	check(Library.validate(assembly).is_empty(), "Connected assembly validates")
-	check(not Connections.connect_parts(assembly,2,0,0,1).is_empty(), "Beam holes cannot connect without fastener")
+	check(not Connections.connect_parts(assembly,2,0,0,1).is_empty(), "Occupied hole cannot be reused by direct attachment")
 	check(not Connections.connect_parts(assembly,1,pin,2,0).is_empty(), "Occupied pin end cannot be reused")
 	check(Connections.connect_parts(assembly,2,0,1,1,90).is_empty(), "Second beam attaches to opposite end of pin")
 	check(Library.validate(assembly).is_empty(), "Three-part connection validates")
@@ -64,6 +64,14 @@ func run() -> void:
 	Connections.connect_parts(assembly,2,0,1,0)
 	Connections.remove(assembly,0)
 	check(Library.validate(assembly).is_empty() and Connections.component(assembly,0).size() == 2, "Removing earlier instance reindexes retained links")
+	var direct: Array = [entry("lego_32524"),entry("metal_001",.1)]
+	check(Connections.connect_parts(direct,1,0,0,4,45).is_empty(), "Attach sheet to arbitrary LEGO beam hole")
+	check(Library.validate(direct).is_empty() and Connections.occupied(direct,0,5), "Direct attachment blocks both faces and validates")
+	Connections.move_group(direct,0,Transform3D(Basis(Vector3.UP,.4),Vector3(.04,.05,.02)))
+	check(Library.validate(direct).is_empty(), "Directly attached parts move together")
+	Connections.detach(direct,1)
+	check(not Connections.occupied(direct,0,4) and not Connections.occupied(direct,0,5), "Detaching frees both hole faces")
+	check(not Connections.compatible("motor_shaft","pin_hole") and not Connections.compatible("bolt_m3","axle_hole"), "Shaft and thread compatibility remains restricted")
 	var axles: Array = [entry("lego_32062"),entry("lego_32270",.1)]
 	var shaft := find_port("lego_32062","axle")
 	var bore := find_port("lego_32270","axle_hole")

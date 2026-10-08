@@ -26,7 +26,7 @@ func run() -> void:
 		editor.choose_step(1)
 		editor.select_catalog(editor.catalog_ids.find("electronics_010"))
 		check(not editor.previewing and not editor.simple_targets.is_empty(), "Picking a motor preserves assembly and highlights places")
-		check(editor.simple_targets.size() == 2-side, "Occupied motor slots are hidden")
+		check(editor.simple_targets.size() > 2-side, "Motor can mount on arbitrary holes as well as named slots")
 		check(editor.target_buttons.get_child_count() == 2-side, "Named large mount buttons avoid precision clicks")
 		editor.target_buttons.get_child(0).pressed.emit()
 		var motor := editor.selected
@@ -94,6 +94,32 @@ func run() -> void:
 	if not upgraded.has("error"):
 		check(Library.validate(upgraded.assembly).is_empty(), "Migrated motor and wheel geometry aligns")
 	DirAccess.remove_absolute(filename)
+	# Every platform face can accept a motor body, with persistent geometry.
+	for destination in range(Connections.for_part("metal_007").size()):
+		if not Connections.is_hole(Connections.for_part("metal_007")[destination].kind):
+			continue
+		var custom: Array = [{"id":"metal_007","position":[0,0,0],"rotation":[0,0,0]}]
+		check(Easy.install_motor(custom,{"part":0,"port":destination,"own":0},90).is_empty(), "Motor fits any platform hole face")
+		check(custom.size() == 4 and Library.validate(custom).is_empty(), "Arbitrary motor mount includes screws and valid links")
+		check(Connections.occupied(custom,0,destination), "Arbitrary motor consumes its chosen hole")
+	editor.set_assembly([{"id":"metal_007","position":[0,0,0],"rotation":[0,0,0]}])
+	editor.choose_step(4)
+	editor.select_catalog(editor.catalog_ids.find("metal_001"))
+	check(editor.simple_source.visible and editor.simple_source.item_count > 2, "Choose own hole without advanced mode")
+	editor.simple_source.select(3)
+	editor.simple_source.item_selected.emit(3)
+	check(not editor.simple_targets.is_empty() and editor.simple_targets[0].own == 2, "Simple targets respect selected source hole")
+	editor.show_ghost(0)
+	check(editor.ghost_root.get_child_count() == 1, "Preview direct hole attachment")
+	editor.place_simple(0)
+	check(editor.assembly.size() == 2 and Library.validate(editor.assembly).is_empty(), "Attach sheet through selected holes in simple mode")
+	check(Store.write_project(filename,{"speed":.65,"wheel_base":.3,"noise":.02,"seed":42},editor.assembly) == OK and not Store.read_project(filename).has("error"), "Arbitrary hole attachment survives saving")
+	DirAccess.remove_absolute(filename)
+	editor.undo_step()
+	check(editor.assembly.size() == 1, "Undo arbitrary hole attachment")
+	var sensor: Array = [{"id":"metal_007","position":[0,0,0],"rotation":[0,0,0]}]
+	check(not Easy.candidates(sensor,"electronics_001").is_empty(), "Previously unmarked sensor can attach by its body")
+	check(Easy.place(sensor,"electronics_001",Easy.candidates(sensor,"electronics_001")[8]).is_empty() and Library.validate(sensor).is_empty(), "Sensor body attachment remains valid")
 	var ready := Easy.default_robot()
 	check(ready.size() == 9 and Library.validate(ready).is_empty(), "Working default robot contains actual parts and screws")
 	check(preload("res://src/assembly_runtime.gd").inspect(ready).can_drive, "Default robot drives with assembled motors")

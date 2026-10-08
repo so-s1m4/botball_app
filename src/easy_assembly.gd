@@ -15,17 +15,25 @@ static func in_group(part: Dictionary, group: int) -> bool:
 static func display_name(id: String) -> String:
 	return {"metal_007":"Платформа робота", "electronics_010":"Мотор", "electronics_009":"Сервомотор", "electronics_011":"Маленький сервомотор", "electronics_018":"Колесо Solarbotics", "metal_015":"Винт крепления мотора", "metal_012":"Круглый рычаг серво", "metal_013":"Длинный рычаг серво"}.get(id, Library.find_part(id).get("name", id))
 
-static func candidates(assembly: Array, id: String) -> Array:
+static func candidates(assembly: Array, id: String, source_port: int = -1) -> Array:
 	var result: Array = []
 	var own := Connections.for_part(id)
 	for index in range(assembly.size()):
 		var ports := Connections.for_part(assembly[index].id)
-		for destination in range(ports.size()):
+		# Keep the two ready-to-drive mounts first, followed by arbitrary holes.
+		var destinations := range(ports.size())
+		destinations.sort_custom(func(a,b):
+			var a_mount: bool = ports[a].kind in ["motor_mount", "servo_mount"]
+			var b_mount: bool = ports[b].kind in ["motor_mount", "servo_mount"]
+			return a < b if a_mount == b_mount else a_mount)
+		for destination in destinations:
 			if ports[destination].kind == "motor_shaft" and not fastening_ports(assembly, index).is_empty():
 				continue
 			if Connections.occupied(assembly, index, destination):
 				continue
 			for source in range(own.size()):
+				if source_port >= 0 and source != source_port:
+					continue
 				if Connections.compatible(own[source].kind, ports[destination].kind):
 					result.append({"part":index, "port":destination, "own":source, "position":Connections.world_port(assembly[index], destination).position})
 					break
@@ -72,10 +80,12 @@ static func fasten_motor(assembly: Array, index: int) -> String:
 		return "Мотор уже закреплён"
 	var mounted := false
 	for link in assembly[index].get("links", []):
-		if Connections.for_part(assembly[index].id)[int(link.port)].kind == "motor_body_mount":
+		var own: Dictionary = Connections.for_part(assembly[index].id)[int(link.port)]
+		var target: Dictionary = Connections.for_part(assembly[int(link.other)].id)[int(link.other_port)]
+		if own.kind == "motor_body_mount" or own.get("purpose", "") == "motor_fastener" and Connections.is_hole(target.kind):
 			mounted = true
 	if not mounted:
-		return "Сначала установи мотор на платформу: выбери мотор и место «Слева» или «Справа»"
+		return "Сначала установи мотор: выбери свободное отверстие или место «Слева» / «Справа»"
 	var snapshot := assembly.duplicate(true)
 	for hole in holes:
 		var error := place(assembly, "metal_015", {"part":index,"port":hole,"own":0})

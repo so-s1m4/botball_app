@@ -1,7 +1,7 @@
 extends RefCounted
 ## Connections refer to stable inventory instance and port indices.
 static var ports: Dictionary = {}
-const LABELS := {"pin_hole":"Отверстие для пина", "axle_hole":"Крестовое отверстие", "pin":"Пин", "axle":"Ось", "stud":"Шип LEGO", "stud_socket":"Гнездо LEGO", "hole_8_32":"Отверстие 8-32", "bolt_8_32":"Винт 8-32", "bolt_m3":"Винт M3", "thread_8_32":"Резьба 8-32", "thread_m3":"Резьба M3", "nut_8_32":"Гайка / стойка 8-32", "nut_m3":"Гайка M3", "motor_mount":"Место для мотора", "motor_body_mount":"Крепление мотора", "motor_shaft":"Вал мотора", "motor_wheel_socket":"Ступица колеса", "servo_mount":"Место для серво", "servo_body_mount":"Крепление серво", "servo_output":"Выход серво", "servo_socket":"Крепление рычага"}
+const LABELS := {"pin_hole":"Отверстие для пина", "axle_hole":"Крестовое отверстие", "pin":"Пин", "axle":"Ось", "stud":"Шип LEGO", "stud_socket":"Гнездо LEGO", "hole_8_32":"Отверстие 8-32", "bolt_8_32":"Винт 8-32", "bolt_m3":"Винт M3", "thread_8_32":"Резьба 8-32", "thread_m3":"Резьба M3", "nut_8_32":"Гайка / стойка 8-32", "nut_m3":"Гайка M3", "motor_mount":"Место для мотора", "motor_body_mount":"Крепление мотора", "motor_shaft":"Вал мотора", "motor_wheel_socket":"Ступица колеса", "body_mount":"Крепление корпуса", "servo_mount":"Место для серво", "servo_body_mount":"Крепление серво", "servo_output":"Выход серво", "servo_socket":"Крепление рычага"}
 
 static func ensure_loaded() -> void:
 	if ports.is_empty():
@@ -16,7 +16,15 @@ static func for_part(id: String) -> Array:
 	ensure_loaded()
 	return ports.get(id, [])
 
+static func is_hole(kind: String) -> bool:
+	return kind in ["pin_hole", "axle_hole", "hole_8_32"]
+
 static func compatible(a: String, b: String) -> bool:
+	# A direct hole joint is a rigid teaching attachment, without a modelled screw.
+	if is_hole(a) and is_hole(b):
+		return true
+	if a in ["motor_body_mount", "servo_body_mount", "body_mount"] and is_hole(b) or b in ["motor_body_mount", "servo_body_mount", "body_mount"] and is_hole(a):
+		return true
 	var pairs := [["servo_mount", "servo_body_mount"], ["servo_output", "servo_socket"], ["motor_mount", "motor_body_mount"], ["motor_shaft", "motor_wheel_socket"], ["pin", "pin_hole"], ["axle", "axle_hole"], ["axle", "pin_hole"], ["stud", "stud_socket"], ["bolt_8_32", "hole_8_32"], ["thread_8_32", "nut_8_32"], ["thread_m3", "nut_m3"]]
 	for pair in pairs:
 		if (a == pair[0] and b == pair[1]) or (a == pair[1] and b == pair[0]):

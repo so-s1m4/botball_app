@@ -38,6 +38,7 @@ var advanced_toggle: CheckButton
 var simple_hint: Label
 var step_tabs: HBoxContainer
 var target_buttons: HBoxContainer
+var simple_source: OptionButton
 var simple_tools: HBoxContainer
 var step_buttons: Array[Button] = []
 var simple_group := 0
@@ -200,6 +201,16 @@ func _ready() -> void:
 	simple_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	simple_hint.add_theme_font_size_override("font_size", 18)
 	workspace.add_child(simple_hint)
+	simple_source = OptionButton.new()
+	simple_source.visible = false
+	simple_source.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	simple_source.item_selected.connect(func(_index):
+		hover_target = -1
+		for child in ghost_root.get_children():
+			ghost_root.remove_child(child)
+			child.queue_free()
+		refresh_simple_targets())
+	workspace.add_child(simple_source)
 	target_buttons = HBoxContainer.new()
 	workspace.add_child(target_buttons)
 	var templates := HBoxContainer.new()
@@ -346,8 +357,18 @@ func select_catalog(index: int) -> void:
 	var dims: Array = meta.size
 	details.text = "%s\n%.1f × %.1f × %.1f мм\n%s" % [Easy.display_name(part.id),dims[0]*1000,dims[1]*1000,dims[2]*1000,"Модель LDraw" if meta.quality == "ldraw" else "Модель KIPR" if meta.quality == "kipr" else "Приближённая модель"]
 	if not advanced_toggle.button_pressed and not assembly.is_empty():
+		cancel_pending(false)
 		pending_id = catalog_id
 		pending_twist = 0
+		simple_source.clear()
+		simple_source.add_item("Крепление детали: автоматически", -1)
+		var ports := Connections.for_part(pending_id)
+		for i in range(ports.size()):
+			simple_source.add_item("Крепление детали: " + port_label(ports[i], i), i)
+			var p := Connections.vector(ports[i].position) * 1000
+			simple_source.set_item_tooltip(i+1, "%s · X %.1f, Y %.1f, Z %.1f мм" % [ports[i].get("label", "Точка %d" % (i+1)),p.x,p.y,p.z])
+		simple_source.select(0)
+		simple_source.visible = not ports.is_empty()
 		show_assembly(false)
 		refresh_simple_targets()
 		return
@@ -727,6 +748,7 @@ func toggle_advanced(enabled: bool) -> void:
 	simple_hint.visible = not enabled
 	simple_tools.visible = not enabled
 	target_buttons.visible = not enabled
+	simple_source.visible = not enabled and not pending_id.is_empty() and simple_source.item_count > 1
 	refresh_catalog()
 	show_assembly(false)
 
@@ -747,6 +769,8 @@ func undo_step() -> void:
 
 func cancel_pending(redraw: bool = true) -> void:
 	pending_id = ""
+	if simple_source != null:
+		simple_source.visible = false
 	hover_target = -1
 	if ghost_root != null:
 		for child in ghost_root.get_children():
@@ -766,7 +790,7 @@ func update_simple_hint() -> void:
 	elif selected >= 0 and assembly[selected].id == "electronics_010":
 		simple_hint.text = "Нажми «Прикрутить мотор», чтобы закрепить мотор из старой сборки двумя винтами." if not Easy.fastening_ports(assembly, selected).is_empty() else "Мотор прикручен. Выбери колёса и нажми на зелёный вал мотора."
 	elif simple_group == 1:
-		simple_hint.text = "2. Выбери мотор, затем «Слева» или «Справа». Мотор установится сразу с двумя винтами."
+		simple_hint.text = "2. Выбери мотор и любое зелёное отверстие или «Слева» / «Справа». Винты добавятся автоматически."
 	elif simple_group == 2:
 		simple_hint.text = "3. Выбери колесо Solarbotics и нажми на зелёный вал мотора."
 	elif selected >= 0 and assembly[selected].id in ["electronics_009", "electronics_011"]:
@@ -834,11 +858,11 @@ func refresh_simple_targets() -> void:
 	simple_targets.clear()
 	if pending_id.is_empty():
 		return
-	simple_targets = Easy.candidates(assembly, pending_id)
+	simple_targets = Easy.candidates(assembly, pending_id, -1 if simple_source.selected <= 0 else simple_source.get_selected_id())
 	for candidate_index in range(simple_targets.size()):
 		var candidate: Dictionary = simple_targets[candidate_index]
-		if pending_id in ["electronics_010", "electronics_018", "electronics_009", "electronics_011"]:
-			var port: Dictionary = Connections.for_part(assembly[candidate.part].id)[candidate.port]
+		var port: Dictionary = Connections.for_part(assembly[candidate.part].id)[candidate.port]
+		if port.kind in ["motor_mount", "servo_mount", "motor_shaft"]:
 			var title: String = port.get("label", "Установить")
 			if pending_id == "electronics_010":
 				title = "Слева · с винтами" if "Левый" in title else "Справа · с винтами"
@@ -861,13 +885,13 @@ func refresh_simple_targets() -> void:
 		port_root.add_child(visual)
 	if simple_targets.is_empty():
 		if pending_id in ["electronics_009", "electronics_011"]:
-			simple_hint.text = "Свободного места для серво нет. Начни с платформы робота."
+			simple_hint.text = "Нет свободных отверстий для серво. Добавь платформу или балку."
 		elif pending_id == "electronics_018":
 			simple_hint.text = "Свободного вала пока нет. Сначала установи и прикрути мотор."
 		else:
 			simple_hint.text = "Подходящих креплений пока нет. LEGO-колесу нужна ось; деталь можно положить рядом."
 	else:
-		simple_hint.text = "В руках: %s. Наведи на зелёное место и нажми — деталь встанет сама." % Easy.display_name(pending_id)
+		simple_hint.text = "В руках: %s. Выбери её крепление в списке и нажми на зелёное отверстие. Для другой стороны поверни камеру или переверни сборку." % Easy.display_name(pending_id)
 
 func nearest_simple_target(mouse_position: Vector2) -> int:
 	var point := mouse_position * Vector2(view.get_child(0).size) / view.size
