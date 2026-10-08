@@ -35,12 +35,14 @@ var syncing_map := false
 var program_editor: Window
 var actuator_panel: VBoxContainer
 var hardware_label: Label
+var status_dirty := false
+var status_elapsed := 0.0
 var current_program: String = ProgramEditor.EXAMPLES[0]
 
 func _ready() -> void:
 	build_theme()
 	var background := ColorRect.new()
-	background.color = Color("101927")
+	background.color = Color("191d23")
 	background.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	add_child(background)
 	var margin := MarginContainer.new()
@@ -92,13 +94,14 @@ func _ready() -> void:
 	left.add_child(view_container)
 	viewport = SubViewport.new()
 	viewport.size = Vector2i(800, 600)
+	viewport.msaa_3d = Viewport.MSAA_2X
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	viewport.physics_object_picking = false
 	view_container.add_child(viewport)
 	sim = Simulation.new()
 	viewport.add_child(sim)
 	view_container.gui_input.connect(camera_input)
-	left.add_child(label("Камера: перетаскивай правой кнопкой · колёсико — масштаб", 13, Color("93a9bd")))
+	left.add_child(label("Камера: ПКМ — вращать · Shift+ПКМ — сдвиг · колесо — приблизить · F — робот", 13, Color("93a9bd")))
 	var sidebar := VBoxContainer.new()
 	sidebar.custom_minimum_size.x = 310
 	sidebar.add_theme_constant_override("separation", 10)
@@ -212,7 +215,7 @@ func _ready() -> void:
 	assembly_editor.set_assembly(starter)
 	assembly_editor.choose_step(4)
 	refresh_actuator_controls()
-	sim.changed.connect(update_status)
+	sim.changed.connect(func(): status_dirty = true)
 	sim.event.connect(log_event)
 	apply_settings()
 	update_status()
@@ -220,11 +223,17 @@ func _ready() -> void:
 	if not OS.has_feature("editor"):
 		update_checker.call_deferred("check", false)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	# Telemetry needs ten updates a second, independent of 120 Hz physics.
+	status_elapsed += delta
+	if status_dirty and status_elapsed >= 0.1:
+		status_dirty = false
+		status_elapsed = 0.0
+		update_status()
 	if sim == null or not sim.running or sim.paused or sim.autonomous or sim.program_mode:
 		return
 	var focused := get_viewport().gui_get_focus_owner()
-	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible or map_dialog.visible or program_editor.visible:
+	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible or map_dialog.visible or program_editor.visible or assembly_editor.visible:
 		sim.manual_forward = 0
 		sim.manual_turn = 0
 		return
@@ -251,16 +260,31 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func camera_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and event.button_mask & MOUSE_BUTTON_MASK_RIGHT:
-		sim.orbit -= event.relative.x * 0.008
-		sim.elevation = clampf(sim.elevation + event.relative.y * 0.008, 0.25, 1.4)
-		sim.update_camera()
+	if event is InputEventMouseMotion:
+		if event.button_mask & MOUSE_BUTTON_MASK_MIDDLE or (event.button_mask & MOUSE_BUTTON_MASK_RIGHT and event.shift_pressed):
+			sim.pan_camera(event.relative, view_container.size.y)
+		elif event.button_mask & MOUSE_BUTTON_MASK_RIGHT:
+			sim.orbit -= event.relative.x * 0.008
+			sim.elevation = clampf(sim.elevation + event.relative.y * 0.008, 0.05, 1.5)
+			sim.update_camera()
+		else:
+			return
 	elif event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			sim.zoom = maxf(sim.camera_min_zoom, sim.zoom * .9)
+			sim.zoom_camera(pow(0.9, event.factor))
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			sim.zoom = minf(sim.camera_max_zoom, sim.zoom / .9)
-		sim.update_camera()
+			sim.zoom_camera(pow(0.9, -event.factor))
+		else:
+			return
+	elif event is InputEventMagnifyGesture:
+		sim.zoom_camera(1.0 / maxf(event.factor, 0.01))
+	elif event is InputEventPanGesture:
+		sim.zoom_camera(exp(event.delta.y * 0.05))
+	elif event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F:
+		sim.focus_robot()
+	else:
+		return
+	view_container.accept_event()
 
 func start_attempt(auto: bool) -> void:
 	apply_settings()
@@ -387,7 +411,7 @@ func build_theme() -> void:
 	theme.default_font_size = 14
 	theme.set_color("font_color", "Label", Color("e6eef6"))
 	for state in ["normal", "hover", "pressed", "disabled"]:
-		theme.set_stylebox(state, "Button", style(Color("2c4257") if state == "hover" else Color("1e3043")))
+		theme.set_stylebox(state, "Button", style(Color("3d4652") if state == "hover" else Color("282e37")))
 	theme.set_color("font_color", "Button", Color("e6eef6"))
 	theme.set_stylebox("normal", "LineEdit", style(Color("1e3043")))
 	theme.set_stylebox("read_only", "LineEdit", style(Color("172535")))

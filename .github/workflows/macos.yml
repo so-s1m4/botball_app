@@ -38,16 +38,26 @@ jobs:
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/tires.gd
       - name: Test simple assembly
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/easy.gd
+      - name: Test constructor usability and model reuse
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/usability.gd
       - name: Test fullscreen and constructor layout
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/layout.gd
+      - name: Test playground camera controls
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/playground_camera.gd
       - name: Test map switching and runtime GLB import
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/maps.gd
       - name: Test assembled robot actuators and programs
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/programs.gd --fixed-fps 120
+      - name: Test servo horn and LEGO gear attachments
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/mechanisms.gd
+      - name: Test gear trains, rack lift, load and limits
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/transmissions.gd --fixed-fps 120
       - name: Test ready robot on application startup
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/starter.gd --fixed-fps 120
       - name: Test mass, balance, traction and tipping
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/physics.gd --fixed-fps 120
+      - name: Test compliant gripper contacts, friction and release
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/gripper.gd --fixed-fps 120
       - name: Test update checker
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/updates.gd
       - name: Build universal macOS app
@@ -89,37 +99,19 @@ jobs:
             exit 0
           fi
           cat > /tmp/release-notes.md <<'NOTES'
-          macOS installer for Apple Silicon and Intel.
+          Установщик Botball Lab 0.10.0 для macOS на Apple Silicon и Intel.
 
-          Download Botball-Lab-macOS.dmg, open it and drag Botball Lab.app into Applications.
-          To update, quit Botball Lab and replace the previous app. Saved projects are preserved.
-          The app checks for newer versions at startup; use «Обновления» to check manually.
+          Скачайте Botball-Lab-macOS.dmg, откройте его и перенесите Botball Lab.app в «Программы». Для обновления закройте приложение и замените предыдущую версию. Сохранённые проекты сохраняются.
 
-          Adds explicit selection of a source hole on a motor or other part and a destination hole on the assembly, with numbered holes, coordinates and a placement preview. Selected motor bolt holes align with the selected platform holes.
+          - Контактный захват: постепенное закрытие губок, удержание силами сжатия и трения, проскальзывание при перегрузке и отпускание с сохранением скорости. Собственные губки управляются серво; груз нагружает привод.
+          - Вращательные опоры и направляющие, передачи между шестернями и рейкой, гравитация подвижных узлов, пределы хода и остановка при перегрузке или внешнем препятствии. В конструкторе доступен пример «Реечный лифт».
+          - Приближение камеры в playground, жесты трекпада, сдвиг Shift+ПКМ и центрирование на роботе клавишей F.
+          - Момент моторов, инерция колёс, буксование, активное торможение и сцепление поверхности.
+          - Обновлённые материалы, освещение и лабораторный стол. Переиспользование 3D-моделей, отмена/повтор и улучшенный предпросмотр креплений.
 
-          Fixes fullscreen layout: responsive header rows, scrollable constructor panels, window-sized constructor and F11 fullscreen toggle.
+          Физика остаётся приближённой: параметры оборудования оценочные, коллайдеры деталей упрощены, передачи используют идеальные связи. Тросы, ремни, деформация и внутренние столкновения деталей одного робота не поддержаны. Контактный захват рассчитан на учебный куб.
 
-          Adds LEGO rim and tyre assembly: rim 56145 accepts tyres 55976 and 44309; rim 4185 accepts tyre 70162. Matching seats align the wheel centres, preserve the axle hole and reject incompatible sizes.
-
-          Corrects motor fastening: both screws must line up with actual platform holes; invalid placements are rejected without changing the assembly. Opposite chassis walls have independent hole occupancy.
-
-          Allows direct rigid attachment through any free marked holes, including LEGO beams and metal sheets. Motors and servos can be placed at arbitrary holes; motor fastening remains automatic. Simple mode offers a source attachment selector, click-to-place target holes, preview and undo. Both hole faces share occupancy; saved projects and physics preserve the new connections. Direct hole joints and motor mounting hardware remain approximate.
-
-          Adds force-driven rigid-body physics: estimated part masses, center of gravity, inertia, wheel traction/slip, gravity and tipping. Moving servo payloads update balance; the interface shows mass, lateral balance, tilt and a center-of-gravity marker. Physics regressions cover air traction, overhanging weight, pause/reset and collisions. Wheel joints, mass values and contact loads remain approximate.
-
-          Starts with a working assembled robot: platform, two fastened motors and two wheels. Restore it with «Готовый робот» or start an empty build with «Собрать с нуля». Motor placement offers large left/right buttons and adds both inventory screws automatically. Corrected chassis side walls and motor output direction; all 156 models have crease-aware surface normals, with detailed estimated fasteners, chamfered electronics and studio reflections. Old standard robot projects are realigned on opening.
-
-          Includes a Python-like code editor: numbered motor and servo control, wait, drive, stop, variables, loops, conditions, print, virtual distance and encoder readings. Assembled motors/wheels drive the robot with its measured track; servo output rotates its attached horn. Programs are saved with projects. Motor mounts remain approximate.
-
-          Includes simple assembly: choose a platform, flip it, click highlighted motor mounts, fasten with inventory screws, and attach wheels. Placement preview and undo are included; the advanced connector editor remains available. Motor mounting locations are approximate teaching geometry.
-
-          Includes map switching and runtime GLB import with materials, static collision, automatic fitting and saved map selection. The training task and controller remain educational rather than imported season rules.
-
-          Includes a picture catalog for all 156 installable parts and textured plastic, metal and rubber finishes.
-
-          Includes connection-based assembly: LEGO pins, axles, studs and 8-32/M3 fasteners. Connected groups move together and connections are saved with the project. Some connection geometry is approximate; gear engagement and compliant joints are not included.
-          This build has an ad-hoc signature and is not Apple-notarized.
-          Source code and third-party model licenses are included in this repository.
+          Приложение подписано ad-hoc и не нотариализировано Apple. Исходный код и лицензии моделей доступны в репозитории.
           NOTES
           gh release create "$TAG" build/Botball-Lab-macOS.dmg build/Botball-Lab-macOS.zip build/SHA256SUMS.txt --target "$GITHUB_SHA" --title "Botball Lab $VERSION" --notes-file /tmp/release-notes.md --latest
       - uses: actions/upload-artifact@v4

@@ -12,6 +12,27 @@ static func ensure_loaded() -> void:
 				ports[id] = []
 			ports[id].append_array(extra[id])
 
+
+		# Append after all historical ports: saved projects persist port indices.
+		# Gear centres are derived from the imported mesh's Z shaft axis.
+		var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/parts/models.json")).models
+		for id in ["lego_3647", "lego_32270", "lego_6589", "lego_4019", "lego_32269", "lego_3648", "lego_32498", "lego_3649"]:
+			if ports[id].any(func(point): return point.kind == "axle_hole"):
+				continue
+			var size: Array = models[id].size
+			for side in [-1, 1]:
+				ports[id].append({"kind":"axle_hole", "position":[0, float(size[1])/2, side*float(size[2])/2], "normal":[0,0,side], "tangent":[1,0,0], "quality":"estimated", "label":"Центр шестерни · крестовая ось"})
+		# Imported 1x5 horn lies in XY, with its holes running through Z.
+		# Hole spacing is approximate; retain the original servo socket at index 0.
+		var horn_size: Array = models.metal_013.size
+		for x in [-0.0254, -0.0127, 0.0127, 0.0254, 0.0]:
+			for side in [-1, 1]:
+				ports.metal_013.append({"kind":"hole_8_32", "position":[x, float(horn_size[1])/2, side*float(horn_size[2])/2], "normal":[0,0,side], "quality":"estimated", "label":"Отверстие рычага серво"})
+
+		ports.metal_013.append({"kind":"servo_socket", "position":[0, float(horn_size[1])/2, -float(horn_size[2])/2], "normal":[0,0,-1], "quality":"estimated", "label":"Соосный выход серво · плоскость рычага"})
+		for x in [-.012, -.004, .004, .012]:
+			ports.lego_3743.append({"kind":"stud_socket", "position":[x,0,0], "normal":[0,-1,0], "quality":"estimated", "label":"Рейка · крепление к каретке"})
+
 static func for_part(id: String) -> Array:
 	ensure_loaded()
 	return ports.get(id, [])
@@ -81,13 +102,21 @@ static func set_transform(entry: Dictionary, pose: Transform3D) -> void:
 	var rotation := pose.basis.get_euler() * 180.0 / PI
 	entry.rotation = [rotation.x, rotation.y, rotation.z]
 
-static func connect_parts(assembly: Array, moving: int, own: int, fixed: int, destination: int, twist: float = 0) -> String:
+static func connect_parts(assembly: Array, moving: int, own: int, fixed: int, destination: int, twist: float = 0, mode: String = "fixed", lower: float = -180, upper: float = 180) -> String:
 	if moving < 0 or fixed < 0 or moving >= assembly.size() or fixed >= assembly.size() or moving == fixed:
 		return "Выбери другую деталь для соединения"
 	var own_ports := for_part(assembly[moving].id)
 	var fixed_ports := for_part(assembly[fixed].id)
 	if own < 0 or destination < 0 or own >= own_ports.size() or destination >= fixed_ports.size():
 		return "Выбери две точки крепления"
+	if mode not in ["fixed", "hinge", "slider"] or not is_finite(lower) or not is_finite(upper) or lower > 0 or upper < 0 or lower >= upper or absf(lower) > 360 or absf(upper) > 360:
+		return "Неверный тип или пределы подвижного соединения"
+	if mode == "hinge" and not (is_hole(own_ports[own].kind) and is_hole(fixed_ports[destination].kind)):
+		return "Свободная ось требует двух отверстий; привод серво подключается через его выход"
+	if mode == "hinge" and own_ports[own].kind == "axle_hole" and fixed_ports[destination].kind == "axle_hole":
+		return "Два крестовых отверстия фиксируют ось. Для вращения нужна опора с круглым отверстием"
+	if mode != "fixed" and component(assembly, moving).has(fixed):
+		return "Подвижный узел уже связан с опорой другим креплением"
 	var same_group := component(assembly, moving).has(fixed)
 	if occupied(assembly, moving, own) or occupied(assembly, fixed, destination):
 		return "Точка крепления занята; сначала отсоедини деталь"
@@ -138,8 +167,13 @@ static func connect_parts(assembly: Array, moving: int, own: int, fixed: int, de
 		assembly[moving].links = []
 	if not assembly[fixed].has("links"):
 		assembly[fixed].links = []
-	assembly[moving].links.append({"port":own, "other":fixed, "other_port":destination})
-	assembly[fixed].links.append({"port":destination, "other":moving, "other_port":own})
+	var joint := {"port":own, "other":fixed, "other_port":destination}
+	if mode != "fixed":
+		joint.merge({"mode":mode, "moving":moving, "lower":lower, "upper":upper})
+	assembly[moving].links.append(joint)
+	var reverse := joint.duplicate(true)
+	reverse.merge({"port":destination, "other":moving, "other_port":own}, true)
+	assembly[fixed].links.append(reverse)
 	return ""
 
 static func detach(assembly: Array, index: int) -> void:
@@ -159,6 +193,8 @@ static func remove(assembly: Array, index: int) -> void:
 		for link in entry.get("links", []):
 			if link.other > index:
 				link.other -= 1
+			if link.has("moving") and link.moving > index:
+				link.moving -= 1
 
 static func validate(assembly: Array) -> String:
 	for index in range(assembly.size()):
@@ -186,12 +222,26 @@ static func validate(assembly: Array) -> String:
 			seen[own] = true
 			if not compatible(for_part(assembly[index].id)[own].kind, for_part(assembly[other].id)[destination].kind):
 				return "Несовместимое соединение"
+			if link.get("mode", "fixed") not in ["fixed", "hinge", "slider"]:
+				return "Неверный тип соединения"
+			if link.get("mode", "fixed") != "fixed":
+				if not (link.get("moving") is int or link.get("moving") is float) or not is_finite(link.moving) or link.moving != int(link.moving) or int(link.moving) not in [index, other]:
+					return "Неверная подвижная деталь"
+				for key in ["lower", "upper"]:
+					if not (link.get(key) is float or link.get(key) is int) or not is_finite(link[key]):
+						return "Неверный предел соединения"
+				if link.lower > 0 or link.upper < 0 or link.lower >= link.upper or absf(link.lower) > 360 or absf(link.upper) > 360:
+					return "Пределы соединения должны включать исходное положение"
+				if link.mode == "hinge" and (not is_hole(for_part(assembly[index].id)[own].kind) or not is_hole(for_part(assembly[other].id)[destination].kind) or for_part(assembly[index].id)[own].kind == "axle_hole" and for_part(assembly[other].id)[destination].kind == "axle_hole"):
+					return "Неверная вращательная опора"
 			var reciprocal := false
 			var other_links = assembly[other].get("links", [])
 			if not other_links is Array:
 				return "Неверный список соединений"
 			for reverse in other_links:
 				if reverse is Dictionary and reverse.get("port") == destination and reverse.get("other") == index and reverse.get("other_port") == own:
+					if reverse.get("mode", "fixed") != link.get("mode", "fixed") or reverse.get("moving") != link.get("moving") or reverse.get("lower") != link.get("lower") or reverse.get("upper") != link.get("upper"):
+						return "Параметры соединения должны быть взаимными"
 					reciprocal = true
 			if not reciprocal:
 				return "Соединение должно быть взаимным"

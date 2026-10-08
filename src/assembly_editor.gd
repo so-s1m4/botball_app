@@ -26,6 +26,9 @@ var previewing := false
 var own_port: OptionButton
 var target_part: OptionButton
 var target_port: OptionButton
+var joint_mode: OptionButton
+var joint_lower: SpinBox
+var joint_upper: SpinBox
 var twist: SpinBox
 var connect_button: Button
 var detach_button: Button
@@ -37,10 +40,10 @@ var advanced: VBoxContainer
 var advanced_toggle: CheckButton
 var simple_hint: Label
 var step_tabs: HBoxContainer
-var target_buttons: HBoxContainer
+var target_buttons: HFlowContainer
 var simple_destination: OptionButton
 var simple_source: OptionButton
-var simple_tools: HBoxContainer
+var simple_tools: HFlowContainer
 var step_buttons: Array[Button] = []
 var simple_group := 0
 var pending_id := ""
@@ -48,6 +51,10 @@ var pending_twist := 0.0
 var ghost_root: Node3D
 var simple_targets: Array = []
 var undo_history: Array = []
+var redo_history: Array = []
+var redo_button: Button
+var place_button: Button
+var placement_error := ""
 var undo_button: Button
 var fasten_button: Button
 var hover_target := -1
@@ -62,6 +69,11 @@ func _ready() -> void:
 	size = Vector2i(1100, 860)
 	min_size = Vector2i(1000, 640)
 	close_requested.connect(hide)
+	var background := ColorRect.new()
+	background.color = Color("191d23")
+	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(background)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
@@ -147,38 +159,12 @@ func _ready() -> void:
 	var viewport := SubViewport.new()
 	viewport.size = Vector2i(650, 440)
 	viewport.own_world_3d = true
-	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	viewport.msaa_3d = Viewport.MSAA_2X
+	viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
 	view.add_child(viewport)
 	var world := Node3D.new()
 	viewport.add_child(world)
-	var env := WorldEnvironment.new()
-	env.environment = Environment.new()
-	env.environment.background_mode = Environment.BG_COLOR
-	env.environment.background_color = Color("152234")
-	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.environment.ambient_light_color = Color("dbe7f3")
-	env.environment.ambient_light_energy = 0.65
-	# A studio sky provides reflections even with a flat viewport background.
-	env.environment.sky = Sky.new()
-	var studio := ProceduralSkyMaterial.new()
-	studio.sky_top_color = Color("7c92ad")
-	studio.sky_horizon_color = Color("dce3e9")
-	studio.ground_bottom_color = Color("263447")
-	studio.ground_horizon_color = Color("bbc5cf")
-	env.environment.sky.sky_material = studio
-	env.environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
-	world.add_child(env)
-	var light := DirectionalLight3D.new()
-	light.rotation_degrees = Vector3(-50, -30, 0)
-	light.light_energy = 1.2
-	light.shadow_enabled = true
-	light.directional_shadow_max_distance = 2.0
-	world.add_child(light)
-	var fill := DirectionalLight3D.new()
-	fill.rotation_degrees = Vector3(-25,140,0)
-	fill.light_energy = .45
-	fill.light_color = Color("a8bfdb")
-	world.add_child(fill)
+	preload("res://src/studio.gd").install(world, true)
 	model_root = Node3D.new()
 	world.add_child(model_root)
 	selection_root = Node3D.new()
@@ -198,7 +184,7 @@ func _ready() -> void:
 	var grid_visual := MeshInstance3D.new()
 	grid_visual.mesh = grid
 	var grid_mat := StandardMaterial3D.new()
-	grid_mat.albedo_color = Color("355268")
+	grid_mat.albedo_color = Color("354049")
 	grid_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	grid_visual.material_override = grid_mat
 	world.add_child(grid_visual)
@@ -208,7 +194,9 @@ func _ready() -> void:
 	camera.current = true
 	world.add_child(camera)
 	view.gui_input.connect(camera_input)
-	workspace.add_child(caption("Нажми на зелёное место — поставить деталь · ПКМ — осмотреть"))
+	var camera_hint := caption("ЛКМ — выбрать / прикрепить · ПКМ — вращать · Shift+ПКМ — сдвиг · колесо — масштаб · F — вся сборка")
+	camera_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	workspace.add_child(camera_hint)
 	simple_hint = caption("1. Выбери платформу на картинке и нажми «Взять платформу».")
 	simple_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	simple_hint.add_theme_font_size_override("font_size", 18)
@@ -236,26 +224,33 @@ func _ready() -> void:
 		if hover_target >= 0:
 			show_ghost(hover_target))
 	workspace.add_child(simple_destination)
-	var place_button := action("Прикрепить к выбранному отверстию", func():
+	place_button = action("Прикрепить к выбранному отверстию", func():
 		if not pending_id.is_empty() and simple_destination.selected > 0:
 			place_simple(simple_destination.selected - 1))
 	simple_destination.visibility_changed.connect(func(): place_button.visible = simple_destination.visible)
 	place_button.visible = false
 	workspace.add_child(place_button)
-	target_buttons = HBoxContainer.new()
+	target_buttons = HFlowContainer.new()
 	workspace.add_child(target_buttons)
 	var templates := HBoxContainer.new()
 	workspace.add_child(templates)
 	templates.add_child(action("Готовый робот", load_default_robot))
 	templates.add_child(action("Собрать с нуля", start_empty_robot))
-	simple_tools = HBoxContainer.new()
+	templates.add_child(action("Пример: реечный лифт", load_lift))
+	simple_tools = HFlowContainer.new()
 	workspace.add_child(simple_tools)
 	simple_tools.add_child(action("Перевернуть", flip_assembly))
 	simple_tools.add_child(action("Повернуть", turn_pending))
 	fasten_button = action("Прикрутить мотор", fasten_selected)
 	simple_tools.add_child(fasten_button)
-	undo_button = action("Отмена шага", undo_step)
-	simple_tools.add_child(undo_button)
+	var history_tools := HBoxContainer.new()
+	workspace.add_child(history_tools)
+	undo_button = action("Отменить", undo_step)
+	undo_button.tooltip_text = "Ctrl / ⌘ + Z"
+	history_tools.add_child(undo_button)
+	redo_button = action("Повторить", redo_step)
+	redo_button.tooltip_text = "Ctrl / ⌘ + Shift + Z"
+	history_tools.add_child(redo_button)
 	simple_tools.add_child(action("Отложить", cancel_pending))
 	for tool in simple_tools.get_children():
 		tool.add_theme_font_size_override("font_size", 14)
@@ -308,6 +303,24 @@ func _ready() -> void:
 	attach_row.add_child(connect_button)
 	detach_button = action("Отсоединить", detach_selected)
 	attach_row.add_child(detach_button)
+	var joint_row := HFlowContainer.new()
+	advanced.add_child(joint_row)
+	joint_mode = OptionButton.new()
+	for label in ["Жёсткое крепление", "Вращательная опора", "Направляющая · вдоль X детали"]:
+		joint_mode.add_item(label)
+	joint_row.add_child(joint_mode)
+	joint_row.add_child(caption("Ход: ° для оси, мм для направляющей"))
+	joint_lower = SpinBox.new()
+	joint_lower.min_value = -360
+	joint_lower.max_value = 0
+	joint_lower.value = -180
+	joint_row.add_child(joint_lower)
+	joint_upper = SpinBox.new()
+	joint_upper.min_value = 0
+	joint_upper.max_value = 360
+	joint_upper.value = 180
+	joint_row.add_child(joint_upper)
+	joint_mode.tooltip_text = "Шестерни зацепляются автоматически при совпадении осей и расстояния между центрами. Направляющая задаёт идеальную опору; её трение и геометрия не моделируются."
 	connection_status = caption("Добавь основание, затем пин, ось или винт и выбери точки крепления.")
 	connection_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	advanced.add_child(connection_status)
@@ -340,6 +353,7 @@ func set_assembly(value: Array, clear_history: bool = true) -> void:
 	cancel_pending(false)
 	if clear_history:
 		undo_history.clear()
+		redo_history.clear()
 	assembly = value.duplicate(true)
 	selected = -1
 	refresh_connections()
@@ -401,7 +415,6 @@ func select_catalog(index: int) -> void:
 		simple_source.select(0)
 		simple_source.visible = not ports.is_empty()
 		show_assembly(false)
-		refresh_simple_targets()
 		return
 	Library.populate(model_root, [{"id":catalog_id,"position":[0,0,0],"rotation":[0,0,0]}])
 	previewing = true
@@ -449,7 +462,9 @@ func remove_part() -> void:
 	else:
 		show_assembly()
 
-func commit() -> void:
+func commit(clear_redo: bool = true) -> void:
+	if clear_redo:
+		redo_history.clear()
 	refresh_catalog()
 	refresh_installed()
 	refresh_connections()
@@ -474,9 +489,7 @@ func select_installed(index: int) -> void:
 	syncing = false
 	refresh_connections()
 	show_assembly(false)
-	var p: Array = assembly[index].position
-	target = Vector3(p[0],p[1],p[2])
-	update_camera()
+	# Selection keeps the camera still so nearby holes remain under the pointer.
 	update_actions()
 	update_simple_hint()
 
@@ -493,6 +506,13 @@ func transform_selected(_value: float) -> void:
 		select_installed(selected)
 		connection_status.text = error
 		return
+	if assembly == backup:
+		return
+	undo_history.append(backup)
+	redo_history.clear()
+	if undo_history.size() > 40:
+		undo_history.pop_front()
+	update_actions()
 	Library.populate(model_root,assembly)
 	previewing = false
 	mark_selection()
@@ -510,8 +530,6 @@ func show_assembly(reset_camera: bool = true) -> void:
 	mark_selection()
 	mark_ports()
 	update_camera()
-	if not pending_id.is_empty():
-		refresh_simple_targets()
 
 func clear_selection() -> void:
 	for child in selection_root.get_children():
@@ -556,6 +574,8 @@ func update_actions() -> void:
 		add_button.text = "Добавить в сборку"
 	if undo_button != null:
 		undo_button.disabled = undo_history.is_empty()
+	if redo_button != null:
+		redo_button.disabled = redo_history.is_empty()
 	if fasten_button != null:
 		fasten_button.disabled = Easy.motor_to_fasten(assembly, selected) < 0
 	for field in fields:
@@ -563,7 +583,7 @@ func update_actions() -> void:
 
 func camera_input(event: InputEvent) -> void:
 	if not advanced_toggle.button_pressed:
-		if event is InputEventMouseMotion and not pending_id.is_empty():
+		if event is InputEventMouseMotion and event.button_mask == 0 and not pending_id.is_empty():
 			preview_simple_target(event.position)
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			if not pending_id.is_empty():
@@ -590,14 +610,23 @@ func camera_input(event: InputEvent) -> void:
 			syncing = false
 			transform_selected(0)
 	if event is InputEventMouseMotion and event.button_mask & MOUSE_BUTTON_MASK_RIGHT:
-		orbit -= event.relative.x*.008
-		elevation = clampf(elevation+event.relative.y*.008,-1.5,1.5)
+		if event.shift_pressed:
+			pan_camera(event.relative)
+		else:
+			orbit -= event.relative.x*.008
+			elevation = clampf(elevation+event.relative.y*.008,-1.5,1.5)
+	elif event is InputEventMouseMotion and event.button_mask & MOUSE_BUTTON_MASK_MIDDLE:
+		pan_camera(event.relative)
 	elif event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			zoom = maxf(.015,zoom*.85)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			zoom = minf(3,zoom/ .85)
 	update_camera()
+
+func pan_camera(relative: Vector2) -> void:
+	var metres_per_pixel := 2.0 * zoom * tan(deg_to_rad(camera.fov)/2.0) / maxf(view.size.y, 1)
+	target += (-camera.basis.x * relative.x + camera.basis.y * relative.y) * metres_per_pixel
 
 func update_camera() -> void:
 	camera.position = target + Vector3(sin(orbit)*cos(elevation),sin(elevation),cos(orbit)*cos(elevation))*zoom
@@ -673,17 +702,20 @@ func update_connection_actions() -> void:
 func attach_selected() -> void:
 	if connect_button.disabled:
 		return
-	var error := Connections.connect_parts(assembly, selected, own_port.selected, target_part.get_selected_id(), target_port.get_selected_id(), twist.value)
+	remember_step()
+	var error := Connections.connect_parts(assembly, selected, own_port.selected, target_part.get_selected_id(), target_port.get_selected_id(), twist.value, ["fixed", "hinge", "slider"][joint_mode.selected], joint_lower.value, joint_upper.value)
 	if not error.is_empty():
+		undo_history.pop_back()
 		connection_status.text = error
 		return
 	commit()
 	select_installed(selected)
-	connection_status.text = "Соединено. Группа перемещается вместе; для отдельной детали нажми «Отсоединить»."
+	connection_status.text = "Соединено: " + joint_mode.get_item_text(joint_mode.selected) + ". Движение проверяется в playground командой servo()."
 
 func detach_selected() -> void:
 	if selected < 0:
 		return
+	remember_step()
 	Connections.detach(assembly, selected)
 	commit()
 	connection_status.text = "Деталь отсоединена; крепления свободны."
@@ -792,10 +824,25 @@ func undo_step() -> void:
 	if undo_history.is_empty():
 		return
 	cancel_pending(false)
+	redo_history.append(assembly.duplicate(true))
 	assembly = undo_history.pop_back()
 	selected = mini(selected, assembly.size()-1)
-	commit()
+	commit(false)
+	if selected >= 0:
+		select_installed(selected)
 	frame_assembly()
+	update_simple_hint()
+
+func redo_step() -> void:
+	if redo_history.is_empty():
+		return
+	cancel_pending(false)
+	undo_history.append(assembly.duplicate(true))
+	assembly = redo_history.pop_back()
+	selected = mini(selected, assembly.size()-1)
+	commit(false)
+	if selected >= 0:
+		select_installed(selected)
 	update_simple_hint()
 
 func cancel_pending(redraw: bool = true) -> void:
@@ -890,6 +937,9 @@ func refresh_simple_targets() -> void:
 	simple_targets.clear()
 	simple_destination.clear()
 	simple_destination.add_item("Выбери отверстие на сборке…")
+	hover_target = -1
+	Library.populate(ghost_root, [])
+	place_button.disabled = true
 	simple_destination.visible = false
 	if pending_id.is_empty():
 		return
@@ -908,17 +958,30 @@ func refresh_simple_targets() -> void:
 			var button := action(title, func():place_simple(candidate_index))
 			button.custom_minimum_size.y = 42
 			target_buttons.add_child(button)
-		var visual := MeshInstance3D.new()
+	if not simple_targets.is_empty():
+		# All target dots share one mesh, material and draw call.
 		var sphere := SphereMesh.new()
 		sphere.radius = maxf(.002, zoom*.006)
 		sphere.height = sphere.radius * 2
-		visual.mesh = sphere
-		visual.position = candidate.position
+		sphere.radial_segments = 8
+		sphere.rings = 4
 		var mat := StandardMaterial3D.new()
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.albedo_color = Color("51e9a7")
+		mat.albedo_color = Color.WHITE
+		mat.vertex_color_use_as_albedo = true
 		mat.no_depth_test = true
-		visual.material_override = mat
+		sphere.material = mat
+		var dots := MultiMesh.new()
+		dots.transform_format = MultiMesh.TRANSFORM_3D
+		dots.mesh = sphere
+		dots.use_colors = true
+		dots.instance_count = simple_targets.size()
+		for i in range(simple_targets.size()):
+			dots.set_instance_transform(i, Transform3D(Basis.IDENTITY, simple_targets[i].position))
+			dots.set_instance_color(i, Color("51e9a7"))
+		var visual := MultiMeshInstance3D.new()
+		visual.multimesh = dots
+		visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		port_root.add_child(visual)
 	simple_destination.visible = not simple_targets.is_empty()
 	if simple_targets.is_empty():
@@ -950,22 +1013,41 @@ func preview_simple_target(mouse_position: Vector2) -> void:
 	if nearest == hover_target:
 		return
 	hover_target = nearest
-	for child in ghost_root.get_children():
-		ghost_root.remove_child(child)
-		child.queue_free()
 	if nearest >= 0:
 		show_ghost(nearest)
+	else:
+		Library.populate(ghost_root, [])
+		simple_destination.select(0)
+		place_button.disabled = true
+		highlight_simple_target(-1)
+
+func highlight_simple_target(index: int, invalid: bool = false) -> void:
+	if port_root.get_child_count() != 1 or not port_root.get_child(0) is MultiMeshInstance3D:
+		return
+	var dots: MultiMesh = port_root.get_child(0).multimesh
+	for i in range(dots.instance_count):
+		dots.set_instance_color(i, (Color("ff655a") if invalid else Color("ffcf66")) if i == index else Color("51e9a7"))
+		dots.set_instance_transform(i, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * (1.5 if i == index else 1.0)), simple_targets[i].position))
 
 func show_ghost(index: int) -> void:
-	for child in ghost_root.get_children():
-		ghost_root.remove_child(child)
-		child.queue_free()
-	var preview := assembly.duplicate(true)
-	if not Easy.place(preview, pending_id, simple_targets[index], pending_twist).is_empty():
+	if index < 0 or index >= simple_targets.size() or pending_id.is_empty():
 		return
-	Library.populate(ghost_root, [preview.back()])
-	var mesh: MeshInstance3D = ghost_root.get_child(0).get_child(0)
-	mesh.transparency = 0.45
+	hover_target = index
+	simple_destination.select(index+1)
+	var preview := assembly.duplicate(true)
+	var new_index := preview.size()
+	placement_error = Easy.install_motor(preview, simple_targets[index], pending_twist) if pending_id == "electronics_010" else Easy.place(preview, pending_id, simple_targets[index], pending_twist)
+	place_button.disabled = not placement_error.is_empty()
+	highlight_simple_target(index, not placement_error.is_empty())
+	if not placement_error.is_empty():
+		Library.populate(ghost_root, [])
+		simple_hint.text = placement_error + " Выбери другое отверстие или поверни деталь."
+		return
+	Library.populate(ghost_root, preview.slice(new_index))
+	for part in ghost_root.get_children():
+		var mesh: MeshInstance3D = part.get_child(0)
+		mesh.transparency = 0.45
+	simple_hint.text = "Предпросмотр: %s · отверстие детали №%d → сборки №%d. Нажми «Прикрепить» или Enter." % [Easy.display_name(pending_id), simple_targets[index].own+1, simple_targets[index].port+1]
 
 func place_simple(index: int) -> void:
 	remember_step()
@@ -1019,9 +1101,31 @@ func select_in_scene(mouse_position: Vector2) -> void:
 		select_installed(nearest)
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+	if not event is InputEventKey or not event.pressed or event.echo:
+		return
+	var focused := gui_get_focus_owner()
+	if focused is LineEdit or focused is TextEdit:
+		return
+	if event.keycode == KEY_ESCAPE:
 		cancel_pending()
-		set_input_as_handled()
+	elif event.keycode == KEY_Z and event.is_command_or_control_pressed():
+		if event.shift_pressed:
+			redo_step()
+		else:
+			undo_step()
+	elif event.keycode == KEY_F:
+		frame_assembly()
+	elif event.keycode == KEY_DELETE or event.keycode == KEY_BACKSPACE:
+		remove_part()
+	elif event.keycode == KEY_R:
+		turn_pending()
+	elif event.keycode == KEY_ENTER and hover_target >= 0 and not pending_id.is_empty() and placement_error.is_empty():
+		place_simple(hover_target)
+	elif event.keycode == KEY_F11:
+		mode = Window.MODE_WINDOWED if mode == Window.MODE_FULLSCREEN else Window.MODE_FULLSCREEN
+	else:
+		return
+	set_input_as_handled()
 
 
 func load_default_robot() -> void:
@@ -1041,3 +1145,16 @@ func start_empty_robot() -> void:
 	set_assembly([],false)
 	commit()
 	choose_step(0)
+
+func load_lift() -> void:
+	var example := preload("res://src/mechanical_examples.gd").lift()
+	if example.has("error"):
+		connection_status.text = example.error
+		return
+	remember_step()
+	cancel_pending(false)
+	assembly = example.assembly
+	selected = -1
+	commit()
+	frame_assembly()
+	simple_hint.text = "Серво 1 → 24/16 зубьев → вертикальная рейка. В playground: servo(1, 140), wait(1), servo(1, 40). Опоры и направляющая идеальные; центральное крепление требует винта."

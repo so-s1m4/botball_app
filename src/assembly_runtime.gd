@@ -2,6 +2,7 @@ extends RefCounted
 ## Runtime actuators leave the saved rest assembly and its links untouched.
 const Connections = preload("res://src/assembly_connections.gd")
 const Easy = preload("res://src/easy_assembly.gd")
+const Mechanisms = preload("res://src/mechanical_solver.gd")
 const Library = preload("res://src/part_library.gd")
 static func inspect(assembly: Array) -> Dictionary:
 	var motors: Array[int] = []
@@ -32,7 +33,9 @@ static func inspect(assembly: Array) -> Dictionary:
 	var base := 0.0
 	if wheels.size() >= 2:
 		base = wheels.back().center.x - wheels.front().center.x
-	return {"motors":motors,"wheels":wheels,"servos":servos,"wheel_base":base,"can_drive":wheels.size() >= 2 and base > .005}
+	var result := {"motors":motors,"wheels":wheels,"servos":servos,"wheel_base":base,"can_drive":wheels.size() >= 2 and base > .005}
+	result.mechanisms = Mechanisms.inspect(assembly, servos)
+	return result
 
 static func branch(assembly: Array, servo: int, output: int) -> Array[int]:
 	var result: Array[int] = [output]
@@ -40,6 +43,8 @@ static func branch(assembly: Array, servo: int, output: int) -> Array[int]:
 	while cursor < result.size():
 		var current := result[cursor]
 		for link in assembly[current].get("links",[]):
+			if link.get("mode", "fixed") != "fixed":
+				continue
 			var other := int(link.other)
 			if current == output and other == servo or current == servo and other == output:
 				continue
@@ -52,16 +57,4 @@ static func posed(assembly: Array, actuators: Dictionary) -> Array[Transform3D]:
 	var poses: Array[Transform3D] = []
 	for entry in assembly:
 		poses.append(Connections.transform(entry))
-	var ordered: Array = actuators.servos.duplicate()
-	ordered.sort_custom(func(a,b):return a.followers.size() > b.followers.size())
-	for servo in ordered:
-		if servo.locked or servo.followers.is_empty():
-			continue
-		var parent_delta: Transform3D = poses[servo.index] * Connections.transform(assembly[servo.index]).affine_inverse()
-		var pivot: Vector3 = parent_delta * servo.pivot
-		var axis: Vector3 = parent_delta.basis * servo.axis
-		var delta := Transform3D(Basis(axis,deg_to_rad(servo.angle-90)),pivot)
-		delta.origin -= delta.basis * pivot
-		for index in servo.followers:
-			poses[index] = delta * poses[index]
-	return poses
+	return Mechanisms.posed(assembly, actuators, poses)

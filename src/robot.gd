@@ -9,11 +9,16 @@ var motor_error := 0.02
 var left_encoder := 0.0
 var right_encoder := 0.0
 var carrying := false
+var gripped_body: RigidBody3D
+var gripped_part := -1
+var gripped_offset := Vector3.ZERO
 var rng := RandomNumberGenerator.new()
 var sensor: RayCast3D
 var fingers: Array[MeshInstance3D] = []
 const MassModel = preload("res://src/assembly_physics.gd")
 var wheel_speeds: Dictionary = {}
+var motor_gains: Dictionary = {}
+var rolling_resistance := 0.015
 var ground_contacts := 0
 var slip := 0.0
 var tilt_degrees := 0.0
@@ -34,14 +39,21 @@ var actuators := {"motors":[],"wheels":[],"servos":[],"wheel_base":0.0,"can_driv
 var wheel_angles: Dictionary = {}
 var motor_commands: Dictionary = {}
 var motor_encoders: Dictionary = {}
+var servo_targets: Dictionary = {}
+var simulate_actuators := false
+var servo_speed := 300.0 # Estimated degrees/second; not calibrated hardware data.
+var mechanism_message := ""
+var servo_torque := 0.18 # Estimated stall torque in N m.
 
 func _ready() -> void:
 	freeze = true
 	can_sleep = false
 	continuous_cd = true
 	center_of_mass_mode = CENTER_OF_MASS_MODE_CUSTOM
-	linear_damp = 0.15
-	angular_damp = 0.8
+	linear_damp_mode = DAMP_MODE_REPLACE
+	angular_damp_mode = DAMP_MODE_REPLACE
+	linear_damp = 0.02
+	angular_damp = 0.05
 	physics_material_override = PhysicsMaterial.new()
 	physics_material_override.friction = 0.015
 	physics_material_override.bounce = 0.0
@@ -68,7 +80,15 @@ func _ready() -> void:
 			wheel.material_override = material(Color("17212d"))
 			add_child(wheel)
 	for x in [-0.13, 0.13]:
-		fingers.append(box(Vector3(0.035, 0.08, 0.26), Vector3(x, 0.13, -0.29), Color("f7b64c")))
+		var finger := box(Vector3(0.035, 0.08, 0.26), Vector3(x, 0.13, -0.29), Color("b8bdc3"))
+		fingers.append(finger)
+		var pad := MeshInstance3D.new()
+		var pad_mesh := BoxMesh.new()
+		pad_mesh.size = Vector3(.002,.072,.20)
+		pad.mesh = pad_mesh
+		pad.position = Vector3(-signf(x)*.017,0,-.02)
+		pad.material_override = material(Color("26292c"))
+		finger.add_child(pad)
 	for child in get_children():
 		if child is MeshInstance3D and not fingers.has(child):
 			training_visuals.append(child)
@@ -95,6 +115,8 @@ func _ready() -> void:
 func step(delta: float) -> void:
 	# Called only while the attempt is active; the engine integrates gravity/contact.
 	freeze = false
+	advance_servos(delta)
+	advance_free_joints(delta)
 	ground_contacts = 0
 	slip = 0.0
 	tilt_degrees = rad_to_deg(acos(clampf(global_basis.y.dot(Vector3.UP),-1,1)))
@@ -107,36 +129,63 @@ func step(delta: float) -> void:
 	var midpoint: float = (wheels.front().center.x+wheels.back().center.x)/2
 	for wheel in wheels:
 		var command: float = motor_commands.get(wheel.motor,0.0) if not motor_commands.is_empty() else (left_command if wheel.center.x < midpoint else right_command)
-		var target := command*max_speed*(1.0+rng.randf_range(-motor_error,motor_error))
-		var speed: float = move_toward(wheel_speeds.get(wheel.wheel,0.0),target,3.0*delta)
-		wheel_speeds[wheel.wheel] = speed
+		if not motor_gains.has(wheel.motor):
+			motor_gains[wheel.motor] = rng.randf_range(-1.0, 1.0)
+		var free_speed: float = maxf(max_speed * (1.0 + motor_gains[wheel.motor] * motor_error), 0.01)
+		var speed: float = wheel_speeds.get(wheel.wheel, 0.0)
+		var radius: float = maxf(wheel.radius, 0.001)
+		# Reflected rotor/gearing inertia plus the tyre's rotational inertia.
+		var wheel_mass: float = 0.018 if assembly.is_empty() else MassModel.part_mass(assembly[wheel.wheel].id)
+		var effective_mass: float = wheel_mass * 0.5 + 0.03
+		var stall_force: float = (0.25 if assembly.is_empty() else motor_torque) / radius
+		# DC torque-speed curve; zero command actively brakes the motor.
+		# Implicit integration stays stable with small wheels at 120 Hz.
+		var drive_force: float = stall_force * (clampf(command, -1, 1) - speed / free_speed)
+		var motor_damping: float = stall_force / free_speed
+		var free_wheel_speed := speed + drive_force * delta / (effective_mass + motor_damping * delta)
+		speed = free_wheel_speed
 		var local_center: Vector3 = wheel.center + (assembly_root.position if not assembly.is_empty() else Vector3.ZERO)
 		if not assembly.is_empty():
 			local_center = assembly_root.position + assembly_root.get_child(wheel.wheel).transform * PartLibrary.meshes[assembly[wheel.wheel].id].get_aabb().get_center()
 		var center := global_transform*local_center
 		var down := -global_basis.y
-		var query := PhysicsRayQueryParameters3D.create(center,center+down*(wheel.radius+.025))
+		var query := PhysicsRayQueryParameters3D.create(center,center+down*(wheel.radius+.006))
 		query.exclude = [get_rid()]
+		if is_instance_valid(gripped_body):
+			query.exclude = [get_rid(),gripped_body.get_rid()]
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
-		if not hit.is_empty() and global_basis.y.dot(Vector3.UP) > .25:
+		if not hit.is_empty() and global_basis.y.dot(Vector3.UP) > .25 and hit.normal.dot(global_basis.y) > .25:
 			ground_contacts += 1
 			var normal: Vector3 = hit.normal
 			var forward := (-global_basis.z).slide(normal).normalized()
 			var lateral := forward.cross(normal).normalized()
 			var arm: Vector3 = hit.position-global_transform*center_of_mass
 			var contact_velocity := linear_velocity+angular_velocity.cross(arm)
+			if hit.collider is RigidBody3D:
+				var support: RigidBody3D = hit.collider
+				contact_velocity -= support.linear_velocity + support.angular_velocity.cross(hit.position - support.global_transform * support.center_of_mass)
 			var actual := contact_velocity.dot(forward)
 			slip = maxf(slip,absf(speed-actual))
 			# Lateral weight distribution changes the available grip on each wheel.
 			var base: float = maxf(absf(wheels.back().center.x-wheels.front().center.x),.005)
-			var fraction := clampf(.5+(center_of_mass.x-midpoint-(assembly_root.position.x if not assembly.is_empty() else 0.0))/base*(1 if wheel.center.x > midpoint else -1),.02,.98)
+			var fraction := clampf(.5+(center_of_mass.x-midpoint-(assembly_root.position.x if not assembly.is_empty() else 0.0))/base*(1 if wheel.center.x > midpoint else -1),0.0,1.0)
 			var normal_load := mass*9.8*maxf(normal.dot(Vector3.UP),0.0)*fraction*2.0/wheels.size()
-			var limit := friction*normal_load
-			var torque_limit: float = (.25 if assembly.is_empty() else motor_torque)/wheel.radius
-			var longitudinal := clampf((speed-actual)*mass*12.0/wheels.size(),-torque_limit,torque_limit)
-			var side := -contact_velocity.dot(lateral)*mass*20.0/wheels.size()
-			var force := (forward*longitudinal+lateral*side).limit_length(limit)
+			var surface_grip := friction
+			if hit.collider is PhysicsBody3D and hit.collider.physics_material_override != null:
+				surface_grip = minf(surface_grip, hit.collider.physics_material_override.friction)
+			var limit := maxf(0.0, surface_grip) * normal_load
+			# One friction circle shares grip between acceleration and lateral scrub.
+			var stiffness := mass * 18.0 / wheels.size()
+			var longitudinal := (free_wheel_speed - actual) / (1.0 / stiffness + delta / (effective_mass + motor_damping * delta))
+			var side := -contact_velocity.dot(lateral) * mass * 20.0 / wheels.size()
+			var force := (forward * longitudinal + lateral * side).limit_length(limit)
+			var rolling := minf(rolling_resistance * normal_load, absf(speed) * effective_mass / delta)
+			speed = free_wheel_speed - (force.dot(forward) + signf(speed) * rolling) * delta / (effective_mass + motor_damping * delta)
 			apply_force(force,hit.position-global_position)
+			if hit.collider is RigidBody3D:
+				hit.collider.apply_force(-force, hit.position - hit.collider.global_position)
+		wheel_speeds[wheel.wheel] = speed
+
 		if wheel.center.x < midpoint:
 			left_encoder += speed*delta
 		else:
@@ -145,8 +194,8 @@ func step(delta: float) -> void:
 
 func refresh_mass() -> void:
 	if assembly.is_empty():
-		mass = 1.0 + (.05 if carrying else 0.0)
-		center_of_mass = (Vector3(0,.17,0)+Vector3(0,.14,-.32)*.05) / mass if carrying else Vector3(0,.17,0)
+		mass = 1.0
+		center_of_mass = Vector3(0,.17,0)
 		inertia = Vector3(.02,.025,.02)
 	else:
 		var properties := MassModel.properties(assembly,Runtime.posed(assembly,actuators),assembly_root.position)
@@ -163,6 +212,11 @@ func physics_status() -> String:
 		var right: float = actuators.wheels.back().center.x+assembly_root.position.x
 		var right_load := clampf((center_of_mass.x-left)/(right-left),0,1)
 		balance = " · баланс Л/П %.0f/%.0f%%" % [(1-right_load)*100,right_load*100]
+	var mechanism_status: String = mechanism_message
+	if carrying:
+		mechanism_status += ("\n" if not mechanism_status.is_empty() else "")+"Захват: предмет удерживается трением"
+	if not mechanism_status.is_empty():
+		balance += "\n" + mechanism_status
 	return "Масса ≈ %.0f г · ЦТ %.0f мм · наклон %.0f°\n%s · проскальзывание %.2f м/с" % [mass*1000,center_of_mass.y*1000,tilt_degrees,"Опрокинут" if tilt_degrees > 60 else "Колёса на опоре: %d" % ground_contacts,slip] + balance
 
 func pause_physics(value: bool) -> void:
@@ -193,9 +247,11 @@ func stop() -> void:
 
 func reset_robot(seed_value: int) -> void:
 	freeze = true
+	simulate_actuators = false
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
 	wheel_speeds.clear()
+	motor_gains.clear()
 	ground_contacts = 0
 	slip = 0
 	tilt_degrees = 0
@@ -205,9 +261,18 @@ func reset_robot(seed_value: int) -> void:
 	right_encoder = 0
 	rng.seed = seed_value
 	set_grip(false)
+	gripped_body = null
+	gripped_part = -1
+	for i in range(fingers.size()):
+		fingers[i].position.x = (-1.0 if i == 0 else 1.0)*.13
 	stop()
 	wheel_angles.clear()
 	motor_encoders.clear()
+	servo_targets.clear()
+	mechanism_message = ""
+	for joint in actuators.get("mechanisms", {}).get("channels", []):
+		joint.value = 0.0
+		joint.velocity = 0.0
 	for servo in actuators.servos:
 		servo.angle = 90.0
 	update_assembly_pose()
@@ -216,8 +281,7 @@ func reset_robot(seed_value: int) -> void:
 func set_grip(closed: bool) -> void:
 	carrying = closed
 	refresh_mass()
-	for i in range(fingers.size()):
-		fingers[i].position.x = (-1.0 if i == 0 else 1.0) * (0.095 if closed else 0.13)
+
 
 func grip_position() -> Vector3:
 	return global_transform * Vector3(0, 0.14, -0.32)
@@ -245,6 +309,9 @@ func material(color: Color) -> StandardMaterial3D:
 	return mat
 
 func set_assembly(value: Array) -> void:
+	gripped_body = null
+	gripped_part = -1
+	carrying = false
 	assembly = value.duplicate(true)
 	PartLibrary.populate(assembly_root, assembly)
 	for visual in training_visuals:
@@ -258,8 +325,11 @@ func set_assembly(value: Array) -> void:
 	part_colliders.clear()
 	wheel_angles.clear()
 	motor_encoders.clear()
+	servo_targets.clear()
+	mechanism_message = ""
 	motor_commands.clear()
 	wheel_speeds.clear()
+	motor_gains.clear()
 	actuators = Runtime.inspect(assembly)
 	assembly_root.transform = Transform3D.IDENTITY
 	if not assembly.is_empty():
@@ -301,13 +371,143 @@ func update_assembly_pose() -> void:
 func set_servo_angle(index: int, angle: float) -> void:
 	for servo in actuators.servos:
 		if servo.index == index and not servo.locked:
-			servo.angle = clampf(angle,0,180)
+			servo_targets[index] = clampf(angle,0,180)
+			# Stationary editor/preview can position the horn without starting a run.
+			if not simulate_actuators:
+				servo.angle = servo_targets[index]
 	update_assembly_pose()
 	refresh_mass()
+
+func advance_servos(delta: float) -> void:
+	mechanism_message = ""
+	var moved := false
+	var poses := Runtime.posed(assembly, actuators)
+	for servo in actuators.servos:
+		if servo.locked or not servo_targets.has(servo.index):
+			continue
+		var target: float = servo_targets[servo.index]
+		var direction := signf(target - servo.angle)
+		if direction == 0.0:
+			continue
+		# Virtual work includes gearing, sliders and every moving payload.
+		var original: float = servo.angle
+		servo.angle = original + direction*.01
+		var probe := Runtime.posed(assembly, actuators)
+		var energy_change := 0.0
+		for i in range(assembly.size()):
+			var local_center: Vector3 = PartLibrary.meshes[assembly[i].id].get_aabb().get_center()
+			var displacement: Vector3 = global_basis * (probe[i]*local_center - poses[i]*local_center)
+			energy_change += MassModel.part_mass(assembly[i].id)*9.8*displacement.y
+		if is_instance_valid(gripped_body) and gripped_part >= 0:
+			var displacement: Vector3 = global_basis*(probe[gripped_part]*gripped_offset-poses[gripped_part]*gripped_offset)
+			energy_change += gripped_body.mass*9.8*displacement.y
+		servo.angle = original
+		var resistance := maxf(0.0, energy_change/deg_to_rad(.01))
+		var rate := servo_speed * clampf(1.0 - resistance / maxf(servo_torque, 0.00000001), 0.0, 1.0)
+		if rate < .01:
+			mechanism_message = "Серво остановилось: нагрузка превышает доступный момент"
+		var requested := move_toward(original, target, rate*delta)
+		servo.angle = requested
+		if not mechanism_pose_allowed(poses):
+			mechanism_message = actuators.mechanisms.message
+			# Approach stops without overshooting a guide or forcing a locked gear.
+			var low := 0.0
+			var high := 1.0
+			for _iteration in range(10):
+				var fraction := (low+high)/2
+				servo.angle = lerpf(original,requested,fraction)
+				if mechanism_pose_allowed(poses):
+					low = fraction
+				else:
+					high = fraction
+			servo.angle = lerpf(original,requested,low)
+		moved = moved or not is_equal_approx(original,servo.angle)
+		poses = Runtime.posed(assembly,actuators)
+	if moved:
+		refresh_mass()
+
+func advance_free_joints(delta: float) -> void:
+	if assembly.is_empty() or delta <= 0:
+		return
+	var mechanisms: Dictionary = actuators.mechanisms
+	var before := Runtime.posed(assembly,actuators)
+	var roots: Array = mechanisms.free_roots.duplicate()
+	if roots.is_empty():
+		return
+	for c in roots:
+		var joint: Dictionary = mechanisms.channels[c]
+		if joint.get("locked",false):
+			continue
+		var original: float = joint.value
+		var epsilon := .00001 if joint.type == "slider" else .0001
+		joint.value = original+epsilon
+		var probe := Runtime.posed(assembly,actuators)
+		joint.value = original
+		var force := 0.0
+		var generalized_mass := 0.0
+		for i in range(assembly.size()):
+			var part_mass := MassModel.part_mass(assembly[i].id)
+			var bounds: AABB = PartLibrary.meshes[assembly[i].id].get_aabb()
+			var velocity: Vector3 = (probe[i]*bounds.get_center()-before[i]*bounds.get_center())/epsilon
+			force -= part_mass*9.8*(global_basis*velocity).y
+			var relative: Basis = probe[i].basis*before[i].basis.inverse()
+			var quaternion := relative.get_rotation_quaternion()
+			var angular_rate := 2*atan2(Vector3(quaternion.x,quaternion.y,quaternion.z).length(),absf(quaternion.w))/epsilon
+			generalized_mass += part_mass*(velocity.length_squared()+bounds.size.length_squared()/12*angular_rate*angular_rate)
+		var speed: float = joint.get("velocity",0.0)
+		speed = (speed+force/maxf(generalized_mass,.00000001)*delta)/(1+3*delta)
+		# Semi-implicit integration, bounded per tick to keep small parts stable.
+		var increment := clampf(speed*delta,-.002,.002) if joint.type == "slider" else clampf(speed*delta,-.1,.1)
+		var target := clampf(original+increment,joint.lower,joint.upper)
+		joint.value = target
+		if not mechanism_pose_allowed(before):
+			var low := 0.0
+			var high := 1.0
+			for _iteration in range(10):
+				var fraction := (low+high)/2
+				joint.value = lerpf(original,target,fraction)
+				if mechanism_pose_allowed(before): low = fraction
+				else: high = fraction
+			joint.value = lerpf(original,target,low)
+			speed = 0.0
+		if is_equal_approx(joint.value,joint.lower) or is_equal_approx(joint.value,joint.upper):
+			speed = 0.0
+		joint.velocity = speed
+		before = Runtime.posed(assembly,actuators)
+		var coordinates := Runtime.Mechanisms.values(actuators)
+		for index in coordinates:
+			if not mechanisms.driven.has(index):
+				mechanisms.channels[index].value = coordinates[index]
+	update_assembly_pose()
+	refresh_mass()
+
+func mechanism_pose_allowed(before: Array[Transform3D]) -> bool:
+	var proposed := Runtime.posed(assembly,actuators)
+	if actuators.get("mechanisms", {}).get("blocked",false):
+		return false
+	if not simulate_actuators or not is_inside_tree():
+		return true
+	for i in range(proposed.size()):
+		if proposed[i].is_equal_approx(before[i]):
+			continue
+		var query := PhysicsShapeQueryParameters3D.new()
+		query.shape = part_colliders[i].shape
+		var center: Vector3 = PartLibrary.meshes[assembly[i].id].get_aabb().get_center()
+		query.transform = global_transform*assembly_root.transform*proposed[i]*Transform3D(Basis.IDENTITY,center)
+		query.exclude = [get_rid()]
+		if is_instance_valid(gripped_body):
+			query.exclude = [get_rid(),gripped_body.get_rid()]
+		query.margin = .00001
+		if not get_world_3d().direct_space_state.intersect_shape(query,1).is_empty():
+			actuators.mechanisms.message = "Подвижная деталь упёрлась в препятствие"
+			return false
+	return true
 
 func hardware_status() -> String:
 	if assembly.is_empty():
 		return "Учебный робот"
+	if not actuators.can_drive and not actuators.get("mechanisms", {}).get("channels", []).is_empty():
+		return "Механизм: серво %d · подвижных опор %d · передач %d. Управление в «Код робота»." % [actuators.servos.size(),actuators.mechanisms.channels.size()-actuators.servos.size(),actuators.mechanisms.edges.size()]
 	if not actuators.can_drive:
 		return "Для движения поставь 2 мотора, прикрути их и добавь 2 колеса Solarbotics. Серво можно проверить отдельно."
 	return "Готов: 2 ведущих колеса · колея %.0f мм · серво: %d" % [actuators.wheel_base*1000,actuators.servos.size()]
@@ -335,6 +535,14 @@ func command_servo(port: float, angle: float) -> String:
 	var servo: Dictionary = actuators.servos[int(port)-1]
 	if servo.locked:
 		return "рычаг серво закреплён неподвижно: отсоедини лишнее крепление"
+	if not simulate_actuators:
+		var original: float = servo.angle
+		servo.angle = angle
+		Runtime.posed(assembly,actuators)
+		var error: String = actuators.mechanisms.message
+		servo.angle = original
+		if not error.is_empty():
+			return error
 	set_servo_angle(servo.index,angle)
 	return ""
 

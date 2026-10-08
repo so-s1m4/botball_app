@@ -14,7 +14,7 @@ var map_config := {"id":"training_delivery"}
 var field_root: Node3D
 var imported_root: Node3D
 var camera_target := Vector3.ZERO
-var camera_min_zoom := 2.3
+var camera_min_zoom := 0.18
 var camera_max_zoom := 6.0
 var map_revision := 0
 var program: RefCounted
@@ -41,25 +41,14 @@ var camera: Camera3D
 var release_wait := 0.0
 var manual_forward := 0.0
 var manual_turn := 0.0
+var gripper = preload("res://src/gripper.gd").new()
 
 func _ready() -> void:
 	build_world()
 	reset_attempt()
 
 func build_world() -> void:
-	var env := WorldEnvironment.new()
-	env.environment = Environment.new()
-	env.environment.background_mode = Environment.BG_COLOR
-	env.environment.background_color = Color("101b2b")
-	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.environment.ambient_light_color = Color("c7d8ed")
-	env.environment.ambient_light_energy = 0.3
-	add_child(env)
-	var light := DirectionalLight3D.new()
-	light.rotation_degrees = Vector3(-55, -30, 0)
-	light.light_energy = 0.65
-	light.shadow_enabled = true
-	add_child(light)
+	preload("res://src/studio.gd").install(self)
 	field_root = Node3D.new()
 	add_child(field_root)
 	build_training_field()
@@ -67,8 +56,8 @@ func build_world() -> void:
 	add_child(robot)
 	cube = RigidBody3D.new()
 	cube.mass = 0.05
-	# This object is repeatedly frozen and teleported by the gripper.
-	# Disable sleeping so releasing always resumes gravity.
+	cube.continuous_cd = true
+	# Contact forces must wake the object even after resting on the table.
 	cube.can_sleep = false
 	cube.physics_material_override = PhysicsMaterial.new()
 	cube.physics_material_override.friction = 0.8
@@ -87,6 +76,7 @@ func build_world() -> void:
 	camera = Camera3D.new()
 	camera.current = true
 	camera.fov = 48
+	camera.near = 0.005
 	add_child(camera)
 	update_camera()
 
@@ -106,9 +96,12 @@ func _physics_process(delta: float) -> void:
 	else:
 		robot.drive(manual_forward, manual_turn)
 	robot.step(delta)
-	if robot.carrying:
-		cube.global_position = robot.grip_position()
-		cube.rotation = Vector3.ZERO
+	var was_carrying: bool = robot.carrying
+	gripper.step(robot,cube,delta)
+	if robot.carrying and not was_carrying:
+		event.emit("Предмет удерживается губками")
+	elif was_carrying and not robot.carrying and gripper.closed:
+		event.emit("Предмет выскользнул из захвата")
 	if not robot.carrying and cube_in_goal() and cube.linear_velocity.length() < 0.12:
 		release_wait += delta
 		if release_wait >= 0.4 and score < 100:
@@ -127,6 +120,7 @@ func start(auto: bool) -> void:
 	reset_attempt()
 	autonomous = auto
 	running = true
+	robot.simulate_actuators = true
 	event.emit("Автономная попытка" if auto else "Ручная попытка")
 	changed.emit()
 
@@ -143,6 +137,7 @@ func reset_attempt() -> void:
 	release_wait = 0
 	manual_forward = 0
 	manual_turn = 0
+	gripper.reset()
 	robot.reset_robot(seed_value)
 	robot.position.y = robot_spawn_y
 	cube.freeze = true
@@ -170,7 +165,7 @@ func toggle_pause() -> void:
 		robot.motor_commands = paused_commands.motors.duplicate()
 	if not paused:
 		robot.pause_physics(false)
-	cube.freeze = paused or robot.carrying
+	cube.freeze = paused
 	event.emit("Пауза" if paused else "Продолжение")
 	changed.emit()
 
@@ -178,24 +173,15 @@ func toggle_grip() -> void:
 	if not running or paused:
 		return
 	if not robot.assembly.is_empty():
-		event.emit("Для своей сборки управлять рычагом можно командой servo. Учебный захват доступен у учебного робота.")
+		event.emit("В своей сборке двигай губки командой servo. Предмет удерживается при контакте с двух противоположных сторон.")
 		return
-	if robot.carrying:
+	gripper.closed = not gripper.closed
+	if not gripper.closed:
+		gripper.engaged = false
 		robot.set_grip(false)
-		cube.freeze = false
-		cube.sleeping = false
-		cube.collision_layer = 1
-		cube.collision_mask = 1
-		cube.linear_velocity = Vector3.ZERO
-		event.emit("Захват открыт")
-	elif robot.grip_position().distance_to(cube.global_position) < 0.19:
-		robot.set_grip(true)
-		cube.freeze = true
-		cube.collision_layer = 0
-		cube.collision_mask = 0
-		event.emit("Куб захвачен")
-	else:
-		event.emit("Куб слишком далеко от захвата")
+		robot.gripped_body = null
+		robot.gripped_part = -1
+	event.emit("Губки закрываются" if gripper.closed else "Захват открывается")
 
 func auto_step(_delta: float) -> void:
 	# Demonstration controller uses known coordinates, not a sensor-only program.
@@ -204,13 +190,13 @@ func auto_step(_delta: float) -> void:
 			if navigate(Vector3(CUBE_START.x, map_ground, CUBE_START.z + 0.34), 0.035):
 				phase = 1
 		1:
-			if orient(0.0):
+			if gripper.closed or orient(0.0):
 				robot.stop()
-				toggle_grip()
+				if not gripper.closed: toggle_grip()
 				if robot.carrying:
 					phase = 2
-				else:
-					finish("Не удалось захватить куб. Сбрось попытку.")
+				elif gripper.opening <= .1201:
+					finish("Губки не удержали куб. Сбрось попытку.")
 		2:
 			if navigate(Vector3(GOAL.x, map_ground, GOAL.z + 0.32), 0.04):
 				phase = 3
@@ -256,12 +242,27 @@ func cube_in_goal() -> bool:
 
 func finish(message: String) -> void:
 	running = false
+	robot.simulate_actuators = false
 	if program != null:
 		program.running = false
 	robot.stop()
 	robot.freeze = true
 	event.emit(message)
 	changed.emit()
+
+func zoom_camera(factor: float) -> void:
+	zoom = clampf(zoom * factor, camera_min_zoom, camera_max_zoom)
+	update_camera()
+
+func pan_camera(motion: Vector2, view_height: float) -> void:
+	var scale := 2.0 * zoom * tan(deg_to_rad(camera.fov * 0.5)) / maxf(view_height, 1.0)
+	camera_target += (-camera.global_basis.x * motion.x + camera.global_basis.y * motion.y) * scale
+	update_camera()
+
+func focus_robot() -> void:
+	camera_target = robot.global_transform * robot.center_of_mass
+	zoom = clampf(0.75, camera_min_zoom, camera_max_zoom)
+	update_camera()
 
 func update_camera() -> void:
 	camera.position = camera_target + Vector3(sin(orbit) * cos(elevation), sin(elevation), cos(orbit) * cos(elevation)) * zoom
@@ -302,18 +303,29 @@ func label_3d(text: String, at: Vector3, color: Color) -> void:
 	field_root.add_child(label)
 
 func build_training_field() -> void:
-	static_box(Vector3(3.0, 0.10, 2.4), Vector3(0, -0.05, 0), Color("d5dedb"))
+	static_box(Vector3(3.0, 0.10, 2.4), Vector3(0, -0.05, 0), Color("b7b4ab"))
 	for x in [-1.54, 1.54]:
-		static_box(Vector3(0.08, 0.20, 2.56), Vector3(x, 0.1, 0), Color("365066"))
+		static_box(Vector3(0.08, 0.20, 2.56), Vector3(x, 0.1, 0), Color("484e55"))
 	for z in [-1.24, 1.24]:
-		static_box(Vector3(3.16, 0.20, 0.08), Vector3(0, 0.1, z), Color("365066"))
+		static_box(Vector3(3.16, 0.20, 0.08), Vector3(0, 0.1, z), Color("484e55"))
+	# Bench trim and supports are decorative and never change table contacts.
+	var bench := MeshInstance3D.new()
+	var slab := BoxMesh.new()
+	slab.size = Vector3(3.22, 0.12, 2.62)
+	bench.mesh = slab
+	bench.position.y = -0.17
+	bench.material_override = preload("res://src/studio.gd").wood_material()
+	field_root.add_child(bench)
+	for x in [-1.35, 1.35]:
+		for z in [-1.05, 1.05]:
+			visual_box(Vector3(.065, .55, .065), Vector3(x, -.50, z), Color("42474c"))
 	# Grid is visual; it does not create collision geometry.
 	for i in range(-5, 6):
-		visual_box(Vector3(0.003, 0.002, 2.4), Vector3(i * 0.25, 0.002, 0), Color("b3c5c2"))
+		visual_box(Vector3(0.003, 0.002, 2.4), Vector3(i * 0.25, 0.002, 0), Color("888a86"))
 	for i in range(-4, 5):
-		visual_box(Vector3(3, 0.002, 0.003), Vector3(0, 0.002, i * 0.25), Color("b3c5c2"))
-	visual_box(Vector3(0.64, 0.004, 0.55), Vector3(-0.95, 0.004, 0.82), Color("7bafcb"))
-	visual_box(Vector3(GOAL_HALF.x * 2, 0.005, GOAL_HALF.y * 2), GOAL + Vector3(0, 0.006, 0), Color("52baa0"))
+		visual_box(Vector3(3, 0.002, 0.003), Vector3(0, 0.002, i * 0.25), Color("888a86"))
+	visual_box(Vector3(0.64, 0.004, 0.55), Vector3(-0.95, 0.004, 0.82), Color("8cabb6"))
+	visual_box(Vector3(GOAL_HALF.x * 2, 0.005, GOAL_HALF.y * 2), GOAL + Vector3(0, 0.006, 0), Color("80a58b"))
 	label_3d("СТАРТ", Vector3(-0.95, 0.014, 1.05), Color("234258"))
 	label_3d("ДОСТАВКА · 100", GOAL + Vector3(0, 0.016, 0.23), Color("125f50"))
 
@@ -338,7 +350,7 @@ func set_map(config: Dictionary) -> String:
 	map_config = config.duplicate(true)
 	camera_target = Vector3.ZERO
 	zoom = 3.8
-	camera_min_zoom = 2.3
+	camera_min_zoom = 0.18
 	camera_max_zoom = 6.0
 	if config.id == "custom":
 		imported_root = loaded.scene
@@ -382,7 +394,7 @@ func place_on_imported_ground(revision: int) -> void:
 			else:
 				cube_spawn_y = hit.position.y + .10
 	reset_attempt()
-	visual_box(Vector3(GOAL_HALF.x*2,.005,GOAL_HALF.y*2),GOAL+Vector3(0,map_ground+.006,0),Color("52baa0"))
+	visual_box(Vector3(GOAL_HALF.x*2,.005,GOAL_HALF.y*2),GOAL+Vector3(0,map_ground+.006,0),Color("80a58b"))
 	label_3d("ДОСТАВКА · 100",GOAL+Vector3(0,map_ground+.016,.23),Color("125f50"))
 
 func start_program(source: String) -> String:
@@ -396,6 +408,7 @@ func start_program(source: String) -> String:
 	program_mode = true
 	program_output_count = 0
 	running = true
+	robot.simulate_actuators = true
 	event.emit("Программа запущена")
 	changed.emit()
 	return ""

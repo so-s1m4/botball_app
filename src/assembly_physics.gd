@@ -33,8 +33,12 @@ static func properties(assembly: Array, poses: Array[Transform3D], offset: Vecto
 	var com := weighted/maxf(total,0.001)
 	var inertia_value := Vector3.ZERO
 	for i in range(assembly.size()):
-		var box: AABB = poses[i]*Library.meshes[assembly[i].id].get_aabb()
-		var s := box.size
-		var r := centers[i]-com
-		inertia_value += masses[i]*Vector3((s.y*s.y+s.z*s.z)/12+r.y*r.y+r.z*r.z,(s.x*s.x+s.z*s.z)/12+r.x*r.x+r.z*r.z,(s.x*s.x+s.y*s.y)/12+r.x*r.x+r.y*r.y)
+		# Rotate each part's local inertia rather than using its enlarged world AABB.
+		var size: Vector3 = Library.meshes[assembly[i].id].get_aabb().size
+		var local_inertia := masses[i] * Vector3(size.y * size.y + size.z * size.z, size.x * size.x + size.z * size.z, size.x * size.x + size.y * size.y) / 12.0
+		var basis := poses[i].basis.orthonormalized()
+		var rotated := basis.x * basis.x * local_inertia.x + basis.y * basis.y * local_inertia.y + basis.z * basis.z * local_inertia.z
+		var r := centers[i] - com
+		inertia_value += rotated + masses[i] * Vector3(r.y * r.y + r.z * r.z, r.x * r.x + r.z * r.z, r.x * r.x + r.y * r.y)
+
 	return {"mass":maxf(total,0.001),"center":com,"inertia":inertia_value.max(Vector3.ONE*0.00001)}

@@ -36,7 +36,10 @@ static func candidates(assembly: Array, id: String, source_port: int = -1) -> Ar
 				continue
 			if Connections.occupied(assembly, index, destination):
 				continue
-			for source in range(own.size()):
+			var sources := range(own.size())
+			if source_port < 0 and id == "metal_013":
+				sources.reverse() # New coaxial output socket precedes the legacy one.
+			for source in sources:
 				if tyre_body_mount(id, own[source]):
 					continue
 				if source_port >= 0 and source != source_port:
@@ -44,6 +47,11 @@ static func candidates(assembly: Array, id: String, source_port: int = -1) -> Ar
 				if Connections.compatible(own[source].kind, ports[destination].kind):
 					result.append({"part":index, "port":destination, "own":source, "position":Connections.world_port(assembly[index], destination).position})
 					break
+	# Prefer the output socket for a servo horn before its optional mounting holes.
+	# Explicit source selection still lists only that selected hole.
+	if source_port < 0 and id in ["metal_012", "metal_013"]:
+		result.sort_custom(func(a,b):
+			return own[a.own].kind == "servo_socket" and own[b.own].kind != "servo_socket")
 	return result
 
 static func place(assembly: Array, id: String, candidate: Dictionary, twist: float = 0) -> String:

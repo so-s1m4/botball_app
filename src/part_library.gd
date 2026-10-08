@@ -2,6 +2,7 @@ extends RefCounted
 ## Meshes and inventory share stable IDs; dimensions are metres.
 const Connections = preload("res://src/assembly_connections.gd")
 static var parts: Array = []
+static var parts_by_id: Dictionary = {}
 static var models: Dictionary = {}
 static var meshes: Dictionary = {}
 static var materials: Dictionary = {}
@@ -13,15 +14,14 @@ static func ensure_loaded() -> void:
 		return
 	var catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/parts/botball_2026.json"))
 	parts = catalog.parts
+	for part in parts:
+		parts_by_id[part.id] = part
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/parts/models.json"))
 	models = manifest.models
 
 static func find_part(id: String) -> Dictionary:
 	ensure_loaded()
-	for part in parts:
-		if part.id == id:
-			return part
-	return {}
+	return parts_by_id.get(id, {})
 
 static func create_part(id: String) -> Node3D:
 	ensure_loaded()
@@ -86,13 +86,24 @@ static func apply_finish(mat: StandardMaterial3D, part: Dictionary, keep_color: 
 			mat.albedo_color = Color("303b48")
 		if "(black)" in name_lower:
 			mat.albedo_color = Color("34383e")
+		if part.group == "lego":
+			# Technic gears are moulded grey plastic; shafts and friction pins
+			# retain the catalogue's black finish instead of the old yellow tint.
+			if "tooth" in name_lower or "gear" in name_lower or "bush" in name_lower:
+				mat.albedo_color = Color("969a9d")
+			elif "axle" in name_lower or "pin" in name_lower:
+				mat.albedo_color = Color("24272b")
+			elif "liftarm" in name_lower:
+				mat.albedo_color = Color("d7d9d9")
+			elif "plate" in name_lower or "tile" in name_lower:
+				mat.albedo_color = Color("ece9df")
 		if "brass" in name_lower:
 			mat.albedo_color = Color("b99a50")
 	mat.metallic = 0.8 if metal else 0.0
 	mat.roughness = 0.88 if rubber else 0.38 if metal and dark_surface else 0.27 if metal else 0.4
 	mat.normal_enabled = true
 	mat.normal_texture = surface_texture(kind)
-	mat.normal_scale = 0.35 if rubber else 0.12 if metal else 0.08
+	mat.normal_scale = 0.22 if rubber else 0.07 if metal else 0.035
 	mat.uv1_triplanar = true
 	mat.uv1_scale = Vector3.ONE * (280.0 if rubber else 140.0)
 	mat.clearcoat_enabled = not metal and not rubber
@@ -107,14 +118,27 @@ static func thumbnail(id: String) -> Texture2D:
 	return thumbnails.get(id)
 
 static func populate(parent: Node3D, assembly: Array) -> void:
-	for child in parent.get_children():
-		parent.remove_child(child)
-		child.queue_free()
-	for entry in assembly:
-		var part := create_part(entry.id)
-		part.position = Vector3(entry.position[0], entry.position[1], entry.position[2])
-		part.rotation_degrees = Vector3(entry.rotation[0], entry.rotation[1], entry.rotation[2])
-		parent.add_child(part)
+	# Reuse the unchanged models when selecting, moving or appending parts.
+	for index in range(assembly.size()):
+		var entry: Dictionary = assembly[index]
+		var part: Node3D
+		if index < parent.get_child_count() and parent.get_child(index).get_meta("part_id", "") == entry.id:
+			part = parent.get_child(index)
+		else:
+			if index < parent.get_child_count():
+				var old := parent.get_child(index)
+				parent.remove_child(old)
+				old.queue_free()
+			part = create_part(entry.id)
+			part.set_meta("part_id", entry.id)
+			parent.add_child(part)
+			parent.move_child(part, index)
+		part.position = Connections.vector(entry.position)
+		part.rotation_degrees = Connections.vector(entry.rotation)
+	while parent.get_child_count() > assembly.size():
+		var old := parent.get_child(parent.get_child_count()-1)
+		parent.remove_child(old)
+		old.queue_free()
 
 static func validate(assembly: Variant) -> String:
 	ensure_loaded()
