@@ -38,6 +38,7 @@ var advanced_toggle: CheckButton
 var simple_hint: Label
 var step_tabs: HBoxContainer
 var target_buttons: HBoxContainer
+var simple_destination: OptionButton
 var simple_source: OptionButton
 var simple_tools: HBoxContainer
 var step_buttons: Array[Button] = []
@@ -59,7 +60,7 @@ func _ready() -> void:
 	Library.ensure_loaded()
 	title = "Конструктор · Botball 2026"
 	size = Vector2i(1100, 860)
-	min_size = Vector2i(1000, 780)
+	min_size = Vector2i(1000, 640)
 	close_requested.connect(hide)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -69,9 +70,15 @@ func _ready() -> void:
 	var columns := HBoxContainer.new()
 	columns.add_theme_constant_override("separation", 14)
 	margin.add_child(columns)
+	var inventory_scroll := ScrollContainer.new()
+	inventory_scroll.custom_minimum_size.x = 348
+	inventory_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	columns.add_child(inventory_scroll)
 	var inventory := VBoxContainer.new()
 	inventory.custom_minimum_size.x = 332
-	columns.add_child(inventory)
+	inventory.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	inventory.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	inventory_scroll.add_child(inventory)
 	inventory.add_child(caption("ДЕТАЛИ НАБОРА 2026"))
 	search = LineEdit.new()
 	search.placeholder_text = "Название или артикул…"
@@ -117,9 +124,14 @@ func _ready() -> void:
 	inventory.add_child(installed)
 	remove_button = action("Удалить выбранную деталь", remove_part)
 	inventory.add_child(remove_button)
+	var workspace_scroll := ScrollContainer.new()
+	workspace_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	workspace_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	columns.add_child(workspace_scroll)
 	var workspace := VBoxContainer.new()
 	workspace.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	columns.add_child(workspace)
+	workspace.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	workspace_scroll.add_child(workspace)
 	count_label = caption("")
 	var top_row := HBoxContainer.new()
 	workspace.add_child(top_row)
@@ -203,6 +215,7 @@ func _ready() -> void:
 	workspace.add_child(simple_hint)
 	simple_source = OptionButton.new()
 	simple_source.visible = false
+	simple_source.clip_text = true
 	simple_source.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	simple_source.item_selected.connect(func(_index):
 		hover_target = -1
@@ -211,6 +224,24 @@ func _ready() -> void:
 			child.queue_free()
 		refresh_simple_targets())
 	workspace.add_child(simple_source)
+	simple_destination = OptionButton.new()
+	simple_destination.clip_text = true
+	simple_destination.visible = false
+	simple_destination.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	simple_destination.item_selected.connect(func(index):
+		hover_target = index - 1
+		for child in ghost_root.get_children():
+			ghost_root.remove_child(child)
+			child.queue_free()
+		if hover_target >= 0:
+			show_ghost(hover_target))
+	workspace.add_child(simple_destination)
+	var place_button := action("Прикрепить к выбранному отверстию", func():
+		if not pending_id.is_empty() and simple_destination.selected > 0:
+			place_simple(simple_destination.selected - 1))
+	simple_destination.visibility_changed.connect(func(): place_button.visible = simple_destination.visible)
+	place_button.visible = false
+	workspace.add_child(place_button)
 	target_buttons = HBoxContainer.new()
 	workspace.add_child(target_buttons)
 	var templates := HBoxContainer.new()
@@ -364,7 +395,7 @@ func select_catalog(index: int) -> void:
 		simple_source.add_item("Крепление детали: автоматически", -1)
 		var ports := Connections.for_part(pending_id)
 		for i in range(ports.size()):
-			simple_source.add_item("Крепление детали: " + port_label(ports[i], i), i)
+			simple_source.add_item("На детали: №%d · %s · X %.1f, Y %.1f, Z %.1f мм" % [i+1, port_label(ports[i], i), ports[i].position[0]*1000, ports[i].position[1]*1000, ports[i].position[2]*1000], i)
 			var p := Connections.vector(ports[i].position) * 1000
 			simple_source.set_item_tooltip(i+1, "%s · X %.1f, Y %.1f, Z %.1f мм" % [ports[i].get("label", "Точка %d" % (i+1)),p.x,p.y,p.z])
 		simple_source.select(0)
@@ -771,6 +802,7 @@ func cancel_pending(redraw: bool = true) -> void:
 	pending_id = ""
 	if simple_source != null:
 		simple_source.visible = false
+		simple_destination.visible = false
 	hover_target = -1
 	if ghost_root != null:
 		for child in ghost_root.get_children():
@@ -856,12 +888,17 @@ func refresh_simple_targets() -> void:
 		target_buttons.remove_child(button)
 		button.queue_free()
 	simple_targets.clear()
+	simple_destination.clear()
+	simple_destination.add_item("Выбери отверстие на сборке…")
+	simple_destination.visible = false
 	if pending_id.is_empty():
 		return
 	simple_targets = Easy.candidates(assembly, pending_id, -1 if simple_source.selected <= 0 else simple_source.get_selected_id())
 	for candidate_index in range(simple_targets.size()):
 		var candidate: Dictionary = simple_targets[candidate_index]
 		var port: Dictionary = Connections.for_part(assembly[candidate.part].id)[candidate.port]
+		var p: Vector3 = candidate.position * 1000
+		simple_destination.add_item("%s #%d · отверстие №%d · X %.1f, Y %.1f, Z %.1f мм" % [Easy.display_name(assembly[candidate.part].id), candidate.part+1, candidate.port+1, p.x, p.y, p.z])
 		if port.kind in ["motor_mount", "servo_mount", "motor_shaft"]:
 			var title: String = port.get("label", "Установить")
 			if pending_id == "electronics_010":
@@ -883,6 +920,7 @@ func refresh_simple_targets() -> void:
 		mat.no_depth_test = true
 		visual.material_override = mat
 		port_root.add_child(visual)
+	simple_destination.visible = not simple_targets.is_empty()
 	if simple_targets.is_empty():
 		if pending_id in ["electronics_009", "electronics_011"]:
 			simple_hint.text = "Нет свободных отверстий для серво. Добавь платформу или балку."

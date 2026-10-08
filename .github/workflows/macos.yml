@@ -38,6 +38,8 @@ jobs:
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/tires.gd
       - name: Test simple assembly
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/easy.gd
+      - name: Test fullscreen and constructor layout
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/layout.gd
       - name: Test map switching and runtime GLB import
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/maps.gd
       - name: Test assembled robot actuators and programs
@@ -98,6 +100,10 @@ jobs:
           Download Botball-Lab-macOS.dmg, open it and drag Botball Lab.app into Applications.
           To update, quit Botball Lab and replace the previous app. Saved projects are preserved.
           The app checks for newer versions at startup; use «Обновления» to check manually.
+
+          Adds explicit selection of a source hole on a motor or other part and a destination hole on the assembly, with numbered holes, coordinates and a placement preview. Selected motor bolt holes align with the selected platform holes.
+
+          Fixes fullscreen layout: responsive header rows, scrollable constructor panels, window-sized constructor and F11 fullscreen toggle.
 
           Adds LEGO rim and tyre assembly: rim 56145 accepts tyres 55976 and 44309; rim 4185 accepts tyre 70162. Matching seats align the wheel centres, preserve the axle hole and reject incompatible sizes.
 

@@ -51,7 +51,7 @@ func _ready() -> void:
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 14)
 	margin.add_child(root)
-	var header := HBoxContainer.new()
+	var header := HFlowContainer.new()
 	header.add_theme_constant_override("separation", 12)
 	root.add_child(header)
 	var title := label("BOTBALL  /  LAB", 26)
@@ -72,7 +72,7 @@ func _ready() -> void:
 	var left := VBoxContainer.new()
 	left.size_flags_horizontal = SIZE_EXPAND_FILL
 	columns.add_child(left)
-	var info := HBoxContainer.new()
+	var info := HFlowContainer.new()
 	left.add_child(info)
 	map_selector = OptionButton.new()
 	for name in ["Учебный стол", "Полоса препятствий", "Своя карта (.glb)…"]:
@@ -235,6 +235,11 @@ func pressed(first: Key, second: Key) -> bool:
 	return Input.is_physical_key_pressed(first) or Input.is_physical_key_pressed(second)
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F11:
+		var window := get_window()
+		window.mode = Window.MODE_WINDOWED if window.mode == Window.MODE_FULLSCREEN else Window.MODE_FULLSCREEN
+		get_viewport().set_input_as_handled()
+		return
 	if program_editor.visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -390,7 +395,7 @@ func build_theme() -> void:
 func open_constructor() -> void:
 	sim.reset_attempt()
 	assembly_editor.set_assembly(sim.robot.assembly)
-	assembly_editor.popup_centered()
+	assembly_editor.popup_centered_ratio(0.9)
 
 func select_map(index: int) -> void:
 	if syncing_map:

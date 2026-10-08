@@ -121,6 +121,10 @@ func run() -> void:
 	editor.simple_source.select(3)
 	editor.simple_source.item_selected.emit(3)
 	check(not editor.simple_targets.is_empty() and editor.simple_targets[0].own == 2, "Simple targets respect selected source hole")
+	check(editor.simple_destination.visible and editor.simple_destination.item_count == editor.simple_targets.size()+1, "Every destination has an explicit list entry")
+	editor.simple_destination.select(1)
+	editor.simple_destination.item_selected.emit(1)
+	check(editor.hover_target == 0 and editor.ghost_root.get_child_count() == 1, "Destination selection previews exact selected hole")
 	editor.show_ghost(0)
 	check(editor.ghost_root.get_child_count() == 1, "Preview direct hole attachment")
 	editor.place_simple(0)
@@ -132,6 +136,19 @@ func run() -> void:
 	var sensor: Array = [{"id":"metal_007","position":[0,0,0],"rotation":[0,0,0]}]
 	check(not Easy.candidates(sensor,"electronics_001").is_empty(), "Previously unmarked sensor can attach by its body")
 	check(Easy.place(sensor,"electronics_001",Easy.candidates(sensor,"electronics_001")[8]).is_empty() and Library.validate(sensor).is_empty(), "Sensor body attachment remains valid")
+	for own in [2,3]:
+		var fitted_hole := false
+		var base: Array = [{"id":"metal_007","position":[0,0,0],"rotation":[0,0,0]}]
+		for candidate in Easy.candidates(base,"electronics_010",own):
+			var motor_assembly := base.duplicate(true)
+			if Easy.install_motor(motor_assembly,candidate).is_empty():
+				var source := Connections.world_port(motor_assembly[1],own)
+				var destination := Connections.world_port(motor_assembly[0],candidate.port)
+				check(source.position.distance_to(destination.position) < .0001, "Selected motor hole aligns exactly to selected platform hole")
+				check(Library.validate(motor_assembly).is_empty(), "Explicit motor hole mount remains valid")
+				fitted_hole = true
+				break
+		check(fitted_hole, "Each motor bolt hole can be selected for mounting")
 	var ready := Easy.default_robot()
 	check(ready.size() == 9 and Library.validate(ready).is_empty(), "Working default robot contains actual parts and screws")
 	check(preload("res://src/assembly_runtime.gd").inspect(ready).can_drive, "Default robot drives with assembled motors")
