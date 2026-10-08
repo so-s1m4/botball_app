@@ -101,12 +101,14 @@ func _ready() -> void:
 	sim = Simulation.new()
 	viewport.add_child(sim)
 	view_container.gui_input.connect(camera_input)
-	left.add_child(label("Камера: ПКМ — вращать · Shift+ПКМ — сдвиг · колесо — приблизить · F — робот", 13, Color("93a9bd")))
+	var camera_hint := label("Камера: ПКМ — вращать · Shift+ПКМ — сдвиг · колесо — приблизить · F — робот", 13, Color("93a9bd"))
+	camera_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	left.add_child(camera_hint)
 	var sidebar := VBoxContainer.new()
-	sidebar.custom_minimum_size.x = 310
+	sidebar.custom_minimum_size.x = 360
 	sidebar.add_theme_constant_override("separation", 10)
 	var sidebar_scroll := ScrollContainer.new()
-	sidebar_scroll.custom_minimum_size.x = 326
+	sidebar_scroll.custom_minimum_size.x = 376
 	sidebar_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	columns.add_child(sidebar_scroll)
 	sidebar_scroll.add_child(sidebar)
@@ -178,7 +180,7 @@ func _ready() -> void:
 	log_text.custom_minimum_size.y = 70
 	log_text.size_flags_vertical = SIZE_EXPAND_FILL
 	log_text.scroll_following = true
-	log_text.add_theme_font_size_override("normal_font_size", 14)
+	log_text.add_theme_font_size_override("normal_font_size", 18)
 	sidebar.add_child(log_text)
 	var footer := label("Учебные размеры и правила. Упрощённая физика; автопилот использует известные координаты поля.", 12, Color("93a9bd"))
 	footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -381,14 +383,14 @@ func setting(parent: VBoxContainer, text: String, low: float, high: float, step_
 func label(text: String, size: int, color := Color("e6eef6")) -> Label:
 	var result := Label.new()
 	result.text = text
-	result.add_theme_font_size_override("font_size", size + 2)
+	result.add_theme_font_size_override("font_size", roundi((size + 2) * 1.2))
 	result.add_theme_color_override("font_color", color)
 	return result
 
 func button(text: String, action: Callable, primary := false) -> Button:
 	var result := Button.new()
 	result.text = text
-	result.custom_minimum_size.y = 40
+	result.custom_minimum_size.y = 48
 	result.focus_mode = Control.FOCUS_NONE
 	result.pressed.connect(action)
 	if primary:
@@ -402,13 +404,13 @@ func style(color: Color) -> StyleBoxFlat:
 	box.set_corner_radius_all(6)
 	box.content_margin_left = 12
 	box.content_margin_right = 12
-	box.content_margin_top = 8
-	box.content_margin_bottom = 8
+	box.content_margin_top = 10
+	box.content_margin_bottom = 10
 	return box
 
 func build_theme() -> void:
 	theme = Theme.new()
-	theme.default_font_size = 16
+	theme.default_font_size = 20
 	theme.set_color("font_color", "Label", Color("e6eef6"))
 	for state in ["normal", "hover", "pressed", "disabled"]:
 		theme.set_stylebox(state, "Button", style(Color("3d4652") if state == "hover" else Color("282e37")))

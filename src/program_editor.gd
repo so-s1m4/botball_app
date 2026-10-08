@@ -30,7 +30,7 @@ func _ready() -> void:
 	ports = Label.new()
 	ports.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	layout.add_child(ports)
-	var toolbar := HBoxContainer.new()
+	var toolbar := HFlowContainer.new()
 	layout.add_child(toolbar)
 	run_button = action("Запустить на карте",func():run_requested.emit(code.text))
 	toolbar.add_child(run_button)
@@ -46,7 +46,7 @@ func _ready() -> void:
 	code.gutters_draw_line_numbers = true
 	code.indent_size = 4
 	code.indent_use_spaces = true
-	code.add_theme_font_size_override("font_size",18)
+	code.add_theme_font_size_override("font_size",22)
 	code.text = initial_source
 	code.text_changed.connect(func():source_changed.emit(code.text))
 	layout.add_child(code)
@@ -65,7 +65,7 @@ func _ready() -> void:
 func action(text: String, callback: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.custom_minimum_size.y = 40
+	button.custom_minimum_size.y = 48
 	button.pressed.connect(callback)
 	return button
 func set_source(source: String) -> void:

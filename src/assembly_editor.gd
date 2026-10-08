@@ -39,7 +39,7 @@ var picked_ports: Array = []
 var advanced: VBoxContainer
 var advanced_toggle: CheckButton
 var simple_hint: Label
-var step_tabs: HBoxContainer
+var step_tabs: HFlowContainer
 var target_buttons: HFlowContainer
 var simple_destination: OptionButton
 var simple_source: OptionButton
@@ -83,11 +83,11 @@ func _ready() -> void:
 	columns.add_theme_constant_override("separation", 14)
 	margin.add_child(columns)
 	var inventory_scroll := ScrollContainer.new()
-	inventory_scroll.custom_minimum_size.x = 348
+	inventory_scroll.custom_minimum_size.x = 388
 	inventory_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	columns.add_child(inventory_scroll)
 	var inventory := VBoxContainer.new()
-	inventory.custom_minimum_size.x = 332
+	inventory.custom_minimum_size.x = 372
 	inventory.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	inventory.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	inventory_scroll.add_child(inventory)
@@ -101,11 +101,11 @@ func _ready() -> void:
 		category.add_item(text)
 	category.item_selected.connect(func(_index): refresh_catalog())
 	inventory.add_child(category)
-	step_tabs = HBoxContainer.new()
+	step_tabs = HFlowContainer.new()
 	inventory.add_child(step_tabs)
 	for i in range(Easy.GROUPS.size()):
 		var tab := action(Easy.GROUPS[i], choose_step.bind(i))
-		tab.add_theme_font_size_override("font_size", 13)
+		tab.add_theme_font_size_override("font_size", 16)
 		tab.toggle_mode = true
 		step_buttons.append(tab)
 		step_tabs.add_child(tab)
@@ -116,11 +116,11 @@ func _ready() -> void:
 	catalog.custom_minimum_size.y = 160
 	catalog.max_columns = 2
 	catalog.same_column_width = true
-	catalog.fixed_column_width = 148
+	catalog.fixed_column_width = 166
 	catalog.icon_mode = ItemList.ICON_MODE_TOP
 	catalog.fixed_icon_size = Vector2i(140, 104)
 	catalog.max_text_lines = 3
-	catalog.add_theme_font_size_override("font_size", 14)
+	catalog.add_theme_font_size_override("font_size", 18)
 	catalog.item_selected.connect(select_catalog)
 	inventory.add_child(catalog)
 	details = caption("Выбери деталь для просмотра в 3D")
@@ -199,7 +199,7 @@ func _ready() -> void:
 	workspace.add_child(camera_hint)
 	simple_hint = caption("1. Выбери платформу на картинке и нажми «Взять платформу».")
 	simple_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	simple_hint.add_theme_font_size_override("font_size", 20)
+	simple_hint.add_theme_font_size_override("font_size", 24)
 	workspace.add_child(simple_hint)
 	simple_source = OptionButton.new()
 	simple_source.visible = false
@@ -253,8 +253,8 @@ func _ready() -> void:
 	history_tools.add_child(redo_button)
 	simple_tools.add_child(action("Отложить", cancel_pending))
 	for tool in simple_tools.get_children():
-		tool.add_theme_font_size_override("font_size", 16)
-		tool.custom_minimum_size.y = 40
+		tool.add_theme_font_size_override("font_size", 20)
+		tool.custom_minimum_size.y = 48
 	advanced_toggle = CheckButton.new()
 	advanced_toggle.text = "Дополнительно: координаты и отдельные крепления"
 	advanced_toggle.toggled.connect(toggle_advanced)
@@ -640,6 +640,7 @@ func caption(text: String) -> Label:
 func action(text: String, callback: Callable) -> Button:
 	var result := Button.new()
 	result.text = text
+	result.custom_minimum_size.y = 48
 	result.pressed.connect(callback)
 	return result
 
@@ -956,7 +957,7 @@ func refresh_simple_targets() -> void:
 			elif pending_id == "electronics_018":
 				title = "Надеть колесо · мотор %d" % (candidate.part+1)
 			var button := action(title, func():place_simple(candidate_index))
-			button.custom_minimum_size.y = 42
+			button.custom_minimum_size.y = 48
 			target_buttons.add_child(button)
 	if not simple_targets.is_empty():
 		# All target dots share one mesh, material and draw call.
