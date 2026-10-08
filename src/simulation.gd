@@ -25,7 +25,7 @@ var paused_commands: Dictionary = {}
 var map_ground := 0.0
 var robot_spawn_y := .015
 var cube_spawn_y := .10
-var robot: CharacterBody3D
+var robot: RigidBody3D
 var cube: RigidBody3D
 var elapsed := 0.0
 var score := 0
@@ -163,11 +163,13 @@ func toggle_pause() -> void:
 	paused = not paused
 	if paused:
 		paused_commands = {"left":robot.left_command,"right":robot.right_command,"motors":robot.motor_commands.duplicate()}
-		robot.stop()
+		robot.pause_physics(true)
 	elif program_mode and not paused_commands.is_empty():
 		robot.left_command = paused_commands.left
 		robot.right_command = paused_commands.right
 		robot.motor_commands = paused_commands.motors.duplicate()
+	if not paused:
+		robot.pause_physics(false)
 	cube.freeze = paused or robot.carrying
 	event.emit("Пауза" if paused else "Продолжение")
 	changed.emit()
@@ -229,7 +231,10 @@ func navigate(target: Vector3, tolerance: float) -> bool:
 	var heading := atan2(-offset.x, -offset.z)
 	var error := wrapf(heading - robot.rotation.y, -PI, PI)
 	var forward := clampf(offset.length() * 1.8, 0.08, 0.75) if absf(error) < 0.35 else 0.0
-	robot.drive(forward, clampf(error * 1.4, -0.75, 0.75))
+	var turn := clampf(error*1.4,-.75,.75)
+	if absf(error)>.03:
+		turn = signf(error)*maxf(absf(turn),.12/maxf(robot.max_speed,.1))
+	robot.drive(forward,clampf(turn,-.75,.75))
 	return false
 
 func orient(heading: float) -> bool:
@@ -237,7 +242,8 @@ func orient(heading: float) -> bool:
 	if absf(error) < 0.03:
 		robot.stop()
 		return true
-	robot.drive(0, clampf(error * 1.5, -0.6, 0.6))
+	var turn := signf(error)*maxf(absf(error)*1.5,.12/maxf(robot.max_speed,.1))
+	robot.drive(0,clampf(turn,-.75,.75))
 	return false
 
 func cube_in_goal() -> bool:
@@ -253,6 +259,7 @@ func finish(message: String) -> void:
 	if program != null:
 		program.running = false
 	robot.stop()
+	robot.freeze = true
 	event.emit(message)
 	changed.emit()
 

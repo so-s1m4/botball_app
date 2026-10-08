@@ -269,6 +269,7 @@ func apply_settings() -> void:
 	sim.seed_value = int(seed_input.value)
 
 func update_status() -> void:
+	hardware_label.text = sim.robot.hardware_status() + "\n" + sim.robot.physics_status()
 	score_label.text = "%d / 100" % sim.score
 	timer_label.text = "%.1f с" % (sim.elapsed if sim.program_mode else sim.LIMIT - sim.elapsed)
 	status_label.text = "Пауза" if sim.paused else ("Программа" if sim.program_mode else "Автономно" if sim.autonomous else "Вручную") if sim.running else ("Доставлено" if sim.score > 0 else "Готов к запуску" if sim.elapsed == 0 else "Попытка завершена")

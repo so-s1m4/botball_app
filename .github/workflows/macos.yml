@@ -42,6 +42,8 @@ jobs:
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/programs.gd --fixed-fps 120
       - name: Test ready robot on application startup
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/starter.gd --fixed-fps 120
+      - name: Test mass, balance, traction and tipping
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/physics.gd --fixed-fps 120
       - name: Test update checker
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/updates.gd
       - name: Build universal macOS app
@@ -95,9 +97,11 @@ jobs:
           To update, quit Botball Lab and replace the previous app. Saved projects are preserved.
           The app checks for newer versions at startup; use «Обновления» to check manually.
 
+          Adds force-driven rigid-body physics: estimated part masses, center of gravity, inertia, wheel traction/slip, gravity and tipping. Moving servo payloads update balance; the interface shows mass, lateral balance, tilt and a center-of-gravity marker. Physics regressions cover air traction, overhanging weight, pause/reset and collisions. Wheel joints, mass values and contact loads remain approximate.
+
           Starts with a working assembled robot: platform, two fastened motors and two wheels. Restore it with «Готовый робот» or start an empty build with «Собрать с нуля». Motor placement offers large left/right buttons and adds both inventory screws automatically. Corrected chassis side walls and motor output direction; all 156 models have crease-aware surface normals, with detailed estimated fasteners, chamfered electronics and studio reflections. Old standard robot projects are realigned on opening.
 
-          Includes a Python-like code editor: numbered motor and servo control, wait, drive, stop, variables, loops, conditions, print, virtual distance and encoder readings. Assembled motors/wheels drive the robot with its measured track; servo output rotates its attached horn. Programs are saved with projects. The physics and motor mounts remain simplified.
+          Includes a Python-like code editor: numbered motor and servo control, wait, drive, stop, variables, loops, conditions, print, virtual distance and encoder readings. Assembled motors/wheels drive the robot with its measured track; servo output rotates its attached horn. Programs are saved with projects. Motor mounts remain approximate.
 
           Includes simple assembly: choose a platform, flip it, click highlighted motor mounts, fasten with inventory screws, and attach wheels. Placement preview and undo are included; the advanced connector editor remains available. Motor mounting locations are approximate teaching geometry.
 
@@ -105,7 +109,7 @@ jobs:
 
           Includes a picture catalog for all 156 installable parts and textured plastic, metal and rubber finishes.
 
-          Includes connection-based assembly: LEGO pins, axles, studs and 8-32/M3 fasteners. Connected groups move together and connections are saved with the project. Some connection geometry is approximate; full mechanical dynamics is not included.
+          Includes connection-based assembly: LEGO pins, axles, studs and 8-32/M3 fasteners. Connected groups move together and connections are saved with the project. Some connection geometry is approximate; gear engagement and compliant joints are not included.
           This build has an ad-hoc signature and is not Apple-notarized.
           Source code and third-party model licenses are included in this repository.
           NOTES
