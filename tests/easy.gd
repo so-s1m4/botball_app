@@ -83,7 +83,9 @@ func run() -> void:
 	var legacy: Array = [{"id":"metal_007","position":[0,0,0],"rotation":[0,0,0]}]
 	for side in range(2):
 		check(Easy.place(legacy,"electronics_010",Easy.candidates(legacy,"electronics_010")[0]).is_empty(), "Legacy motor placement")
-		check(Easy.fasten_motor(legacy,legacy.size()-1).is_empty(), "Legacy fastening")
+		var old_motor := legacy.size()-1
+		for hole in [2,3]:
+			check(Easy.place(legacy,"metal_015",{"part":old_motor,"port":hole,"own":0}).is_empty(), "Legacy fastening fixture")
 		check(Easy.place(legacy,"electronics_018",Easy.candidates(legacy,"electronics_018")[0]).is_empty(), "Legacy wheel placement")
 	Connections.ports = current_ports
 	var legacy_file := FileAccess.open(filename,FileAccess.WRITE)
@@ -94,14 +96,24 @@ func run() -> void:
 	if not upgraded.has("error"):
 		check(Library.validate(upgraded.assembly).is_empty(), "Migrated motor and wheel geometry aligns")
 	DirAccess.remove_absolute(filename)
-	# Every platform face can accept a motor body, with persistent geometry.
+	# A single selected hole does not guarantee that both motor screws fit.
+	var fitted := 0
+	var rejected := 0
 	for destination in range(Connections.for_part("metal_007").size()):
 		if not Connections.is_hole(Connections.for_part("metal_007")[destination].kind):
 			continue
 		var custom: Array = [{"id":"metal_007","position":[0,0,0],"rotation":[0,0,0]}]
-		check(Easy.install_motor(custom,{"part":0,"port":destination,"own":0},90).is_empty(), "Motor fits any platform hole face")
-		check(custom.size() == 4 and Library.validate(custom).is_empty(), "Arbitrary motor mount includes screws and valid links")
-		check(Connections.occupied(custom,0,destination), "Arbitrary motor consumes its chosen hole")
+		var original := custom.duplicate(true)
+		var error := Easy.install_motor(custom,{"part":0,"port":destination,"own":0},0)
+		if error.is_empty():
+			fitted += 1
+			check(custom.size() == 4 and Library.validate(custom).is_empty(), "Matched motor mount includes screws and valid links")
+			for h in [2,3]:
+				check(Easy.matching_screw(custom,1,h) >= 0, "Both screws pass through actual platform holes")
+		else:
+			rejected += 1
+			check(custom == original, "Misaligned screw pair leaves assembly unchanged")
+	check(fitted > 0 and rejected > 0, "Only geometrically matching motor placements succeed")
 	editor.set_assembly([{"id":"metal_007","position":[0,0,0],"rotation":[0,0,0]}])
 	editor.choose_step(4)
 	editor.select_catalog(editor.catalog_ids.find("metal_001"))

@@ -15,6 +15,9 @@ static func in_group(part: Dictionary, group: int) -> bool:
 static func display_name(id: String) -> String:
 	return {"metal_007":"Платформа робота", "electronics_010":"Мотор", "electronics_009":"Сервомотор", "electronics_011":"Маленький сервомотор", "electronics_018":"Колесо Solarbotics", "metal_015":"Винт крепления мотора", "metal_012":"Круглый рычаг серво", "metal_013":"Длинный рычаг серво"}.get(id, Library.find_part(id).get("name", id))
 
+static func tyre_body_mount(id: String, port: Dictionary) -> bool:
+	return id in ["lego_55976", "lego_44309", "lego_70162"] and port.kind == "body_mount"
+
 static func candidates(assembly: Array, id: String, source_port: int = -1) -> Array:
 	var result: Array = []
 	var own := Connections.for_part(id)
@@ -27,11 +30,15 @@ static func candidates(assembly: Array, id: String, source_port: int = -1) -> Ar
 			var b_mount: bool = ports[b].kind in ["motor_mount", "servo_mount"]
 			return a < b if a_mount == b_mount else a_mount)
 		for destination in destinations:
+			if tyre_body_mount(assembly[index].id, ports[destination]):
+				continue
 			if ports[destination].kind == "motor_shaft" and not fastening_ports(assembly, index).is_empty():
 				continue
 			if Connections.occupied(assembly, index, destination):
 				continue
 			for source in range(own.size()):
+				if tyre_body_mount(id, own[source]):
+					continue
 				if source_port >= 0 and source != source_port:
 					continue
 				if Connections.compatible(own[source].kind, ports[destination].kind):
@@ -68,9 +75,36 @@ static func fastening_ports(assembly: Array, index: int) -> Array[int]:
 	var result: Array[int] = []
 	var ports := Connections.for_part(assembly[index].id)
 	for i in range(ports.size()):
-		if ports[i].get("purpose", "") == "motor_fastener" and not Connections.occupied(assembly, index, i):
+		if ports[i].get("purpose", "") == "motor_fastener" and not Connections.occupied(assembly, index, i) and matching_screw(assembly, index, i) < 0:
 			result.append(i)
 	return result
+
+static func matching_screw(assembly: Array, motor: int, hole: int) -> int:
+	var target := Connections.world_port(assembly[motor], hole)
+	for member in Connections.component(assembly, motor):
+		if assembly[member].id != "metal_015":
+			continue
+		var screw := Connections.world_port(assembly[member], 0)
+		var delta: Vector3 = screw.position - target.position
+		if delta.cross(target.normal).length() < .0001 and absf(delta.dot(target.normal)) <= .0016:
+			return member
+	return -1
+
+static func platform_fastener(assembly: Array, motor: int, hole: int) -> Dictionary:
+	var target := Connections.world_port(assembly[motor], hole)
+	for member in Connections.component(assembly, motor):
+		if member == motor or assembly[member].id == "metal_015":
+			continue
+		var ports := Connections.for_part(assembly[member].id)
+		for i in range(ports.size()):
+			if ports[i].kind != "hole_8_32" or Connections.occupied(assembly, member, i):
+				continue
+			var point := Connections.world_port(assembly[member], i)
+			var delta: Vector3 = point.position - target.position
+			# Enter from the opposite sheet face, through the sheet into the motor.
+			if point.normal.dot(target.normal) > .999 and delta.cross(target.normal).length() < .0001 and delta.dot(target.normal) >= -.0001 and delta.dot(target.normal) <= .0016:
+				return {"part":member, "port":i, "own":0}
+	return {}
 
 static func fasten_motor(assembly: Array, index: int) -> String:
 	if index < 0 or index >= assembly.size() or assembly[index].id != "electronics_010":
@@ -88,7 +122,11 @@ static func fasten_motor(assembly: Array, index: int) -> String:
 		return "Сначала установи мотор: выбери свободное отверстие или место «Слева» / «Справа»"
 	var snapshot := assembly.duplicate(true)
 	for hole in holes:
-		var error := place(assembly, "metal_015", {"part":index,"port":hole,"own":0})
+		var candidate := platform_fastener(assembly, index, hole)
+		if candidate.is_empty():
+			assembly.assign(snapshot)
+			return "Отверстия под оба винта не совпадают. Выбери другое отверстие или поверни мотор."
+		var error := place(assembly, "metal_015", candidate)
 		if not error.is_empty():
 			assembly.assign(snapshot)
 			return error

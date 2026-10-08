@@ -135,6 +135,15 @@ for part in catalog:
                 for sign in (-1,1):
                     p=[0,sy/2,0]; n=[0,0,0]; n[axis]=sign; p[axis]+=sign*meta['size'][axis]/2
                     ports.append(port('nut_'+thread,p,n,'estimated'))
+    # Tyre seats are independent of axle holes and share the model centre.
+    # Append ports so saved axle connections keep their existing indices.
+    wheel_seats = {
+        'lego_56145': ('rim_30_4', (0, 0, 1)),
+        'lego_4185': ('rim_24', (0, 0, 1)),
+    }
+    if id in wheel_seats:
+        kind, normal = wheel_seats[id]
+        ports.append(port(kind, (0, sy/2, 0), normal, 'ldraw'))
     # Collapse duplicate semantic references; stable indexing is persisted in projects.
     unique={ (p['kind'],tuple(p['position']),tuple(p['normal'])):p for p in ports }
     result[id]=list(unique.values())

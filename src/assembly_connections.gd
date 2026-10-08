@@ -1,7 +1,7 @@
 extends RefCounted
 ## Connections refer to stable inventory instance and port indices.
 static var ports: Dictionary = {}
-const LABELS := {"pin_hole":"Отверстие для пина", "axle_hole":"Крестовое отверстие", "pin":"Пин", "axle":"Ось", "stud":"Шип LEGO", "stud_socket":"Гнездо LEGO", "hole_8_32":"Отверстие 8-32", "bolt_8_32":"Винт 8-32", "bolt_m3":"Винт M3", "thread_8_32":"Резьба 8-32", "thread_m3":"Резьба M3", "nut_8_32":"Гайка / стойка 8-32", "nut_m3":"Гайка M3", "motor_mount":"Место для мотора", "motor_body_mount":"Крепление мотора", "motor_shaft":"Вал мотора", "motor_wheel_socket":"Ступица колеса", "body_mount":"Крепление корпуса", "servo_mount":"Место для серво", "servo_body_mount":"Крепление серво", "servo_output":"Выход серво", "servo_socket":"Крепление рычага"}
+const LABELS := {"rim_30_4":"Посадка шины на диск 30,4 мм", "tire_30_4":"Посадка шины 30,4 мм", "rim_24":"Посадка шины на диск 24 мм", "tire_24":"Посадка шины 24 мм", "pin_hole":"Отверстие для пина", "axle_hole":"Крестовое отверстие", "pin":"Пин", "axle":"Ось", "stud":"Шип LEGO", "stud_socket":"Гнездо LEGO", "hole_8_32":"Отверстие 8-32", "bolt_8_32":"Винт 8-32", "bolt_m3":"Винт M3", "thread_8_32":"Резьба 8-32", "thread_m3":"Резьба M3", "nut_8_32":"Гайка / стойка 8-32", "nut_m3":"Гайка M3", "motor_mount":"Место для мотора", "motor_body_mount":"Крепление мотора", "motor_shaft":"Вал мотора", "motor_wheel_socket":"Ступица колеса", "body_mount":"Крепление корпуса", "servo_mount":"Место для серво", "servo_body_mount":"Крепление серво", "servo_output":"Выход серво", "servo_socket":"Крепление рычага"}
 
 static func ensure_loaded() -> void:
 	if ports.is_empty():
@@ -25,7 +25,7 @@ static func compatible(a: String, b: String) -> bool:
 		return true
 	if a in ["motor_body_mount", "servo_body_mount", "body_mount"] and is_hole(b) or b in ["motor_body_mount", "servo_body_mount", "body_mount"] and is_hole(a):
 		return true
-	var pairs := [["servo_mount", "servo_body_mount"], ["servo_output", "servo_socket"], ["motor_mount", "motor_body_mount"], ["motor_shaft", "motor_wheel_socket"], ["pin", "pin_hole"], ["axle", "axle_hole"], ["axle", "pin_hole"], ["stud", "stud_socket"], ["bolt_8_32", "hole_8_32"], ["thread_8_32", "nut_8_32"], ["thread_m3", "nut_m3"]]
+	var pairs := [["rim_30_4", "tire_30_4"], ["rim_24", "tire_24"], ["servo_mount", "servo_body_mount"], ["servo_output", "servo_socket"], ["motor_mount", "motor_body_mount"], ["motor_shaft", "motor_wheel_socket"], ["pin", "pin_hole"], ["axle", "axle_hole"], ["axle", "pin_hole"], ["stud", "stud_socket"], ["bolt_8_32", "hole_8_32"], ["thread_8_32", "nut_8_32"], ["thread_m3", "nut_m3"]]
 	for pair in pairs:
 		if (a == pair[0] and b == pair[1]) or (a == pair[1] and b == pair[0]):
 			return true
@@ -51,7 +51,9 @@ static func shares_socket(id: String, a: int, b: int) -> bool:
 	if first.kind != second.kind or not (first.kind.ends_with("hole") or first.kind.begins_with("hole_") or first.kind.begins_with("nut_")):
 		return false
 	var normal := vector(first.normal)
-	return absf(normal.dot(vector(second.normal))) > .999 and (vector(second.position)-vector(first.position)).cross(normal).length() < .0001
+	var delta := vector(second.position) - vector(first.position)
+	# Separate channel walls are distinct holes even when their axes line up.
+	return absf(normal.dot(vector(second.normal))) > .999 and delta.cross(normal).length() < .0001 and absf(delta.dot(normal)) <= .016
 
 static func occupied(assembly: Array, index: int, port_index: int) -> bool:
 	for link in assembly[index].get("links", []):

@@ -34,6 +34,8 @@ jobs:
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/parts.gd
       - name: Test mechanical connections
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/connections.gd
+      - name: Test LEGO tyre assembly
+        run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/tires.gd
       - name: Test simple assembly
         run: /tmp/godot-bin/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --script tests/easy.gd
       - name: Test map switching and runtime GLB import
@@ -96,6 +98,10 @@ jobs:
           Download Botball-Lab-macOS.dmg, open it and drag Botball Lab.app into Applications.
           To update, quit Botball Lab and replace the previous app. Saved projects are preserved.
           The app checks for newer versions at startup; use «Обновления» to check manually.
+
+          Adds LEGO rim and tyre assembly: rim 56145 accepts tyres 55976 and 44309; rim 4185 accepts tyre 70162. Matching seats align the wheel centres, preserve the axle hole and reject incompatible sizes.
+
+          Corrects motor fastening: both screws must line up with actual platform holes; invalid placements are rejected without changing the assembly. Opposite chassis walls have independent hole occupancy.
 
           Allows direct rigid attachment through any free marked holes, including LEGO beams and metal sheets. Motors and servos can be placed at arbitrary holes; motor fastening remains automatic. Simple mode offers a source attachment selector, click-to-place target holes, preview and undo. Both hole faces share occupancy; saved projects and physics preserve the new connections. Direct hole joints and motor mounting hardware remain approximate.
 
