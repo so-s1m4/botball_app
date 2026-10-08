@@ -3,6 +3,7 @@ const Editor = preload("res://src/assembly_editor.gd")
 const Easy = preload("res://src/easy_assembly.gd")
 const Library = preload("res://src/part_library.gd")
 const Connections = preload("res://src/assembly_connections.gd")
+const Clearance = preload("res://src/fastener_clearance.gd")
 const Store = preload("res://src/project_store.gd")
 var failures := 0
 func check(condition: bool, message: String) -> void:
@@ -29,10 +30,39 @@ func check_motor_flange(assembly: Array, motor: int) -> void:
 			check(not blocked, "Screw shaft passes through visible motor slot")
 		var screw := Easy.matching_screw(assembly,motor,hole)
 		check(screw >= 0, "Visible slot has a coaxial screw")
+		if screw >= 0:
+			check(not Clearance.intersects_motor(Connections.transform(assembly[screw]),Connections.transform(assembly[motor])), "Complete shaft and head clear the motor case")
+
+# Historical fixtures deliberately contain the intersections now rejected by the editor.
+func historical_screw(assembly: Array, motor: int, hole: int) -> void:
+	var target := Connections.world_port(assembly[motor],hole)
+	var basis := Basis(Quaternion(Vector3.DOWN,-target.normal))
+	var screw := assembly.size()
+	assembly.append({"id":"metal_015","position":[0,0,0],"rotation":[0,0,0],"links":[{"port":0,"other":motor,"other_port":hole}]})
+	Connections.set_transform(assembly[screw],Transform3D(basis,target.position-basis*Vector3(0,.00635,0)))
+	assembly[motor].links.append({"port":hole,"other":screw,"other_port":0})
 
 func _initialize() -> void:
 	call_deferred("run")
 func run() -> void:
+	# A real sheet hole may aim a bolt into a nearby motor case.
+	var sheet: Array = [{"id":"metal_001","position":[0,0,0],"rotation":[0,0,0]}]
+	var clearance_candidate: Dictionary = Easy.candidates(sheet,"metal_015")[0]
+	check(Easy.place(sheet,"metal_015",clearance_candidate).is_empty(), "Clear sheet accepts a bolt")
+	var bolt_pose := Connections.transform(sheet.back())
+	var bad_relative := Transform3D(Basis(Vector3.FORWARD,-PI/2),Vector3(.012,.01,-.00508))
+	var motor_pose := bolt_pose * bad_relative.affine_inverse()
+	check(Clearance.intersects_motor(bolt_pose,motor_pose), "Full bolt intersects the imported solid motor case")
+	var blocked: Array = [sheet[0].duplicate(true),{"id":"electronics_010","position":[0,0,0],"rotation":[0,0,0]}]
+	blocked[0].erase("links")
+	Connections.set_transform(blocked[1],motor_pose)
+	var original_blocked := blocked.duplicate(true)
+	check(not Easy.place(blocked,"metal_015",clearance_candidate).is_empty() and blocked == original_blocked, "Case penetration is rejected without consuming a bolt or moving parts")
+	var separate_motor: Array = sheet.duplicate(true)
+	separate_motor.append({"id":"electronics_010","position":[.3,0,0],"rotation":[0,0,0]})
+	check(not Connections.fastener_move_error(separate_motor,2,motor_pose * Connections.transform(separate_motor[2]).affine_inverse()).is_empty(), "Moving a motor onto an existing bolt is also rejected")
+	var enclosed := Transform3D(Basis(Vector3.FORWARD,-PI/2),Vector3(-.01,.027,-.00508))
+	check(Clearance.intersects_motor(enclosed,Transform3D.IDENTITY), "A bolt entirely inside the case is rejected")
 	var editor := Editor.new()
 	editor.visible = false
 	root.add_child(editor)
@@ -107,7 +137,7 @@ func run() -> void:
 		check(Easy.place(legacy,"electronics_010",Easy.candidates(legacy,"electronics_010")[0]).is_empty(), "Legacy motor placement")
 		var old_motor := legacy.size()-1
 		for hole in [2,3]:
-			check(Easy.place(legacy,"metal_015",{"part":old_motor,"port":hole,"own":0}).is_empty(), "Legacy fastening fixture")
+			historical_screw(legacy,old_motor,hole)
 		check(Easy.place(legacy,"electronics_018",Easy.candidates(legacy,"electronics_018")[0]).is_empty(), "Legacy wheel placement")
 	Connections.ports = current_ports
 	var legacy_file := FileAccess.open(filename,FileAccess.WRITE)
@@ -120,11 +150,23 @@ func run() -> void:
 	DirAccess.remove_absolute(filename)
 	# Revision 2 robots must realign motors, attached wheels and screws on opening.
 	var corrected_ports := Connections.ports
+	var old_robot := Easy.default_robot()
 	Connections.ports = corrected_ports.duplicate(true)
 	for index in [0,2,3]:
 		Connections.ports.electronics_010[index].position[0] = .0187939
 		Connections.ports.electronics_010[index].position[2] = 0.0
-	var old_robot := Easy.default_robot()
+	for index in range(old_robot.size()):
+		if old_robot[index].id != "electronics_010":
+			continue
+		var pose := Connections.transform(old_robot[index])
+		var shift := pose.basis * Vector3(.0108153-.0187939,0,-.00508)
+		pose.origin += shift
+		Connections.set_transform(old_robot[index],pose)
+		for link in old_robot[index].links:
+			if old_robot[int(link.other)].id == "electronics_018":
+				var wheel_pose := Connections.transform(old_robot[int(link.other)])
+				wheel_pose.origin += shift
+				Connections.set_transform(old_robot[int(link.other)],wheel_pose)
 	Connections.move_group(old_robot,0,Transform3D(Basis.from_euler(Vector3(.3,.7,-.4)),Vector3(.08,.04,.02)))
 	Connections.ports = corrected_ports
 	check(not Library.validate(old_robot).is_empty(), "Old case-boundary mounts need migration")

@@ -1,6 +1,7 @@
 extends RefCounted
 ## Connections refer to stable inventory instance and port indices.
 static var ports: Dictionary = {}
+const FastenerClearance = preload("res://src/fastener_clearance.gd")
 const LABELS := {"rim_30_4":"Посадка шины на диск 30,4 мм", "tire_30_4":"Посадка шины 30,4 мм", "rim_24":"Посадка шины на диск 24 мм", "tire_24":"Посадка шины 24 мм", "pin_hole":"Отверстие для пина", "axle_hole":"Крестовое отверстие", "pin":"Пин", "axle":"Ось", "stud":"Шип LEGO", "stud_socket":"Гнездо LEGO", "hole_8_32":"Отверстие 8-32", "bolt_8_32":"Винт 8-32", "bolt_m3":"Винт M3", "thread_8_32":"Резьба 8-32", "thread_m3":"Резьба M3", "nut_8_32":"Гайка / стойка 8-32", "nut_m3":"Гайка M3", "motor_mount":"Место для мотора", "motor_body_mount":"Крепление мотора", "motor_shaft":"Вал мотора", "motor_wheel_socket":"Ступица колеса", "body_mount":"Крепление корпуса", "servo_mount":"Место для серво", "servo_body_mount":"Крепление серво", "servo_output":"Выход серво", "servo_socket":"Крепление рычага"}
 
 static func ensure_loaded() -> void:
@@ -162,6 +163,9 @@ static func connect_parts(assembly: Array, moving: int, own: int, fixed: int, de
 			if dot > .001 and dot < .999:
 				return "Крестовая ось не совмещена с профилем отверстия"
 	else:
+		var clearance_error := fastener_move_error(assembly, moving, delta)
+		if not clearance_error.is_empty():
+			return clearance_error
 		move_group(assembly, moving, pose)
 	if not assembly[moving].has("links"):
 		assembly[moving].links = []
@@ -257,6 +261,24 @@ static func validate(assembly: Array) -> String:
 				var dot := absf(at.dot(bt))
 				if dot > .001 and dot < .999:
 					return "Крестовая ось не совмещена с профилем отверстия"
+	return ""
+
+static func fastener_move_error(assembly: Array, moving: int, delta: Transform3D) -> String:
+	var members := component(assembly,moving)
+	for screw in range(assembly.size()):
+		if assembly[screw].id != "metal_015":
+			continue
+		for motor in range(assembly.size()):
+			if assembly[motor].id != "electronics_010" or members.has(screw) == members.has(motor):
+				continue
+			var bolt_pose := transform(assembly[screw])
+			var motor_pose := transform(assembly[motor])
+			if members.has(screw):
+				bolt_pose = delta * bolt_pose
+			else:
+				motor_pose = delta * motor_pose
+			if FastenerClearance.intersects_motor(bolt_pose,motor_pose):
+				return "Винт пересекает корпус мотора. Выбери монтажную прорезь или другое отверстие."
 	return ""
 
 static func migrate_v1(assembly: Array) -> Dictionary:
