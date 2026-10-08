@@ -18,6 +18,7 @@ var fields: Array[SpinBox] = []
 var view: SubViewportContainer
 var camera: Camera3D
 var model_root: Node3D
+var grid_visual: MeshInstance3D
 var selection_root: Node3D
 var selected := -1
 var catalog_id := ""
@@ -181,7 +182,7 @@ func _ready() -> void:
 		grid.surface_add_vertex(Vector3(-.24,-.001,i*.008))
 		grid.surface_add_vertex(Vector3(.24,-.001,i*.008))
 	grid.surface_end()
-	var grid_visual := MeshInstance3D.new()
+	grid_visual = MeshInstance3D.new()
 	grid_visual.mesh = grid
 	var grid_mat := StandardMaterial3D.new()
 	grid_mat.albedo_color = Color("354049")
@@ -517,6 +518,7 @@ func transform_selected(_value: float) -> void:
 	previewing = false
 	mark_selection()
 	mark_ports()
+	update_grid()
 	assembly_changed.emit(assembly.duplicate(true))
 
 func show_assembly(reset_camera: bool = true) -> void:
@@ -631,6 +633,19 @@ func pan_camera(relative: Vector2) -> void:
 func update_camera() -> void:
 	camera.position = target + Vector3(sin(orbit)*cos(elevation),sin(elevation),cos(orbit)*cos(elevation))*zoom
 	camera.look_at(target)
+	update_grid()
+
+func update_grid() -> void:
+	# The reference plane must stay outside the displayed geometry, including
+	# flipped assemblies and temporary placement previews. Hide its underside.
+	var floor_y := 0.0
+	for container in [model_root, ghost_root]:
+		for part in container.get_children():
+			var mesh: MeshInstance3D = part.get_child(0)
+			var bounds: AABB = part.transform * mesh.transform * mesh.mesh.get_aabb()
+			floor_y = minf(floor_y, bounds.position.y)
+	grid_visual.position.y = floor_y
+	grid_visual.visible = camera.position.y > floor_y - .001
 
 func caption(text: String) -> Label:
 	var result := Label.new()
@@ -1048,6 +1063,7 @@ func show_ghost(index: int) -> void:
 	for part in ghost_root.get_children():
 		var mesh: MeshInstance3D = part.get_child(0)
 		mesh.transparency = 0.45
+	update_grid()
 	simple_hint.text = "Предпросмотр: %s · отверстие детали №%d → сборки №%d. Нажми «Прикрепить» или Enter." % [Easy.display_name(pending_id), simple_targets[index].own+1, simple_targets[index].port+1]
 
 func place_simple(index: int) -> void:

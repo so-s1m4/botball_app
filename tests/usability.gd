@@ -23,6 +23,14 @@ func run() -> void:
 	check(editor.model_root.get_children() == originals, "Selection reuses every existing model")
 	editor.flip_assembly()
 	var flipped := editor.assembly.duplicate(true)
+	check_grid_clearance(editor)
+	var saved_elevation := editor.elevation
+	editor.elevation = -1.2
+	editor.update_camera()
+	check(not editor.grid_visual.visible, "Reference grid is hidden when inspecting the underside")
+	editor.elevation = saved_elevation
+	editor.update_camera()
+	check(editor.grid_visual.visible, "Reference grid returns when inspecting from above")
 	editor.undo_step()
 	check(editor.assembly == robot and not editor.redo_button.disabled, "Undo enables redo")
 	editor.redo_step()
@@ -44,6 +52,9 @@ func run() -> void:
 	editor.fields[0].value += 8
 	var moved := editor.assembly.duplicate(true)
 	check(moved != robot, "Coordinate edit moves assembly")
+	editor.fields[1].value -= 100
+	check_grid_clearance(editor)
+	editor.undo_step()
 	editor.undo_step()
 	check(editor.assembly == robot and is_equal_approx(editor.fields[0].value, robot[0].position[0]*1000), "Coordinate edit and displayed fields can be undone")
 	editor.redo_step()
@@ -70,6 +81,7 @@ func run() -> void:
 	if valid >= 0:
 		editor.show_ghost(valid)
 		check(not editor.place_button.disabled and editor.ghost_root.get_child_count() == 3, "Motor preview includes the motor and both actual screws")
+		check_grid_clearance(editor)
 		check(editor.ghost_root.get_child(0).get_meta("part_id") == "electronics_010", "Motor preview shows the motor rather than the last screw")
 		editor.turn_pending()
 		# Rotation may invalidate a mount; resetting must reproduce the valid preview.
@@ -96,3 +108,11 @@ func run() -> void:
 	await process_frame
 	print("USABILITY: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)
+
+func check_grid_clearance(editor: Window) -> void:
+	var grid_y: float = editor.grid_visual.position.y - .001
+	for container in [editor.model_root, editor.ghost_root]:
+		for part in container.get_children():
+			var mesh: MeshInstance3D = part.get_child(0)
+			var bounds: AABB = part.transform * mesh.transform * mesh.mesh.get_aabb()
+			check(grid_y < bounds.position.y, "Reference grid lies below every displayed part")
