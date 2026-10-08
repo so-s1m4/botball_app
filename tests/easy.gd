@@ -9,6 +9,27 @@ func check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+# Check screw clearance against the imported flange, not just matching port metadata.
+func check_motor_flange(assembly: Array, motor: int) -> void:
+	var mesh: Mesh = load(Library.models.electronics_010.path)
+	var faces := mesh.get_faces()
+	for hole in [2,3]:
+		var local := Connections.vector(Connections.for_part("electronics_010")[hole].position)
+		check(absf(local.x - .0108153) < .000001, "Motor mounts on actual flange face")
+		for sample in range(9):
+			var angle := TAU * sample / 8
+			var offset := Vector3(0,cos(angle),sin(angle)) * (.00175 if sample < 8 else 0.0)
+			var from := Vector3(.0076061,local.y,local.z) + offset
+			var to := Vector3(.0108152,local.y,local.z) + offset
+			var blocked := false
+			for triangle in range(0,faces.size(),3):
+				if Geometry3D.segment_intersects_triangle(from,to,faces[triangle],faces[triangle+1],faces[triangle+2]) != null:
+					blocked = true
+					break
+			check(not blocked, "Screw shaft passes through visible motor slot")
+		var screw := Easy.matching_screw(assembly,motor,hole)
+		check(screw >= 0, "Visible slot has a coaxial screw")
+
 func _initialize() -> void:
 	call_deferred("run")
 func run() -> void:
@@ -32,6 +53,7 @@ func run() -> void:
 		var motor := editor.selected
 		check(editor.assembly[motor].id == "electronics_010" and Connections.component(editor.assembly, motor).has(0), "Motor automatically aligns to platform")
 		check(Easy.fastening_ports(editor.assembly,motor).is_empty(), "Placement automatically fastens motor")
+		check_motor_flange(editor.assembly,motor)
 		check(editor.target_buttons.get_child_count() == 0, "Named mount buttons disappear after placement")
 		check(Easy.fastening_ports(editor.assembly, motor).is_empty(), "Motor fastening uses real inventory screws")
 		check(editor.simple_group == 2, "Next step shows wheels")
@@ -95,6 +117,34 @@ func run() -> void:
 	check(not upgraded.has("error") and upgraded.assembly.size()==9, "Open and realign a 0.5.0 saved robot")
 	if not upgraded.has("error"):
 		check(Library.validate(upgraded.assembly).is_empty(), "Migrated motor and wheel geometry aligns")
+	DirAccess.remove_absolute(filename)
+	# Revision 2 robots must realign motors, attached wheels and screws on opening.
+	var corrected_ports := Connections.ports
+	Connections.ports = corrected_ports.duplicate(true)
+	for index in [0,2,3]:
+		Connections.ports.electronics_010[index].position[0] = .0187939
+		Connections.ports.electronics_010[index].position[2] = 0.0
+	var old_robot := Easy.default_robot()
+	Connections.move_group(old_robot,0,Transform3D(Basis.from_euler(Vector3(.3,.7,-.4)),Vector3(.08,.04,.02)))
+	Connections.ports = corrected_ports
+	check(not Library.validate(old_robot).is_empty(), "Old case-boundary mounts need migration")
+	var v2_file := FileAccess.open(filename,FileAccess.WRITE)
+	v2_file.store_string(JSON.stringify({"version":1,"geometry_revision":2,"table":"training_delivery","robot":{"speed":.65,"wheel_base":.3,"noise":.02,"seed":42},"assembly":old_robot}))
+	v2_file.close()
+	var corrected := Store.read_project(filename)
+	check(not corrected.has("error"), "Open revision 2 robot with corrected flange geometry")
+	if not corrected.has("error"):
+		check(corrected.assembly.size() == 9 and Library.validate(corrected.assembly).is_empty(), "Migration keeps wheels and both screw pairs connected")
+		check(Connections.transform(corrected.assembly[0]).is_equal_approx(Connections.transform(old_robot[0])), "Migration preserves platform pose")
+		for index in range(corrected.assembly.size()):
+			if corrected.assembly[index].id == "electronics_010":
+				check_motor_flange(corrected.assembly,index)
+		check(Store.write_project(filename,corrected.settings,corrected.assembly) == OK, "Save migrated geometry")
+		var again := Store.read_project(filename)
+		check(not again.has("error"), "Corrected geometry round trips")
+		if not again.has("error"):
+			for index in range(corrected.assembly.size()):
+				check(Connections.transform(again.assembly[index]).is_equal_approx(Connections.transform(corrected.assembly[index])), "Reload preserves corrected part pose")
 	DirAccess.remove_absolute(filename)
 	# A single selected hole does not guarantee that both motor screws fit.
 	var fitted := 0

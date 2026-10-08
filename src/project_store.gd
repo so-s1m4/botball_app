@@ -10,7 +10,7 @@ static func write_project(path: String, settings: Dictionary, assembly: Array = 
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"version": FORMAT_VERSION, "geometry_revision":2, "table": "training_delivery", "robot": settings, "assembly": assembly, "map": map_config, "program":program}, "\t"))
+	file.store_string(JSON.stringify({"version": FORMAT_VERSION, "geometry_revision":3, "table": "training_delivery", "robot": settings, "assembly": assembly, "map": map_config, "program":program}, "\t"))
 	file.close()
 	return OK
 
@@ -44,7 +44,12 @@ static func read_project(path: String) -> Dictionary:
 		if migrated.has("error"):
 			return migrated
 		assembly = migrated.assembly
-	elif data.get("geometry_revision") != 2:
+	elif data.get("geometry_revision") == 2:
+		var migrated := PartLibrary.Connections.migrate_v2(assembly)
+		if migrated.has("error"):
+			return migrated
+		assembly = migrated.assembly
+	elif data.get("geometry_revision") != 3:
 		return {"error":"Версия моделей не поддерживается"}
 	var assembly_error := PartLibrary.validate(assembly)
 	if not assembly_error.is_empty():

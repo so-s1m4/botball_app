@@ -1,5 +1,6 @@
 {
   "schema_version": 1,
+  "motor_mount_note": "electronics_010 mounts on the imported flange at X=10.8153 mm, on the Z=-5.08 mm slot row. Nominal 50.8 mm screw spacing fits inside the open slots (including 3.5 mm shaft clearance); the case bounds are not mounting faces.",
   "note": "Approximate teaching mounts. Unmapped parts expose a bottom body attachment rather than an inferred drilled hole. Direct body/hole joints and motor hardware are simplified rigid attachments. Existing connection indices are preserved by appending these ports.",
   "parts": {
     "metal_007": [
@@ -53,9 +54,9 @@
       {
         "kind": "motor_body_mount",
         "position": [
-          0.0187939,
+          0.0108153,
           0.0271302,
-          0
+          -0.00508
         ],
         "normal": [
           1,
@@ -83,9 +84,9 @@
       {
         "kind": "hole_8_32",
         "position": [
-          0.0187939,
+          0.0108153,
           0.0017302,
-          0
+          -0.00508
         ],
         "normal": [
           1,
@@ -99,9 +100,9 @@
       {
         "kind": "hole_8_32",
         "position": [
-          0.0187939,
+          0.0108153,
           0.0525302,
-          0
+          -0.00508
         ],
         "normal": [
           1,

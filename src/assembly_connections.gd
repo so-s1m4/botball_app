@@ -262,11 +262,23 @@ static func validate(assembly: Array) -> String:
 static func migrate_v1(assembly: Array) -> Dictionary:
 	# Validate against the geometry the file was written with before touching it.
 	ensure_loaded()
-	var current := ports
 	var legacy: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/parts/legacy/connections_v1.json")).parts
 	var extra: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/parts/legacy/easy_mounts_v1.json")).parts
 	for id in extra:
 		legacy[id].append_array(extra[id])
+	return migrate_ports(assembly, legacy)
+
+static func migrate_v2(assembly: Array) -> Dictionary:
+	ensure_loaded()
+	var legacy := ports.duplicate(true)
+	# Revision 2 used the case boundary instead of the mounting flange.
+	for index in [0, 2, 3]:
+		legacy.electronics_010[index].position[0] = .0187939
+		legacy.electronics_010[index].position[2] = 0.0
+	return migrate_ports(assembly, legacy)
+
+static func migrate_ports(assembly: Array, legacy: Dictionary) -> Dictionary:
+	var current := ports
 	ports = legacy
 	var error: String = load("res://src/part_library.gd").validate(assembly)
 	ports = current
