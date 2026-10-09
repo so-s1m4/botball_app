@@ -9,3 +9,5 @@ dist/
 Thumbs.db
 
 __pycache__/
+
+server/rooms/

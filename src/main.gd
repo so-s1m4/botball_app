@@ -2,6 +2,9 @@ extends Control
 
 const MapLoader = preload("res://src/map_loader.gd")
 const Simulation = preload("res://src/simulation.gd")
+const SharedRobot = preload("res://src/shared_robot.gd")
+var shared_robot: Node
+var team_button: Button
 const RobotFiles = preload("res://src/robot_files.gd")
 var robot_files: Node
 const Store = preload("res://src/project_store.gd")
@@ -69,6 +72,8 @@ func _ready() -> void:
 	var file_menu := MenuButton.new()
 	file_menu.text = "Файл"
 	header.add_child(file_menu)
+	team_button = button("Совместно", func(): shared_robot.show_panel())
+	header.add_child(team_button)
 	for item in ["Импорт робота…", "Экспорт робота…", "Открыть проект…", "Сохранить проект…", "Обновления"]:
 		file_menu.get_popup().add_item(item)
 	file_menu.get_popup().id_pressed.connect(func(id):
@@ -219,8 +224,10 @@ func _ready() -> void:
 	assembly_editor = AssemblyEditor.new()
 	assembly_editor.visible = false
 	add_child(assembly_editor)
-	assembly_editor.assembly_changed.connect(func(assembly):
-		sim.robot.set_assembly(assembly)
+	assembly_editor.assembly_changed.connect(func(_assembly):
+		if shared_robot != null:
+			shared_robot.local_changed(assembly_editor.assembly)
+		sim.robot.set_assembly(assembly_editor.assembly)
 		refresh_actuator_controls()
 	)
 	assembly_editor.test_requested.connect(test_assembled_robot)
@@ -233,6 +240,17 @@ func _ready() -> void:
 	robot_files.message.connect(log_event)
 	assembly_editor.import_requested.connect(robot_files.import_robot)
 	assembly_editor.export_requested.connect(func(): robot_files.export_robot(assembly_editor.assembly))
+	shared_robot = SharedRobot.new()
+	add_child(shared_robot)
+	shared_robot.editor = assembly_editor
+	shared_robot.remote_changed.connect(func(value):
+		sim.reset_attempt()
+		assembly_editor.set_assembly(value)
+		sim.robot.set_assembly(value)
+		refresh_actuator_controls())
+	shared_robot.status_changed.connect(func(text): team_button.text = text)
+	shared_robot.message.connect(log_event)
+	assembly_editor.shared_requested.connect(shared_robot.show_panel)
 	program_editor = ProgramEditor.new()
 	program_editor.visible = false
 	add_child(program_editor)
@@ -244,6 +262,7 @@ func _ready() -> void:
 	assembly_editor.set_assembly(starter)
 	assembly_editor.choose_step(4)
 	refresh_actuator_controls()
+	shared_robot.call_deferred("auto_join")
 	sim.changed.connect(func(): status_dirty = true)
 	sim.event.connect(log_event)
 	apply_settings()
@@ -262,7 +281,7 @@ func _process(delta: float) -> void:
 	if sim == null or not sim.running or sim.paused or sim.autonomous or sim.program_mode:
 		return
 	var focused := get_viewport().gui_get_focus_owner()
-	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible or map_dialog.visible or program_editor.visible or assembly_editor.visible or robot_files.is_busy():
+	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible or map_dialog.visible or program_editor.visible or assembly_editor.visible or robot_files.is_busy() or shared_robot.panel.visible:
 		sim.manual_forward = 0
 		sim.manual_turn = 0
 		return
@@ -369,6 +388,7 @@ func open_project(path: String) -> void:
 	seed_input.value = settings.seed
 	sim.robot.set_assembly(result.assembly)
 	assembly_editor.set_assembly(result.assembly)
+	shared_robot.local_changed(assembly_editor.assembly)
 	current_program = result.program if not result.program.is_empty() else ProgramEditor.EXAMPLES[0]
 	program_editor.set_source(current_program)
 	refresh_actuator_controls()

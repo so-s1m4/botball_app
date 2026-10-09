@@ -3,6 +3,7 @@ signal assembly_changed(assembly: Array)
 signal test_requested
 signal import_requested
 signal export_requested
+signal shared_requested
 const Connections = preload("res://src/assembly_connections.gd")
 const Library = preload("res://src/part_library.gd")
 const Easy = preload("res://src/easy_assembly.gd")
@@ -156,7 +157,7 @@ func _ready() -> void:
 	var model_menu := MenuButton.new()
 	model_menu.text = "Модель"
 	top_row.add_child(model_menu)
-	for item in ["Импорт робота…", "Экспорт робота…", "Готовый робот", "Собрать с нуля", "Пример: реечный лифт", "Показать всю сборку · F"]:
+	for item in ["Импорт робота…", "Экспорт робота…", "Готовый робот", "Собрать с нуля", "Пример: реечный лифт", "Показать всю сборку · F", "Совместная работа…"]:
 		model_menu.get_popup().add_item(item)
 	model_menu.get_popup().id_pressed.connect(func(id):
 		match id:
@@ -166,6 +167,7 @@ func _ready() -> void:
 			3: start_empty_robot()
 			4: load_lift()
 			5: cancel_pending(); frame_assembly()
+			6: shared_requested.emit()
 	)
 	top_row.add_child(action("Тестировать на карте", func(): test_requested.emit()))
 	view = SubViewportContainer.new()
