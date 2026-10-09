@@ -2,6 +2,8 @@ extends Control
 
 const MapLoader = preload("res://src/map_loader.gd")
 const Simulation = preload("res://src/simulation.gd")
+const RobotFiles = preload("res://src/robot_files.gd")
+var robot_files: Node
 const Store = preload("res://src/project_store.gd")
 const UpdateChecker = preload("res://src/update_checker.gd")
 var update_checker: Node
@@ -64,9 +66,19 @@ func _ready() -> void:
 	header.add_child(button("Код робота", open_program_editor))
 	update_checker = UpdateChecker.new()
 	add_child(update_checker)
-	header.add_child(button("Обновления", func(): update_checker.check()))
-	header.add_child(button("Открыть…", func(): open_dialog.popup_centered_ratio(0.7)))
-	header.add_child(button("Сохранить…", func(): save_dialog.popup_centered_ratio(0.7)))
+	var file_menu := MenuButton.new()
+	file_menu.text = "Файл"
+	header.add_child(file_menu)
+	for item in ["Импорт робота…", "Экспорт робота…", "Открыть проект…", "Сохранить проект…", "Обновления"]:
+		file_menu.get_popup().add_item(item)
+	file_menu.get_popup().id_pressed.connect(func(id):
+		match id:
+			0: robot_files.import_robot()
+			1: robot_files.export_robot(sim.robot.assembly)
+			2: open_dialog.popup_centered_ratio(0.7)
+			3: save_dialog.popup_centered_ratio(0.7)
+			4: update_checker.check()
+	)
 	var columns := HBoxContainer.new()
 	columns.add_theme_constant_override("separation", 16)
 	columns.size_flags_vertical = SIZE_EXPAND_FILL
@@ -82,7 +94,6 @@ func _ready() -> void:
 	map_selector.size_flags_horizontal = SIZE_EXPAND_FILL
 	map_selector.item_selected.connect(select_map)
 	info.add_child(map_selector)
-	info.add_child(button("Загрузить GLB…", func(): map_dialog.popup_centered_ratio(.7)))
 	status_label = label("Готов к запуску", 14, Color("51d8bb"))
 	info.add_child(status_label)
 	view_container = SubViewportContainer.new()
@@ -136,7 +147,6 @@ func _ready() -> void:
 	scale_row.add_child(map_scale)
 	hardware_label = label("",13,Color("51d8bb"))
 	hardware_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	sidebar.add_child(hardware_label)
 	actuator_panel = VBoxContainer.new()
 	sidebar.add_child(actuator_panel)
 	sidebar.add_child(label("ПОПЫТКА", 13, Color("93a9bd")))
@@ -163,25 +173,33 @@ func _ready() -> void:
 	sidebar.add_child(button("Захват / отпустить · Пробел", func(): sim.toggle_grip()))
 	var keys := label("W / ↑ — вперёд    S / ↓ — назад\nA / ←, D / → — поворот    P — пауза", 13, Color("93a9bd"))
 	sidebar.add_child(keys)
-	sidebar.add_child(HSeparator.new())
-	sidebar.add_child(label("ПАРАМЕТРЫ РОБОТА", 13, Color("93a9bd")))
-	speed_input = setting(sidebar, "Скорость, м/с", 0.2, 1.0, 0.05, 0.65)
-	base_input = setting(sidebar, "Колея, м", 0.24, 0.40, 0.01, 0.30)
-	noise_input = setting(sidebar, "Ошибка приводов, %", 0, 15, 1, 2)
-	seed_input = setting(sidebar, "Seed попытки", 1, 999999, 1, 42)
+	var details_toggle := CheckButton.new()
+	details_toggle.text = "Настройки и телеметрия"
+	sidebar.add_child(details_toggle)
+	var details_panel := VBoxContainer.new()
+	details_panel.visible = false
+	sidebar.add_child(details_panel)
+	details_toggle.toggled.connect(func(value): details_panel.visible = value)
+	details_panel.add_child(hardware_label)
+	details_panel.add_child(HSeparator.new())
+	details_panel.add_child(label("ПАРАМЕТРЫ РОБОТА", 13, Color("93a9bd")))
+	speed_input = setting(details_panel, "Скорость, м/с", 0.2, 1.0, 0.05, 0.65)
+	base_input = setting(details_panel, "Колея, м", 0.24, 0.40, 0.01, 0.30)
+	noise_input = setting(details_panel, "Ошибка приводов, %", 0, 15, 1, 2)
+	seed_input = setting(details_panel, "Seed попытки", 1, 999999, 1, 42)
 	for control in inputs:
 		control.value_changed.connect(func(_value): apply_settings())
-	sidebar.add_child(HSeparator.new())
+	details_panel.add_child(HSeparator.new())
 	stage_label = label("Ожидание запуска", 14, Color("51d8bb"))
-	sidebar.add_child(stage_label)
+	details_panel.add_child(stage_label)
 	telemetry_label = label("", 13, Color("93a9bd"))
-	sidebar.add_child(telemetry_label)
+	details_panel.add_child(telemetry_label)
 	log_text = RichTextLabel.new()
 	log_text.custom_minimum_size.y = 70
 	log_text.size_flags_vertical = SIZE_EXPAND_FILL
 	log_text.scroll_following = true
 	log_text.add_theme_font_size_override("normal_font_size", 18)
-	sidebar.add_child(log_text)
+	details_panel.add_child(log_text)
 	var footer := label("Учебные размеры и правила. Упрощённая физика; автопилот использует известные координаты поля.", 12, Color("93a9bd"))
 	footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	root.add_child(footer)
@@ -206,6 +224,15 @@ func _ready() -> void:
 		refresh_actuator_controls()
 	)
 	assembly_editor.test_requested.connect(test_assembled_robot)
+	robot_files = RobotFiles.new()
+	add_child(robot_files)
+	robot_files.imported.connect(func(value):
+		sim.reset_attempt()
+		assembly_editor.import_model(value)
+		log_event("Модель робота импортирована. Отмена доступна в конструкторе."))
+	robot_files.message.connect(log_event)
+	assembly_editor.import_requested.connect(robot_files.import_robot)
+	assembly_editor.export_requested.connect(func(): robot_files.export_robot(assembly_editor.assembly))
 	program_editor = ProgramEditor.new()
 	program_editor.visible = false
 	add_child(program_editor)
@@ -235,7 +262,7 @@ func _process(delta: float) -> void:
 	if sim == null or not sim.running or sim.paused or sim.autonomous or sim.program_mode:
 		return
 	var focused := get_viewport().gui_get_focus_owner()
-	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible or map_dialog.visible or program_editor.visible or assembly_editor.visible:
+	if focused is LineEdit or focused is SpinBox or save_dialog.visible or open_dialog.visible or map_dialog.visible or program_editor.visible or assembly_editor.visible or robot_files.is_busy():
 		sim.manual_forward = 0
 		sim.manual_turn = 0
 		return

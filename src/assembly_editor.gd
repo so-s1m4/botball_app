@@ -1,6 +1,8 @@
 extends Window
 signal assembly_changed(assembly: Array)
 signal test_requested
+signal import_requested
+signal export_requested
 const Connections = preload("res://src/assembly_connections.gd")
 const Library = preload("res://src/part_library.gd")
 const Easy = preload("res://src/easy_assembly.gd")
@@ -58,6 +60,8 @@ var place_button: Button
 var placement_error := ""
 var undo_button: Button
 var fasten_button: Button
+var rotate_button: Button
+var cancel_button: Button
 var hover_target := -1
 var orbit := 0.5
 var elevation := 0.6
@@ -146,10 +150,24 @@ func _ready() -> void:
 	workspace.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	workspace_scroll.add_child(workspace)
 	count_label = caption("")
-	var top_row := HBoxContainer.new()
+	var top_row := HFlowContainer.new()
 	workspace.add_child(top_row)
 	count_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_row.add_child(count_label)
+	var model_menu := MenuButton.new()
+	model_menu.text = "Модель"
+	top_row.add_child(model_menu)
+	for item in ["Импорт робота…", "Экспорт робота…", "Готовый робот", "Собрать с нуля", "Пример: реечный лифт", "Показать всю сборку · F"]:
+		model_menu.get_popup().add_item(item)
+	model_menu.get_popup().id_pressed.connect(func(id):
+		match id:
+			0: import_requested.emit()
+			1: export_requested.emit()
+			2: load_default_robot()
+			3: start_empty_robot()
+			4: load_lift()
+			5: cancel_pending(); frame_assembly()
+	)
 	top_row.add_child(action("Тестировать на карте", func(): test_requested.emit()))
 	view = SubViewportContainer.new()
 	view.stretch = true
@@ -233,15 +251,11 @@ func _ready() -> void:
 	workspace.add_child(place_button)
 	target_buttons = HFlowContainer.new()
 	workspace.add_child(target_buttons)
-	var templates := HBoxContainer.new()
-	workspace.add_child(templates)
-	templates.add_child(action("Готовый робот", load_default_robot))
-	templates.add_child(action("Собрать с нуля", start_empty_robot))
-	templates.add_child(action("Пример: реечный лифт", load_lift))
 	simple_tools = HFlowContainer.new()
 	workspace.add_child(simple_tools)
 	simple_tools.add_child(action("Перевернуть", flip_assembly))
-	simple_tools.add_child(action("Повернуть", turn_pending))
+	rotate_button = action("Повернуть · R", turn_pending)
+	simple_tools.add_child(rotate_button)
 	fasten_button = action("Прикрутить мотор", fasten_selected)
 	simple_tools.add_child(fasten_button)
 	var history_tools := HBoxContainer.new()
@@ -252,7 +266,8 @@ func _ready() -> void:
 	redo_button = action("Повторить", redo_step)
 	redo_button.tooltip_text = "Ctrl / ⌘ + Shift + Z"
 	history_tools.add_child(redo_button)
-	simple_tools.add_child(action("Отложить", cancel_pending))
+	cancel_button = action("Отложить · Esc", cancel_pending)
+	simple_tools.add_child(cancel_button)
 	for tool in simple_tools.get_children():
 		tool.add_theme_font_size_override("font_size", 20)
 		tool.custom_minimum_size.y = 48
@@ -325,8 +340,6 @@ func _ready() -> void:
 	connection_status = caption("Добавь основание, затем пин, ось или винт и выбери точки крепления.")
 	connection_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	advanced.add_child(connection_status)
-	var show_button := action("Показать всю сборку", func(): cancel_pending(); frame_assembly())
-	workspace.add_child(show_button)
 	for key in ["Положение, мм", "Поворот, °"]:
 		var row := HBoxContainer.new()
 		advanced.add_child(row)
@@ -580,6 +593,10 @@ func update_actions() -> void:
 		redo_button.disabled = redo_history.is_empty()
 	if fasten_button != null:
 		fasten_button.disabled = Easy.motor_to_fasten(assembly, selected) < 0
+		fasten_button.visible = not fasten_button.disabled
+	if rotate_button != null:
+		rotate_button.visible = not pending_id.is_empty()
+		cancel_button.visible = not pending_id.is_empty()
 	for field in fields:
 		field.editable = selected >= 0 and not previewing
 
@@ -826,7 +843,7 @@ func toggle_advanced(enabled: bool) -> void:
 	category.visible = enabled
 	simple_hint.visible = not enabled
 	simple_tools.visible = not enabled
-	target_buttons.visible = not enabled
+	target_buttons.visible = false
 	simple_source.visible = not enabled and not pending_id.is_empty() and simple_source.item_count > 1
 	refresh_catalog()
 	show_assembly(false)
@@ -962,18 +979,8 @@ func refresh_simple_targets() -> void:
 	simple_targets = Easy.candidates(assembly, pending_id, -1 if simple_source.selected <= 0 else simple_source.get_selected_id())
 	for candidate_index in range(simple_targets.size()):
 		var candidate: Dictionary = simple_targets[candidate_index]
-		var port: Dictionary = Connections.for_part(assembly[candidate.part].id)[candidate.port]
 		var p: Vector3 = candidate.position * 1000
 		simple_destination.add_item("%s #%d · отверстие №%d · X %.1f, Y %.1f, Z %.1f мм" % [Easy.display_name(assembly[candidate.part].id), candidate.part+1, candidate.port+1, p.x, p.y, p.z])
-		if port.kind in ["motor_mount", "servo_mount", "motor_shaft"]:
-			var title: String = port.get("label", "Установить")
-			if pending_id == "electronics_010":
-				title = "Слева · с винтами" if "Левый" in title else "Справа · с винтами"
-			elif pending_id == "electronics_018":
-				title = "Надеть колесо · мотор %d" % (candidate.part+1)
-			var button := action(title, func():place_simple(candidate_index))
-			button.custom_minimum_size.y = 48
-			target_buttons.add_child(button)
 	if not simple_targets.is_empty():
 		# All target dots share one mesh, material and draw call.
 		var sphere := SphereMesh.new()
@@ -1175,3 +1182,10 @@ func load_lift() -> void:
 	commit()
 	frame_assembly()
 	simple_hint.text = "Серво 1 → 24/16 зубьев → вертикальная рейка. В playground: servo(1, 140), wait(1), servo(1, 40). Опоры и направляющая идеальные; центральное крепление требует винта."
+
+func import_model(value: Array) -> void:
+	remember_step()
+	set_assembly(value, false)
+	commit()
+	choose_step(4 if not assembly.is_empty() else 0)
+	frame_assembly()
