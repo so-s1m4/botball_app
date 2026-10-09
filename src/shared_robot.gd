@@ -39,6 +39,8 @@ func _ready() -> void:
 	panel.add_child(box)
 	var description := Label.new()
 	description.text = "Создай комнату и отправь ссылку участникам.\nПо ссылке можно редактировать общего робота.\nКамера, карта и запуск симуляции у каждого свои.\nПодключение загрузит робота из комнаты."
+	description.custom_minimum_size.x = 600
+	description.size.x = 600
 	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(description)
 	link_input = LineEdit.new()
@@ -63,6 +65,8 @@ func _ready() -> void:
 	leave_button.pressed.connect(leave)
 	row.add_child(leave_button)
 	status = Label.new()
+	status.custom_minimum_size.x = 600
+	status.size.x = 600
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(status)
 	set_status("Локальная сборка")

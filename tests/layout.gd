@@ -27,6 +27,11 @@ func run() -> void:
 		var candidate: Dictionary = editor.simple_targets[0]
 		var point = editor.camera.unproject_position(candidate.position) * editor.view.size / Vector2(editor.view.get_child(0).size)
 		check(editor.nearest_simple_target(point) >= 0, "Hole picking works after resizing")
+	main.shared_robot.show_panel()
+	for i in range(8):
+		await process_frame
+	check(main.shared_robot.panel.size.y < 700, "Shared room dialog stays compact with wrapped text")
+	main.shared_robot.panel.hide()
 	main.queue_free()
 	await process_frame
 	print("LAYOUT: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")

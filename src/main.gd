@@ -242,6 +242,7 @@ func _ready() -> void:
 	assembly_editor.export_requested.connect(func(): robot_files.export_robot(assembly_editor.assembly))
 	shared_robot = SharedRobot.new()
 	add_child(shared_robot)
+	shared_robot.panel.theme = theme
 	shared_robot.editor = assembly_editor
 	shared_robot.remote_changed.connect(func(value):
 		sim.reset_attempt()
