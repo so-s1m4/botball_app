@@ -78,13 +78,24 @@ func run() -> void:
 		editor.select_catalog(editor.catalog_ids.find("electronics_010"))
 		check(not editor.previewing and not editor.simple_targets.is_empty(), "Picking a motor preserves assembly and highlights places")
 		check(editor.simple_targets.size() > 2-side, "Motor can mount on arbitrary holes as well as named slots")
-		check(editor.target_buttons.get_child_count() == 2-side, "Named large mount buttons avoid precision clicks")
-		editor.target_buttons.get_child(0).pressed.emit()
+		var named := -1
+		for i in range(editor.simple_targets.size()):
+			var candidate: Dictionary = editor.simple_targets[i]
+			if Connections.for_part(editor.assembly[candidate.part].id)[candidate.port].kind == "motor_mount":
+				named = i
+				break
+		check(named >= 0, "Named motor mount remains available in destination selector")
+		if named < 0:
+			quit(1)
+			return
+		editor.simple_destination.select(named + 1)
+		editor.simple_destination.item_selected.emit(named + 1)
+		editor.place_button.pressed.emit()
 		var motor := editor.selected
 		check(editor.assembly[motor].id == "electronics_010" and Connections.component(editor.assembly, motor).has(0), "Motor automatically aligns to platform")
 		check(Easy.fastening_ports(editor.assembly,motor).is_empty(), "Placement automatically fastens motor")
 		check_motor_flange(editor.assembly,motor)
-		check(editor.target_buttons.get_child_count() == 0, "Named mount buttons disappear after placement")
+		check(not editor.simple_destination.visible and not editor.place_button.visible, "Placement controls disappear after placement")
 		check(Easy.fastening_ports(editor.assembly, motor).is_empty(), "Motor fastening uses real inventory screws")
 		check(editor.simple_group == 2, "Next step shows wheels")
 		editor.select_catalog(editor.catalog_ids.find("electronics_018"))

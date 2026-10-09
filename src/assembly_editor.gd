@@ -43,7 +43,6 @@ var advanced: VBoxContainer
 var advanced_toggle: CheckButton
 var simple_hint: Label
 var step_tabs: HFlowContainer
-var target_buttons: HFlowContainer
 var simple_destination: OptionButton
 var simple_source: OptionButton
 var simple_tools: HFlowContainer
@@ -249,8 +248,6 @@ func _ready() -> void:
 	simple_destination.visibility_changed.connect(func(): place_button.visible = simple_destination.visible)
 	place_button.visible = false
 	workspace.add_child(place_button)
-	target_buttons = HFlowContainer.new()
-	workspace.add_child(target_buttons)
 	simple_tools = HFlowContainer.new()
 	workspace.add_child(simple_tools)
 	simple_tools.add_child(action("Перевернуть", flip_assembly))
@@ -843,7 +840,6 @@ func toggle_advanced(enabled: bool) -> void:
 	category.visible = enabled
 	simple_hint.visible = not enabled
 	simple_tools.visible = not enabled
-	target_buttons.visible = false
 	simple_source.visible = not enabled and not pending_id.is_empty() and simple_source.item_count > 1
 	refresh_catalog()
 	show_assembly(false)
@@ -964,9 +960,6 @@ func refresh_simple_targets() -> void:
 	for child in port_root.get_children():
 		port_root.remove_child(child)
 		child.queue_free()
-	for button in target_buttons.get_children():
-		target_buttons.remove_child(button)
-		button.queue_free()
 	simple_targets.clear()
 	simple_destination.clear()
 	simple_destination.add_item("Выбери отверстие на сборке…")
