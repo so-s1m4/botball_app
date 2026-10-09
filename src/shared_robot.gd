@@ -26,7 +26,7 @@ var copy_button: Button
 
 func _ready() -> void:
 	http = HTTPRequest.new()
-	http.timeout = 12
+	http.timeout = 30
 	http.body_size_limit = 4 * 1024 * 1024
 	add_child(http)
 	http.request_completed.connect(completed)
@@ -78,6 +78,8 @@ func auto_join() -> void:
 	if OS.has_feature("web"):
 		var token = JavaScriptBridge.eval("new URL(window.location.href).searchParams.get('room') || ''", true)
 		if token is String and valid_room(token):
+			# Let the initial 3D frame finish before starting the web request timer.
+			await get_tree().create_timer(1.0).timeout
 			join_room(token)
 
 static func valid_room(value: String) -> bool:

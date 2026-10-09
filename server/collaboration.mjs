@@ -1,5 +1,4 @@
 import http from 'node:http';
-import {isDeepStrictEqual} from 'node:util';
 import {randomBytes} from 'node:crypto';
 import {readFile, writeFile, rename, mkdir} from 'node:fs/promises';
 import {resolve, dirname, extname} from 'node:path';
@@ -7,7 +6,14 @@ import {fileURLToPath} from 'node:url';
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const catalog = new Map(JSON.parse(await readFile(resolve(project,'data/parts/botball_2026.json'))).parts.map(p=>[p.id,p]));
-const equal = isDeepStrictEqual;
+// Godot and JavaScript can round the last decimal digit differently.
+export function equal(a,b) {
+ if (typeof a==='number' && typeof b==='number') return Math.abs(a-b)<=1e-12*Math.max(1,Math.abs(a),Math.abs(b));
+ if (a===b) return true;
+ if (!a || !b || typeof a!=='object' || typeof b!=='object' || Array.isArray(a)!==Array.isArray(b)) return false;
+ const keys=Object.keys(a);
+ return keys.length===Object.keys(b).length && keys.every(key=>Object.hasOwn(b,key) && equal(a[key],b[key]));
+}
 const uidPattern = /^[a-f0-9]{32}$/;
 const fail = (message,status=400) => Object.assign(new Error(message),{status});
 

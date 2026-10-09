@@ -3,8 +3,13 @@ import assert from 'node:assert/strict';
 import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {createServer,merge,validate} from './collaboration.mjs';
+import {createServer,merge,validate,equal} from './collaboration.mjs';
 const part=(uid,id='metal_001')=>({uid:uid.repeat(32),id,position:[0,0,0],rotation:[0,0,0],links:[]});
+
+test('numeric round trips across Godot and JavaScript do not create false conflicts',()=>{
+ assert.ok(equal({position:[.00202000141143799,0,0]}, {position:[.002020001411438,0,0]}));
+ assert.ok(!equal({position:[.00202000141143799,0,0]}, {position:[.00202001141143799,0,0]}));
+});
 
 test('independent concurrent edits merge, conflicting edits are atomic',()=>{
  const base=[part('a'),part('b','metal_007')];
